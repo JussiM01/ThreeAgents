@@ -18,6 +18,9 @@ class MultiAgent(object):
         self.num_agents = positions.shape[0]
         self.time_delta = time_delta
         self.accepted_error = accepted_error
+        self.course_target = None
+        self.course_direction = None
+        self.course_velocity = None
         self.task_ready = True
 
 
@@ -105,17 +108,36 @@ class MultiAgent(object):
 
     def shift_formation(self, target_point, velocity):
         '''Move the formation towards the target point with the given velocity.
-        (and make course corrections if there are any disturbancies).'''
+        (and make course corrections if there are any disturbancies).''' # NOTE: ADD COURSE CORRECTION LATER
 
-        raise NotImplementedError
+        center_of_mass = np.mean(selff.positions, axis=0)
+
+        if self.course_target == None:
+
+            self.task_ready = False
+            self.course_target = target_point
+            self.course_direction = self._direction(
+                center_of_mass - self.course_target)
+            self.course_velocity = velocity
+
+        dist_cm_to_target = np.linalg.norm(center_of_mass - self.course_target)
+
+        if dist_cm_to_target < self.accepted_error:
+
+            self.tasks_done = True
+
+        else:
+
+            self._shift_step(self.course_direction, self.course_velocity)
 
 
-    # def move_all(self, direction, velocity):
-    #     '''Move all agents to given direction with the given velocity without
-    #     changing the angle of the formation.'''
-    #     speeds = np.tile(direction*velocity, [self.num_agents, 1])
-    #     self.speeds = self._cliped(speeds)
-    #     self.positions += self.speeds*self.time_delta
+    def _shift_step(self, direction, velocity):
+        '''Move all agents to given direction with the given velocity without
+        changing the angle of the formation.'''
+        
+        speeds = np.tile(direction*velocity, [self.num_agents, 1])
+        self.speeds = self._cliped(speeds)
+        self.positions += self.speeds*self.time_delta
 
 
 
