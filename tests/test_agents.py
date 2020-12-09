@@ -68,3 +68,46 @@ def test_stopping_reshape_formation(points, accepted_error):
     new_positions = model.positions
 
     assert np.array_equal(points, new_positions)
+
+
+# testdata2 = ...
+#
+# @pytest.mark.parametrize("points,delta,direction,velocity,expected", testdata2)
+# def test_shift_step("points,delta,direction,velocity,expected"):
+#
+#     init_points = copy.deepcopy(points)
+#
+#     # model = MultiAgent(init_points, ...)
+#     model._shift_step(direction, velocity)
+#
+#     assert model.positions == expected
+#
+#
+# testdata3 = ...
+#
+# @pytest.mark.parametrize("points,delta,target,velocity", testdata3)
+# def test_stopping_shift_formation("points,delta,target,velocity"):
+#
+#     init_points = copy.deepcopy(points)
+#
+#     model = MultiAgent(init_points, ...)
+#     model.shift_formation(target, velocity)
+#
+#     new_positions = model.positions
+#
+#     assert np.array_equal(points, new_positions)
+#
+#
+# testdata4 = ...
+#
+# @pytest.mark.parametrize("points,delta,target,velocity", testdata4)
+# def test_over_shooting_prevention("points,delta,target,velocity"):
+#
+#     init_points = copy.deepcopy(points)
+#
+#     model = MultiAgent(init_points, ...)
+#     model.shift_formation(target, velocity)
+#
+#     new_positions = model.positions
+#
+#     assert np.array_equal(points, new_positions)
