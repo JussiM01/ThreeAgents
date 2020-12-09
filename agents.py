@@ -120,7 +120,8 @@ class MultiAgent(object):
                 center_of_mass - self.course_target)
             self.course_velocity = velocity
 
-        dist_cm_to_target = np.linalg.norm(center_of_mass - self.course_target)
+        cm_to_target = center_of_mass - self.course_target
+        dist_cm_to_target = np.linalg.norm(cm_to_target)
 
         if dist_cm_to_target < self.accepted_error:
 
@@ -128,13 +129,32 @@ class MultiAgent(object):
 
         else:
 
-            self._shift_step(self.course_direction, self.course_velocity)
+            if self._about_to_over_shoots(center_of_mass):
+                adjusted_direction = self._direction(cm_to_target)
+                adjusted_velocity = dist_cm_to_target/self.time_delta
+
+            else:
+                adjusted_direction = self.course_direction
+                adjusted_velocity = self.course_velocity
+
+            self._shift_step(adjusted_direction, adjusted_velocity)
+
+
+    def _about_to_over_shoots(self, current_cm):
+
+        dist_to_target = np.linalg.norm(self.course_target - current_cm)
+        speed = self.course_direction*self.course_velocity
+
+        planned_move = speed*self.time_delta
+        planned_next = current_cm + planned_move
+        planned_dist = np.linalg.norm(self.course_target - planned_next)
+
+        return planned_dist > dist_to_target
 
 
     def _shift_step(self, direction, velocity):
         '''Move all agents to given direction with the given velocity without
         changing the angle of the formation.'''
-        
         speeds = np.tile(direction*velocity, [self.num_agents, 1])
         self.speeds = self._cliped(speeds)
         self.positions += self.speeds*self.time_delta
