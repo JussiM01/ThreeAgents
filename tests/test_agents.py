@@ -70,17 +70,32 @@ def test_stopping_reshape_formation(points, accepted_error):
     assert np.array_equal(points, new_positions)
 
 
-# testdata2 = ...
-#
-# @pytest.mark.parametrize("points,delta,direction,velocity,expected", testdata2)
-# def test_shift_step("points,delta,direction,velocity,expected"):
-#
-#     init_points = copy.deepcopy(points)
-#
-#     # model = MultiAgent(init_points, ...)
-#     model._shift_step(direction, velocity)
-#
-#     assert model.positions == expected
+testdata2 = [
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.005, np.array([1., 0.], dtype=float), 10.,
+        np.array([[-0.95, 0.], [1.05, 0.], [0.05, np.sqrt(3)]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.01, np.array([0., 1.], dtype=float), 20.,
+        np.array([[-1, 0.2], [1., 0.2], [0., np.sqrt(3)+0.2]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([0.5, 0.5], dtype=float), 50.,
+        np.array([[0., 1.], [2., 1.], [1., np.sqrt(3)+1.]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([0.5, 0.5], dtype=float), 100., # speed will be cliped
+        (np.array([[0., 1.], [2., 1.], [1., np.sqrt(3)+1.]], dtype=float))
+    ]
+
+@pytest.mark.parametrize("points,delta,direction,velocity,expected", testdata2)
+def test_shift_step("points,delta,direction,velocity,expected"):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
+    model._shift_step(direction, velocity)
+
+    new_positions = model.positions
+
+    assert new_positions == expected
 #
 #
 # testdata3 = ...
@@ -90,7 +105,7 @@ def test_stopping_reshape_formation(points, accepted_error):
 #
 #     init_points = copy.deepcopy(points)
 #
-#     model = MultiAgent(init_points, ...)
+#     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001)
 #     model.shift_formation(target, velocity)
 #
 #     new_positions = model.positions
@@ -105,7 +120,7 @@ def test_stopping_reshape_formation(points, accepted_error):
 #
 #     init_points = copy.deepcopy(points)
 #
-#     model = MultiAgent(init_points, ...)
+#     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001)
 #     model.shift_formation(target, velocity)
 #
 #     new_positions = model.positions
