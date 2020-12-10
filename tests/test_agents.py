@@ -76,13 +76,19 @@ testdata2 = [
         np.array([[-0.95, 0.], [1.05, 0.], [0.05, np.sqrt(3)]], dtype=float)),
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
         0.01, np.array([0., 1.], dtype=float), 20.,
-        np.array([[-1, 0.2], [1., 0.2], [0., np.sqrt(3)+0.2]], dtype=float)),
+        np.array([[-1, 0.2], [1., 0.2], [0., np.sqrt(3) + 0.2]], dtype=float)),
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
         0.02, np.array([0.5, 0.5], dtype=float), 50.,
-        np.array([[0., 1.], [2., 1.], [1., np.sqrt(3)+1.]], dtype=float)),
+        np.array([[0., 1.], [2., 1.], [1., np.sqrt(3) + 1.]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([-1., 0.], dtype=float), 100., # speed will be cliped
+        np.array([[-2., 0.], [0., 0.], [-1., np.sqrt(3)]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([0., -1.], dtype=float), 100., # speed will be cliped
+        np.array([[-1., -1.], [1., -1.], [0., np.sqrt(3) - 1.]], dtype=float)),
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
         0.02, np.array([0.5, 0.5], dtype=float), 100., # speed will be cliped
-        (np.array([[0., 1.], [2., 1.], [1., np.sqrt(3)+1.]], dtype=float))
+        (np.array([[0., 1.], [2., 1.], [1., np.sqrt(3) + 1.]], dtype=float))
     ]
 
 @pytest.mark.parametrize("points,delta,direction,velocity,expected", testdata2)
