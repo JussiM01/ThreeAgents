@@ -91,13 +91,13 @@ testdata2 = [
         (np.array([[0., 1.], [2., 1.], [1., np.sqrt(3) + 1.]], dtype=float))
     ]
 
-@pytest.mark.parametrize("points,delta,direction,velocity,expected", testdata2)
-def test_shift_step("points,delta,direction,velocity,expected"):
+@pytest.mark.parametrize("points,delta,direction,speed,expected", testdata2)
+def test_shift_step("points,delta,direction,speed,expected"):
 
     init_points = copy.deepcopy(points)
 
     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
-    model._shift_step(direction, velocity)
+    model._shift_step(direction, speed)
 
     new_positions = model.positions
 
@@ -106,13 +106,13 @@ def test_shift_step("points,delta,direction,velocity,expected"):
 #
 # testdata3 = ...
 #
-# @pytest.mark.parametrize("points,delta,target,velocity", testdata3)
-# def test_stopping_shift_formation("points,delta,target,velocity"):
+# @pytest.mark.parametrize("points,delta,target,speed", testdata3)
+# def test_stopping_shift_formation("points,delta,target,speed"):
 #
 #     init_points = copy.deepcopy(points)
 #
 #     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001)
-#     model.shift_formation(target, velocity)
+#     model.shift_formation(target, speed)
 #
 #     new_positions = model.positions
 #
@@ -121,13 +121,13 @@ def test_shift_step("points,delta,direction,velocity,expected"):
 #
 # testdata4 = ...
 #
-# @pytest.mark.parametrize("points,delta,target,velocity", testdata4)
-# def test_over_shooting_prevention("points,delta,target,velocity"):
+# @pytest.mark.parametrize("points,delta,target,speed", testdata4)
+# def test_over_shooting_prevention("points,delta,target,speed"):
 #
 #     init_points = copy.deepcopy(points)
 #
 #     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001)
-#     model.shift_formation(target, velocity)
+#     model.shift_formation(target, speed)
 #
 #     new_positions = model.positions
 #

@@ -21,7 +21,7 @@
     "model": {
         "accepted_error": 0.005,
         "bond_strength": 1.0,
-        "max_velocity": 100.0,
+        "max_speed": 100.0,
         "target_distance": 1.0,
         "time_delta": 0.005
     },
