@@ -125,6 +125,9 @@ class MultiAgent(object):
 
         if dist_cm_to_target < self.accepted_error:
 
+            self.course_target = None
+            self.course_direction = None
+            self.course_speed = None
             self.tasks_done = True
 
         else:
