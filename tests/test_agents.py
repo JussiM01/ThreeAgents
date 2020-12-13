@@ -132,16 +132,29 @@ def test_stopping_shift_formation("points,target,error"):
     assert np.array_equal(points, new_positions)
 
 
-# testdata4 = ...
-#
-# @pytest.mark.parametrize("points,delta,target,speed", testdata4)
-# def test_over_shooting_prevention("points,delta,target,speed"):
-#
-#     init_points = copy.deepcopy(points)
-#
-#     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001)
-#     model.shift_formation(target, speed)
-#
-#     new_positions = model.positions
-#
-#     assert np.array_equal(points, new_positions)
+testdata4 =  [
+    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
+        np.array(array([0., np.sqrt(3)/3]), dtype=float), 5e-6, 1e-7),
+    np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
+        np.array(array([0., np.sqrt(3)/3]), dtype=float), 5e-6, 1e-7),
+    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
+        np.array(array([np.sqrt(3)/3, 0.]), dtype=float), 5e-5, 1e-7),
+    (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
+        np.array(array([np.sqrt(3)/3, 0.]), dtype=float),5e-5, 1e-7),
+    (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
+        np.array(array([0., 2+np.sqrt(3)/3]), dtype=float),5e-4, 1e-7),
+    np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
+        np.array(array([-4.,np.sqrt(3)/3]), dtype=float), 5e-5, 1e-7),
+    ]
+
+@pytest.mark.parametrize("points,target,delta,error", testdata4)
+def test_over_shooting_prevention("points,target,delta,error"):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., delta, error)
+    model.shift_formation(target, 20.)
+
+    new_positions = model.positions
+
+    assert np.array_equal(points, new_positions)
