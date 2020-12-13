@@ -102,23 +102,36 @@ def test_shift_step("points,delta,direction,speed,expected"):
     new_positions = model.positions
 
     assert new_positions == expected
-#
-#
-# testdata3 = ...
-#
-# @pytest.mark.parametrize("points,delta,target,speed", testdata3)
-# def test_stopping_shift_formation("points,delta,target,speed"):
-#
-#     init_points = copy.deepcopy(points)
-#
-#     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001)
-#     model.shift_formation(target, speed)
-#
-#     new_positions = model.positions
-#
-#     assert np.array_equal(points, new_positions)
-#
-#
+
+
+testdata3 = [
+    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
+        np.array(array([0., np.sqrt(3)/3]), dtype=float), 1e-5),
+    np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
+        np.array(array([0., np.sqrt(3)/3]), dtype=float), 1e-5),
+    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
+        np.array(array([np.sqrt(3)/3, 0.]), dtype=float), 1e-4),
+    (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
+        np.array(array([np.sqrt(3)/3, 0.]), dtype=float), 1e-4),
+    (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
+        np.array(array([0., 2+np.sqrt(3)/3]), dtype=float), 1e-3),
+    np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
+        np.array(array([-4.,np.sqrt(3)/3]), dtype=float), 1e-3),
+    ]
+
+@pytest.mark.parametrize("points,target,error,", testdata3)
+def test_stopping_shift_formation("points,target,error"):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+    model.shift_formation(target, 10.)
+
+    new_positions = model.positions
+
+    assert np.array_equal(points, new_positions)
+
+
 # testdata4 = ...
 #
 # @pytest.mark.parametrize("points,delta,target,speed", testdata4)
