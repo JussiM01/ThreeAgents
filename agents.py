@@ -49,9 +49,9 @@ class MultiAgent(object):
 
     def _cliped(self, velocities):
 
-        velocities = np.linalg.norm(velocities, axis=1)
+        speeds = np.linalg.norm(velocities, axis=1)
 
-        if np.max(velocities) <= self.max_speed:
+        if np.max(speeds) <= self.max_speed:
             return velocities
 
         else:
