@@ -101,7 +101,7 @@ def test_shift_step(points, delta, direction, speed, expected):
 
     new_positions = model.positions
 
-    assert new_positions == expected
+    assert np.array_equal(new_positions, expected)
 
 
 testdata3 = [
