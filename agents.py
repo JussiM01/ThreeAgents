@@ -110,7 +110,7 @@ class MultiAgent(object):
         '''Move the formation towards the target point with the given speed.
         (and make course corrections if there are any disturbancies).''' # NOTE: ADD COURSE CORRECTION LATER
 
-        center_of_mass = np.mean(selff.positions, axis=0)
+        center_of_mass = np.mean(self.positions, axis=0)
 
         if self.course_target == None:
 
