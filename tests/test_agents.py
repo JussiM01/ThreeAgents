@@ -155,6 +155,6 @@ def test_over_shooting_prevention(points, target, delta, error):
     model = MultiAgent(init_points, 1., 1., 50., delta, error)
     model.shift_formation(target, 20.)
 
-    new_positions = model.positions
+    new_mean = np.mean(model.positions, axis=0)
 
-    assert np.array_equal(points, new_positions)
+    assert np.allclose(new_mean, target)
