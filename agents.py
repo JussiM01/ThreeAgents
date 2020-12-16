@@ -120,7 +120,7 @@ class MultiAgent(object):
                 center_of_mass - self.course_target)
             self.course_speed = speed
 
-        cm_to_target = center_of_mass - self.course_target
+        cm_to_target = self.course_target - center_of_mass
         dist_cm_to_target = np.linalg.norm(cm_to_target)
 
         if dist_cm_to_target < self.accepted_error:
