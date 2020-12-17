@@ -62,7 +62,7 @@ class Animation(object):
             raise NotImplementedError
 
 
-    def _update_plot(self, frame_number, points, speed_vectors, tasks_done):
+    def _update_plot(self, frame_number, points, velocity_vectors, tasks_done):
 
         # ADD LATER OTHER UPDATES HERE
 
@@ -74,7 +74,7 @@ class Animation(object):
         if self.task_index > self.last:
 
             positions = self.model.positions
-            speeds = np.zeros(self.model.positions.shape, dtype=float)
+            velocities = np.zeros(self.model.positions.shape, dtype=float)
             all_tasks_done = True
 
         else:
@@ -94,10 +94,10 @@ class Animation(object):
                 self.task_index +=1
 
             positions = self.model.positions
-            speeds = self.model.speeds
+            velocities = self.model.velocities
             all_tasks_done = False
 
-        self._update_plot(i, positions, speeds, all_tasks_done)
+        self._update_plot(i, positions, velocities, all_tasks_done)
 
 
     def run(self):
@@ -115,7 +115,7 @@ if __name__ == '__main__': # animation testing
 
         def __init__(self, positions, time_delta=0.05):
             self.positions = positions
-            self.speeds = np.zeros(positions.shape, dtype=float)
+            self.velocities = np.zeros(positions.shape, dtype=float)
             self.num_agents = positions.shape[0]
             self.time_delta = time_delta
             self.task_ready = False
@@ -127,7 +127,7 @@ if __name__ == '__main__': # animation testing
             wiggle = np.concatenate([wx, wy], axis=1)
 
             self.positions += wiggle*self.time_delta
-            self.speeds = wiggle
+            self.velocities = wiggle
 
 
     parser = argparse.ArgumentParser()

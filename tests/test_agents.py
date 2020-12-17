@@ -68,3 +68,93 @@ def test_stopping_reshape_formation(points, accepted_error):
     new_positions = model.positions
 
     assert np.array_equal(points, new_positions)
+
+
+testdata2 = [
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.005, np.array([1., 0.], dtype=float), 10.,
+        np.array([[-0.95, 0.], [1.05, 0.], [0.05, np.sqrt(3)]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.01, np.array([0., 1.], dtype=float), 20.,
+        np.array([[-1, 0.2], [1., 0.2], [0., np.sqrt(3) + 0.2]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([0.5, 0.5], dtype=float), 50.,
+        np.array([[-0.5, 0.5], [1.5, 0.5], [0.5,np.sqrt(3)+0.5]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([-1., 0.], dtype=float), 100., # speed will be cliped
+        np.array([[-2., 0.], [0., 0.], [-1., np.sqrt(3)]], dtype=float)),
+    (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+        0.02, np.array([0., -1.], dtype=float), 100., # speed will be cliped
+        np.array([[-1., -1.], [1., -1.], [0., np.sqrt(3) - 1.]], dtype=float)),
+    (np.array([[0., -1.], [0., 1.], [np.sqrt(3), 0.]], dtype=float),
+        0.02, np.array([0., 1.], dtype=float), 100., # speed will be cliped
+        np.array([[0., 0.], [0., 2.], [np.sqrt(3), 1.]], dtype=float))
+    ]
+
+@pytest.mark.parametrize("points,delta,direction,speed,expected", testdata2)
+def test_shift_step(points, delta, direction, speed, expected):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
+    model._shift_step(direction, speed)
+
+    new_positions = model.positions
+
+    assert np.array_equal(new_positions, expected)
+
+
+testdata3 = [
+    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
+        np.array([0., np.sqrt(3)/3], dtype=float), 1e-5),
+    (np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
+        np.array([0., np.sqrt(3)/3], dtype=float), 1e-5),
+    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
+        np.array([np.sqrt(3)/3, 0.], dtype=float), 1e-4),
+    (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
+        np.array([np.sqrt(3)/3, 0.], dtype=float), 1e-4),
+    (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
+        np.array([0., 2+np.sqrt(3)/3], dtype=float), 1e-3),
+    (np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
+        np.array([-4.,np.sqrt(3)/3], dtype=float), 1e-3),
+    ]
+
+@pytest.mark.parametrize("points,target,error,", testdata3)
+def test_stopping_shift_formation(points, target, error):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+    model.shift_formation(target, 10.)
+
+    new_positions = model.positions
+
+    assert np.array_equal(points, new_positions)
+
+
+testdata4 =  [
+    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
+        np.array([0., np.sqrt(3)/3], dtype=float), 5e-6, 1e-7),
+    (np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
+        np.array([0., np.sqrt(3)/3], dtype=float), 5e-6, 1e-7),
+    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
+        np.array([np.sqrt(3)/3, 0.], dtype=float), 5e-5, 1e-7),
+    (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
+        np.array([np.sqrt(3)/3, 0.], dtype=float),5e-5, 1e-7),
+    (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
+        np.array([0., 2+np.sqrt(3)/3], dtype=float),5e-4, 1e-7),
+    (np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
+        np.array([-4.,np.sqrt(3)/3], dtype=float), 5e-5, 1e-7),
+    ]
+
+@pytest.mark.parametrize("points,target,delta,error", testdata4)
+def test_over_shooting_prevention(points, target, delta, error):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., delta, error)
+    model.shift_formation(target, 20.)
+
+    new_mean = np.mean(model.positions, axis=0)
+
+    assert np.allclose(new_mean, target)
