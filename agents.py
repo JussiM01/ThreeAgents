@@ -112,10 +112,10 @@ class MultiAgent(object):
 
         center_of_mass = np.mean(self.positions, axis=0)
 
-        if self.course_target == None:
+        if self.course_target is None:
 
             self.task_ready = False
-            self.course_target = target_point
+            self.course_target = np.array(target_point, dtype=float)
             self.course_direction = self._direction(
                 center_of_mass - self.course_target)
             self.course_speed = speed

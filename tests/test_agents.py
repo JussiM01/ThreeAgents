@@ -106,17 +106,17 @@ def test_shift_step(points, delta, direction, speed, expected):
 
 testdata3 = [
     (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
-        np.array([0., np.sqrt(3)/3], dtype=float), 1e-5),
+        [0., np.sqrt(3)/3], 1e-5),
     (np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
-        np.array([0., np.sqrt(3)/3], dtype=float), 1e-5),
+        [0., np.sqrt(3)/3], 1e-5),
     (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
-        np.array([np.sqrt(3)/3, 0.], dtype=float), 1e-4),
+        [np.sqrt(3)/3, 0.], 1e-4),
     (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
-        np.array([np.sqrt(3)/3, 0.], dtype=float), 1e-4),
+        [np.sqrt(3)/3, 0.], 1e-4),
     (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
-        np.array([0., 2+np.sqrt(3)/3], dtype=float), 1e-3),
+        [0., 2+np.sqrt(3)/3], 1e-3),
     (np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
-        np.array([-4.,np.sqrt(3)/3], dtype=float), 1e-3),
+        [-4.,np.sqrt(3)/3], 1e-3),
     ]
 
 @pytest.mark.parametrize("points,target,error,", testdata3)
@@ -134,17 +134,17 @@ def test_stopping_shift_formation(points, target, error):
 
 testdata4 =  [
     (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
-        np.array([0., np.sqrt(3)/3], dtype=float), 5e-6, 1e-7),
+        [0., np.sqrt(3)/3], 5e-6, 1e-7),
     (np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
-        np.array([0., np.sqrt(3)/3], dtype=float), 5e-6, 1e-7),
+        [0., np.sqrt(3)/3], 5e-6, 1e-7),
     (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
-        np.array([np.sqrt(3)/3, 0.], dtype=float), 5e-5, 1e-7),
+        [np.sqrt(3)/3, 0.], 5e-5, 1e-7),
     (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
-        np.array([np.sqrt(3)/3, 0.], dtype=float),5e-5, 1e-7),
+        [np.sqrt(3)/3, 0.], 5e-5, 1e-7),
     (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
-        np.array([0., 2+np.sqrt(3)/3], dtype=float),5e-4, 1e-7),
+        [0., 2+np.sqrt(3)/3], 5e-4, 1e-7),
     (np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
-        np.array([-4.,np.sqrt(3)/3], dtype=float), 5e-5, 1e-7),
+        [-4.,np.sqrt(3)/3], 5e-5, 1e-7),
     ]
 
 @pytest.mark.parametrize("points,target,delta,error", testdata4)
