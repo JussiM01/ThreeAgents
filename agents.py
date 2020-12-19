@@ -67,7 +67,8 @@ class MultiAgent(object):
             dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
             dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
 
-            error = abs(max([dist_01, dist_02, dist_12]) - self.target_distance)
+            error = max([abs(d - self.target_distance)
+                for d in [dist_01, dist_02, dist_12]])
 
             if error < self.accepted_error:
                 self.task_ready = True
@@ -128,7 +129,7 @@ class MultiAgent(object):
             self.course_target = None
             self.course_direction = None
             self.course_speed = None
-            self.tasks_done = True
+            self.task_ready = True
 
         else:
 
