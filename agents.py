@@ -107,6 +107,19 @@ class MultiAgent(object):
         raise NotImplementedError
 
 
+    def _rotate(self, vector, angle):
+
+        rotation_matrix = np.array(
+            [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+
+        return rotation_matrix.dot(vector)
+
+
+    def _rotate_all(self, points, angle):
+
+        return np.apply_along_axis(lambda x: self._rotate(x, angle), 1, points)
+
+
     def shift_formation(self, target_point, speed):
         '''Move the formation towards the target point with the given speed.
         (and make course corrections if there are any disturbancies).''' # NOTE: ADD COURSE CORRECTION LATER
