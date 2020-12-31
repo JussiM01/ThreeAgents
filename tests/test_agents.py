@@ -22,7 +22,8 @@ def test_sign_reshape_step(points, target_distance, expected_sign):
     init_points = copy.deepcopy(points)
 
     model = MultiAgent(init_points, target_distance, 1., 100., 0.05, 0.001)
-    model._reshape_step('triangle', 1.)
+    model.formation_type = 'triangle'
+    model._reshape_step(1.)
 
     old_distances = [
         np.linalg.norm(points[0] - points[1]),

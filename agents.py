@@ -18,9 +18,15 @@ class MultiAgent(object):
         self.num_agents = positions.shape[0]
         self.time_delta = time_delta
         self.accepted_error = accepted_error
+        self.formation_type = None
         self.course_target = None
         self.course_direction = None
         self.course_speed = None
+        self.rotation_center = None
+        self.target_direction = None
+        self.rotation_speed = None
+        self.lead_index = None
+        self.rotation_sign = None
         self.task_ready = True
 
 
@@ -63,6 +69,7 @@ class MultiAgent(object):
         self.task_ready = False
 
         if formation_type == 'triangle':
+            self.formation_type = formation_type
             dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
             dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
             dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
@@ -74,17 +81,17 @@ class MultiAgent(object):
                 self.task_ready = True
 
             else:
-                self._reshape_step(formation_type, speed)
+                self._reshape_step(speed)
 
         else:
             raise NotImplementedError
 
 
-    def _reshape_step(self, formation_type, speed):
+    def _reshape_step(self, speed):
 
         velocities = []
-
-        if formation_type == 'triangle':
+        print('F: ', self.formation_type)
+        if self.formation_type == 'triangle':
 
             for i in range(self.num_agents):
                 vectors_to_all = self.positions - self.positions[i,:]
@@ -100,11 +107,91 @@ class MultiAgent(object):
         self.positions += self.velocities*self.time_delta
 
 
-    def turn_formation(self, direction, speed):
-        '''Turn the formation around its center of mass until it faces the given
-        direction.'''
+    def turn_formation(self, target_point, speed):
+        '''Turn the formation around its center of mass until it faces the
+        direction of a given target point.'''
+
+        # if self.formation_type != 'triangle':
+        #     raise NotImplementedError
+        #
+        # if self.rotation_center is None:
+        #     self.task_ready = False
+        #
+        #     center_of_mass = np.mean(self.positions, axis=0)
+        #     to_target = target_point - center_of_mass
+        #     direction = self._direction(to_target)
+        #
+        #     self.rotation_center = center_of_mass
+        #     self.target_direction = direction
+        #     self.rotation_speed = speed
+        #     self.lead_index = self._closest_to(center_of_mass, direction)
+        #     self.rotation_sign = self._rotation_sign(center_of_mass, direction,
+        #         self.lead_index)
+        #
+        # lead_postion = self.postions[self.lead_index]
+        # lead_direction = self._(lead_direction - self.rotation_center)
+        # direction_diff = np.linalg.norm(lead_direction - self.target_direction)
+        #
+        # if direction_diff < self.accepted_error:
+        #
+        #     self.rotation_center = None
+        #     self.target_direction = None
+        #     self.rotation_speed = None
+        #     self.lead_index = None
+        #     self.rotation_sign = None
+        #     self.task_ready = True
+        #
+        # ###############################
+        #
+        # else:
+        #
+        #     if self._about_to_over_turn(....):
+        #         adjusted_direction = self._direction(cm_to_target)
+        #         adjusted_speed = dist_cm_to_target/self.time_delta
+        #
+        #     else:
+        #         adjusted_direction = self.course_direction
+        #         adjusted_speed = self.course_speed
+        #
+        #     self._turn_step(adjusted_direction, adjusted_speed)
+        #
+        # #########################
 
         raise NotImplementedError
+
+
+    # def _turn_step(self): # NOTE: NEEDS MORE ARGUMENTS ?
+    #
+    #     raise NotImplementedError
+    #
+    #
+    # def _about_to_over_turn(self): # NOTE: NEEDS MORE ARGUMENTS ?
+    #
+    #     raise NotImplementedError
+
+
+    def _closest_to(self, center_point, direction_to_target):
+
+        center_to_points = self.postions - center_point
+        directions = self._directions(center_to_points)
+        differences = np.linalg.norm(directions - direction_to_target, axis=1)
+
+        return np.argmin(differences)
+
+
+    def _rotation_sign(self, center_point, direction_to_target, lead_index):
+
+        center_to_point = self.postions[lead_index,:] - center_point
+        direction = self._direction(center_to_point)
+
+        direction_complex = np.array([direction[0] + direction[1]*j])
+        to_target_complex = np.array([direction_to_target[0] +
+            direction_to_target[1]*j])
+
+        conj_to_target = to_target_complex.conj()
+        product = direction_complex*conj_to_target
+
+        return -1*np.sign(product.imag)[0]
 
 
     def _rotate(self, vector, angle):
