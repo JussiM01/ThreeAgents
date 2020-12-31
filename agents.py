@@ -90,7 +90,7 @@ class MultiAgent(object):
     def _reshape_step(self, speed):
 
         velocities = []
-        print('F: ', self.formation_type)
+
         if self.formation_type == 'triangle':
 
             for i in range(self.num_agents):
