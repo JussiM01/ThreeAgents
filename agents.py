@@ -9,8 +9,6 @@ class MultiAgent(object):
             time_delta, accepted_error):
 
         self.positions = positions
-        self.formation_velocities = np.zeros(positions.shape)
-        self.rotation_velocities = np.zeros(positions.shape)
         self.velocities = np.zeros(positions.shape)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
@@ -120,10 +118,11 @@ class MultiAgent(object):
         #     center_of_mass = np.mean(self.positions, axis=0)
         #     to_target = target_point - center_of_mass
         #     direction = self._direction(to_target)
+        #     cliped_speed = speed if speed <= self.max_speed else self.max_speed
         #
         #     self.rotation_center = center_of_mass
         #     self.target_direction = direction
-        #     self.rotation_speed = speed
+        #     self.rotation_speed = cliped_speed
         #     self.lead_index = self._closest_to(center_of_mass, direction)
         #     self.rotation_sign = self._rotation_sign(center_of_mass, direction,
         #         self.lead_index)
@@ -145,29 +144,39 @@ class MultiAgent(object):
         #
         # else:
         #
-        #     if self._about_to_over_turn(....):
-        #         adjusted_direction = self._direction(cm_to_target)
-        #         adjusted_speed = dist_cm_to_target/self.time_delta
+        #     if self.formation_type == 'triangle':
+        #         dist_center_to_points = self.target_distance*np.sqrt(3)/2
+        #
+        #     angle = self.rotation_speed*self.time_delta/dist_center_to_points
+        #
+        #     if self._about_to_over_turn(angle):
+        #         adjusted_angle = ... # NOTE: FILL THIS!
+        #         adjusted_speed = ... # NOTE: FILL THIS!
         #
         #     else:
-        #         adjusted_direction = self.course_direction
-        #         adjusted_speed = self.course_speed
+        #         adjusted_angle = angle
+        #         adjusted_speed = self.rotation_speed
         #
-        #     self._turn_step(adjusted_direction, adjusted_speed)
+        #     self._turn_step(adjusted_angle, adjusted_speed)
         #
         # #########################
 
         raise NotImplementedError
 
 
-    # def _turn_step(self): # NOTE: NEEDS MORE ARGUMENTS ?
-    #
-    #     raise NotImplementedError
-    #
-    #
-    # def _about_to_over_turn(self): # NOTE: NEEDS MORE ARGUMENTS ?
-    #
-    #     raise NotImplementedError
+    def _turn_step(self, angle, speed):
+
+        new_points = self._rotate_all(self.positions, angle*self.rotation_sign)
+        diff_vectors = new_points -self.positions
+        diff_directions = self._directions(diff_vectors)
+
+        self.positions = new_points
+        self.velocities = diff_directions*speed
+
+
+    def _about_to_over_turn(self, angle):
+
+        raise NotImplementedError
 
 
     def _closest_to(self, center_point, direction_to_target):
