@@ -149,7 +149,7 @@ class MultiAgent(object):
         #
         #     angle = self.rotation_speed*self.time_delta/dist_center_to_points
         #
-        #     if self._about_to_over_turn(angle):
+        #     if self._about_to_over_turn(direction_diff, angle):
         #         adjusted_angle = ... # NOTE: FILL THIS!
         #         adjusted_speed = ... # NOTE: FILL THIS!
         #
@@ -160,7 +160,7 @@ class MultiAgent(object):
         #     self._turn_step(adjusted_angle, adjusted_speed)
         #
         # #########################
-
+S
         raise NotImplementedError
 
 
@@ -174,9 +174,14 @@ class MultiAgent(object):
         self.velocities = diff_directions*speed
 
 
-    def _about_to_over_turn(self, angle):
+    def _about_to_over_turn(self, direction_diff, angle):
 
-        raise NotImplementedError
+        lead_point = self.positions[self.lead_index]
+        planned_lead_point = _rotate(self, lead_point, angle)
+        planned_direction = self._direction(planned_lead_point)
+        planned_diff = np.linalg.norm(planned_direction - self.target_direction)
+
+        return planned_diff > direction_diff
 
 
     def _closest_to(self, center_point, direction_to_target):
