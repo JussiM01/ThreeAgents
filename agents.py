@@ -145,7 +145,7 @@ class MultiAgent(object):
         # else:
         #
         #     if self.formation_type == 'triangle':
-        #         dist_center_to_points = self.target_distance*np.sqrt(3)/2
+        #         dist_center_to_points = self.target_distance/np.sqrt(3)
         #
         #     angle = self.rotation_speed*self.time_delta/dist_center_to_points
         #
