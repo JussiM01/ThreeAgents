@@ -159,3 +159,16 @@ def test_over_shooting_prevention(points, target, delta, error):
     new_mean = np.mean(model.positions, axis=0)
 
     assert np.allclose(new_mean, target)
+
+
+# testdata5 = [...]
+#
+# @pytest.mark.parametrize("vectors,expected", testdata5)
+# def test_rotate_all(vectors, expected):
+#
+#     points = np.array([[0., 1.], [2., 3.], [4., 5.]])
+#
+#     model = MultiAgent(points, 1., 1., 50., 0.005, 0.001)
+#     new_vectors = model._rotate_all(vectors)
+#
+#     assert np.allclose(new_vectors, expected)
