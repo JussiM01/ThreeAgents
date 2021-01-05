@@ -128,7 +128,7 @@ class MultiAgent(object):
                 self.lead_index)
 
         lead_position = self.positions[self.lead_index]
-        lead_direction = self._(lead_direction - self.rotation_center)
+        lead_direction = self._(lead_position - self.rotation_center)
         direction_diff = np.linalg.norm(lead_direction - self.target_direction)
 
         if direction_diff < self.accepted_error:
@@ -166,7 +166,7 @@ class MultiAgent(object):
     def _turn_step(self, angle, speed):
 
         new_points = self._rotate_all(self.positions, angle*self.rotation_sign)
-        diff_vectors = new_points -self.positions
+        diff_vectors = new_points - self.positions
         diff_directions = self._directions(diff_vectors)
 
         self.positions = new_points
