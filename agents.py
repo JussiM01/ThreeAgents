@@ -109,59 +109,58 @@ class MultiAgent(object):
         '''Turn the formation around its center of mass until it faces the
         direction of a given target point.'''
 
-        # if self.formation_type != 'triangle':
-        #     raise NotImplementedError
-        #
-        # if self.rotation_center is None:
-        #     self.task_ready = False
-        #
-        #     center_of_mass = np.mean(self.positions, axis=0)
-        #     to_target = target_point - center_of_mass
-        #     direction = self._direction(to_target)
-        #     cliped_speed = speed if speed <= self.max_speed else self.max_speed
-        #
-        #     self.rotation_center = center_of_mass
-        #     self.target_direction = direction
-        #     self.rotation_speed = cliped_speed
-        #     self.lead_index = self._closest_to(center_of_mass, direction)
-        #     self.rotation_sign = self._rotation_sign(center_of_mass, direction,
-        #         self.lead_index)
-        #
-        # lead_postion = self.postions[self.lead_index]
-        # lead_direction = self._(lead_direction - self.rotation_center)
-        # direction_diff = np.linalg.norm(lead_direction - self.target_direction)
-        #
-        # if direction_diff < self.accepted_error:
-        #
-        #     self.rotation_center = None
-        #     self.target_direction = None
-        #     self.rotation_speed = None
-        #     self.lead_index = None
-        #     self.rotation_sign = None
-        #     self.task_ready = True
-        #
-        # ###############################
-        #
-        # else:
-        #
-        #     if self.formation_type == 'triangle':
-        #         dist_center_to_points = self.target_distance/np.sqrt(3)
-        #
-        #     angle = self.rotation_speed*self.time_delta/dist_center_to_points
-        #
-        #     if self._about_to_over_turn(direction_diff, angle):
-        #         adjusted_angle = ... # NOTE: FILL THIS!
-        #         adjusted_speed = ... # NOTE: FILL THIS!
-        #
-        #     else:
-        #         adjusted_angle = angle
-        #         adjusted_speed = self.rotation_speed
-        #
-        #     self._turn_step(adjusted_angle, adjusted_speed)
-        #
-        # #########################
-S
-        raise NotImplementedError
+        if self.formation_type != 'triangle':
+            raise NotImplementedError
+
+        if self.rotation_center is None:
+            self.task_ready = False
+
+            center_of_mass = np.mean(self.positions, axis=0)
+            to_target = target_point - center_of_mass
+            direction = self._direction(to_target)
+            cliped_speed = speed if speed <= self.max_speed else self.max_speed
+
+            self.rotation_center = center_of_mass
+            self.target_direction = direction
+            self.rotation_speed = cliped_speed
+            self.lead_index = self._closest_to(center_of_mass, direction)
+            self.rotation_sign = self._rotation_sign(center_of_mass, direction,
+                self.lead_index)
+
+        lead_position = self.positions[self.lead_index]
+        lead_direction = self._(lead_direction - self.rotation_center)
+        direction_diff = np.linalg.norm(lead_direction - self.target_direction)
+
+        if direction_diff < self.accepted_error:
+
+            self.rotation_center = None
+            self.target_direction = None
+            self.rotation_speed = None
+            self.lead_index = None
+            self.rotation_sign = None
+            self.task_ready = True
+
+        else:
+
+            if self.formation_type == 'triangle':
+                dist_center_to_points = self.target_distance/np.sqrt(3)
+
+            angle = self.rotation_speed*self.time_delta/dist_center_to_points
+
+            if self._about_to_over_turn(direction_diff, angle):
+
+                conj_prod = self._conjugate_product(lead_direction,
+                    self.target_direction)
+                adjusted_angle = np.asin(conj_prod.imag)
+                new_lead = self._rotate(lead_position, adjusted_angle)
+                adjusted_speed = np.linalg.norm(
+                    new_lead - lead_position)/self.time_delta
+
+            else:
+                adjusted_angle = angle
+                adjusted_speed = self.rotation_speed
+
+            self._turn_step(adjusted_angle, adjusted_speed)
 
 
     def _turn_step(self, angle, speed):
@@ -186,7 +185,7 @@ S
 
     def _closest_to(self, center_point, direction_to_target):
 
-        center_to_points = self.postions - center_point
+        center_to_points = self.positions - center_point
         directions = self._directions(center_to_points)
         differences = np.linalg.norm(directions - direction_to_target, axis=1)
 
@@ -203,7 +202,7 @@ S
 
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
 
-        center_to_point = self.postions[lead_index,:] - center_point
+        center_to_point = self.positions[lead_index,:] - center_point
         direction = self._direction(center_to_point)
         product = self._conjugate_product(direction, direction_to_target)
 
