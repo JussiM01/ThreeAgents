@@ -193,17 +193,19 @@ S
         return np.argmin(differences)
 
 
+    def _conjugate_product(vector1, vector2):
+
+        vec1_complex = np.array([vector1[0] + vector1[1]*j])
+        vec2_complex = np.array([vector2[0] + vector2[1]*j])
+
+        return vec1_complex*vec2_complex.conj()
+
+
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
 
         center_to_point = self.postions[lead_index,:] - center_point
         direction = self._direction(center_to_point)
-
-        direction_complex = np.array([direction[0] + direction[1]*j])
-        to_target_complex = np.array([direction_to_target[0] +
-            direction_to_target[1]*j])
-
-        conj_to_target = to_target_complex.conj()
-        product = direction_complex*conj_to_target
+        product = self._conjugate_product(direction, direction_to_target)
 
         return -1*np.sign(product.imag)[0]
 
