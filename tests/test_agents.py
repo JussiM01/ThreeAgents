@@ -172,3 +172,51 @@ def test_over_shooting_prevention(points, target, delta, error):
 #     new_vectors = model._rotate_all(vectors)
 #
 #     assert np.allclose(new_vectors, expected)
+
+
+# testdata6 = [...]
+#
+# @pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata6)
+# def test_turn_step(points, delta, sign, angle, speed, expected):
+#
+#     init_points = copy.deepcopy(points)
+#
+#     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
+#     model.rotation_sign = sign
+#     model._turn_step(angle, speed)
+#
+#     new_positions = model.positions
+#
+#     assert np.array_equal(new_positions, expected)
+
+
+# testdata7 = [...]
+#
+# @pytest.mark.parametrize("points,target,error,", testdata3)
+# def test_stopping_turn_formation(points, target, speed, error):
+#
+#     init_points = copy.deepcopy(points)
+#
+#     model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+#     model.formation_type = 'triangle'
+#     model.turn_formation(self, target, speed)
+#
+#     new_positions = model.positions
+#
+#     assert np.array_equal(points, new_positions)
+
+
+# testdata8 = [...]
+#
+# @pytest.mark.parametrize("points,target,delta,error", testdata4)
+# def test_over_shooting_prevention(points, target, delta, error):
+#
+#     init_points = copy.deepcopy(points)
+#
+#     model = MultiAgent(init_points, 1., 1., 50., delta, error)
+#     model.formation_type = 'triangle'
+#     model.turn_formation(self, target, speed)
+#
+#     new_mean = np.mean(model.positions, axis=0)
+#
+#     assert np.allclose(new_mean, target)
