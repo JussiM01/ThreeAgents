@@ -161,17 +161,31 @@ def test_over_shooting_prevention(points, target, delta, error):
     assert np.allclose(new_mean, target)
 
 
-# testdata5 = [...]
-#
-# @pytest.mark.parametrize("vectors,expected", testdata5)
-# def test_rotate_all(vectors, expected):
-#
-#     points = np.array([[0., 1.], [2., 3.], [4., 5.]])
-#
-#     model = MultiAgent(points, 1., 1., 50., 0.005, 0.001)
-#     new_vectors = model._rotate_all(vectors)
-#
-#     assert np.allclose(new_vectors, expected)
+sq = 1/np.sqrt(2)
+testdata5 = [
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi,
+    np.array([[0., -1.], [-1., 0.], [0., 1.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi,
+    np.array([[0., -1.], [-1., 0.], [0., 1.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/2,
+    np.array([[-1., 0.], [0., 1.], [1., 0.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/2,
+    np.array([[1., 0.], [0., -1.], [-1., 0.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/4,
+    np.array([[-sq, sq], [sq, sq], [sq, -sq]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/4,
+    np.array([[-sq, -sq], [sq, -sq], [sq, sq]], dtype=float))
+    ]
+
+@pytest.mark.parametrize("vectors,angle,expected", testdata5)
+def test_rotate_all(vectors, angle, expected):
+
+    points = np.array([[0., 1.], [2., 3.], [4., 5.]])
+
+    model = MultiAgent(points, 1., 1., 50., 0.005, 0.001)
+    new_vectors = model._rotate_all(vectors, angle)
+
+    assert np.allclose(new_vectors, expected)
 
 
 # testdata6 = [...]
