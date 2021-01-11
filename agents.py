@@ -176,7 +176,7 @@ class MultiAgent(object):
     def _about_to_over_turn(self, direction_diff, angle):
 
         lead_point = self.positions[self.lead_index]
-        planned_lead_point = _rotate(self, lead_point, angle)
+        planned_lead_point = _rotate(self, lead_point, angle*self.rotation_sign)
         planned_direction = self._direction(planned_lead_point)
         planned_diff = np.linalg.norm(planned_direction - self.target_direction)
 
