@@ -174,7 +174,7 @@ testdata5 = [
     (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/4,
     np.array([[-sq, sq], [sq, sq], [sq, -sq]], dtype=float)),
     (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/4,
-    np.array([[-sq, -sq], [sq, -sq], [sq, sq]], dtype=float))
+    np.array([[sq, sq], [sq, -sq], [-sq, -sq]], dtype=float))
     ]
 
 @pytest.mark.parametrize("vectors,angle,expected", testdata5)
