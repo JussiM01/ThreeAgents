@@ -218,7 +218,7 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
 
     model = MultiAgent(init_points, 1., 1., 1000., delta, 0.001)
     model.rotation_sign = sign
-    model.center_point = np.array([0., 0.], dtype=float)
+    model.rotation_center = np.array([0., 0.], dtype=float)
     model._turn_step(angle, speed)
 
     new_lead_position = model.positions[0,:]
