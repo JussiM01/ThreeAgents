@@ -165,7 +165,10 @@ class MultiAgent(object):
 
     def _turn_step(self, angle, speed):
 
-        new_points = self._rotate_all(self.positions, angle*self.rotation_sign)
+        center_to_points = self.positions - self.rotation_center
+        new_points = self.rotation_center + self._rotate_all(center_to_points,
+            angle*self.rotation_sign)
+
         diff_vectors = new_points - self.positions
         diff_directions = self._directions(diff_vectors)
 
