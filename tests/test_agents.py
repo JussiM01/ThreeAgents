@@ -188,20 +188,42 @@ def test_rotate_all(vectors, angle, expected):
     assert np.allclose(new_vectors, expected)
 
 
-# testdata6 = [...]
-#
-# @pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata6)
-# def test_turn_step(points, delta, sign, angle, speed, expected):
-#
-#     init_points = copy.deepcopy(points)
-#
-#     model = MultiAgent(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
-#     model.rotation_sign = sign
-#     model._turn_step(angle, speed)
-#
-#     new_positions = model.positions
-#
-#     assert np.array_equal(new_positions, expected)
+testdata6 = [
+    (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
+    [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
+    [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
+    0.1, -1, np.pi/8, 10*np.pi/8,
+    np.array([np.cos(np.pi/8), np.sin(np.pi/8)], dtype=float)),
+    (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
+    [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
+    [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
+    0.05, 1, np.pi/8, 20*np.pi/8,
+    np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
+    (np.array([[np.cos(np.pi/2), np.sin(np.pi/2)],
+    [np.cos(np.pi/2 + 2*np.pi/3), np.sin(np.pi/2 + 2*np.pi/3)],
+    [np.cos(np.pi/2 + 4*np.pi/3), np.sin(np.pi/2 + 4*np.pi/3)]], dtype=float),
+    0.01, -1, np.pi/8, 100*np.pi/8,
+    np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
+    (np.array([[np.cos(-np.pi/2), np.sin(-np.pi/2)],
+    [np.cos(-np.pi/2 + 2*np.pi/3), np.sin(-np.pi/2 + 2*np.pi/3)],
+    [np.cos(-np.pi/2 + 4*np.pi/3), np.sin(-np.pi/2 + 4*np.pi/3)]], dtype=float),
+    0.005, 1, np.pi/8, 200*np.pi/8,
+    np.array([np.cos(-3*np.pi/8), np.sin(-3*np.pi/8)], dtype=float))
+            ]
+
+@pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata6)
+def test_turn_step(points, delta, sign, angle, speed, expected):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 1000., delta, 0.001)
+    model.rotation_sign = sign
+    model.center_point = np.array([0., 0.], dtype=float)
+    model._turn_step(angle, speed)
+
+    new_lead_position = model.positions[0,:]
+
+    assert np.allclose(new_lead_position, expected)
 
 
 # testdata7 = [...]
