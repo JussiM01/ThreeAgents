@@ -128,7 +128,7 @@ class MultiAgent(object):
                 self.lead_index)
 
         lead_position = self.positions[self.lead_index]
-        lead_direction = self._(lead_position - self.rotation_center)
+        lead_direction = self._direction(lead_position - self.rotation_center)
         direction_diff = np.linalg.norm(lead_direction - self.target_direction)
 
         if direction_diff < self.accepted_error:
@@ -195,10 +195,10 @@ class MultiAgent(object):
         return np.argmin(differences)
 
 
-    def _conjugate_product(vector1, vector2):
+    def _conjugate_product(self, vector1, vector2):
 
-        vec1_complex = np.array([vector1[0] + vector1[1]*j])
-        vec2_complex = np.array([vector2[0] + vector2[1]*j])
+        vec1_complex = np.array([vector1[0] + 1j*vector1[1]])
+        vec2_complex = np.array([vector2[0] + 1j*vector2[1]])
 
         return vec1_complex*vec2_complex.conj()
 
