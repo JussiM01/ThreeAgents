@@ -226,20 +226,37 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
     assert np.allclose(new_lead_position, expected)
 
 
-# testdata7 = [...]
-#
-# @pytest.mark.parametrize("points,target,error,", testdata3)
-# def test_stopping_turn_formation(points, target, speed, error):
-#
-#     init_points = copy.deepcopy(points)
-#
-#     model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
-#     model.formation_type = 'triangle'
-#     model.turn_formation(self, target, speed)
-#
-#     new_positions = model.positions
-#
-#     assert np.array_equal(points, new_positions)
+testdata7 = [
+    (np.array([[np.cos(1e-6), np.sin(1e-6)],
+    [np.cos(1e-6 + 2*np.pi/3), np.sin(1e-6 + 2*np.pi/3)],
+    [np.cos(1e-6 + 4*np.pi/3), np.sin(1e-6 + 4*np.pi/3)]], dtype=float),
+    np.array([10., 0.], dtype=float), 10., 1e-5),
+    (np.array([[np.cos(np.pi/2 - 1e-5), np.sin(np.pi/2 - 1e-5)],
+    [np.cos(np.pi/2 - 1e-5 + 2*np.pi/3), np.sin(np.pi/2 - 1e-5 + 2*np.pi/3)],
+    [np.cos(np.pi/2 - 1e-5 + 4*np.pi/3), np.sin(np.pi/2 - 1e-5 + 4*np.pi/3)]],
+    dtype=float), np.array([0., 20.], dtype=float), 20., 1e-4),
+    (np.array([[np.cos(np.pi/4 - 1e-4), np.sin(np.pi/4 - 1e-4)],
+    [np.cos(np.pi/4 - 1e-4 + 2*np.pi/3), np.sin(np.pi/4 - 1e-4 + 2*np.pi/3)],
+    [np.cos(np.pi/4 - 1e-4 + 4*np.pi/3), np.sin(np.pi/4 - 1e-4 + 4*np.pi/3)]],
+    dtype=float), np.array([30., 30.], dtype=float), 50., 1e-3),
+    (np.array([[np.cos(-np.pi/4 - 1e-3), np.sin(-np.pi/4 - 1e-3)],
+    [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
+    [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]],
+    dtype=float), np.array([50., -50.], dtype=float), 100., 1e-2),
+            ]
+
+@pytest.mark.parametrize("points,target,speed,error,", testdata7)
+def test_stopping_turn_formation(points, target, speed, error):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+    model.formation_type = 'triangle'
+    model.turn_formation(target, speed)
+
+    new_positions = model.positions
+
+    assert np.array_equal(points, new_positions)
 
 
 # testdata8 = [...]
