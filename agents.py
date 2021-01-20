@@ -152,7 +152,6 @@ class MultiAgent(object):
                 conj_prod = self._conjugate_product(lead_direction,
                     self.target_direction)
                 adjusted_angle = np.arcsin(conj_prod.imag)[0]
-                print('A', adjusted_angle)
                 new_lead = self._rotate(lead_position, adjusted_angle)
                 adjusted_speed = np.linalg.norm(
                     new_lead - lead_position)/self.time_delta
