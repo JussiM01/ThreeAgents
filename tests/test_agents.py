@@ -261,15 +261,20 @@ def test_stopping_turn_formation(points, target, speed, error):
 
 # testdata8 = [...]
 #
-# @pytest.mark.parametrize("points,target,delta,error", testdata4)
-# def test_over_shooting_prevention(points, target, delta, error):
+# @pytest.mark.parametrize("points,target,delta,error", testdata8)
+# def test_over_turning_prevention(points, target, delta, error):
 #
 #     init_points = copy.deepcopy(points)
+#     rotation_center = np.mean(points)
 #
 #     model = MultiAgent(init_points, 1., 1., 50., delta, error)
 #     model.formation_type = 'triangle'
 #     model.turn_formation(self, target, speed)
 #
-#     new_mean = np.mean(model.positions, axis=0)
+#     target_direction = model._direction(target - rotation_center)
+#     center_to_points = model.positions - rotation_center
+#     directions = model._directions(center_to_points)
 #
-#     assert np.allclose(new_mean, target)
+#     differences = np.linalg.norm(directions - target_direction, axis=0)
+#
+#     assert np.min(differences) == 0
