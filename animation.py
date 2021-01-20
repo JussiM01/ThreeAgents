@@ -87,6 +87,9 @@ class Animation(object):
             elif task['type'] == 'shift':
                 self.model.shift_formation(*task['args'])
 
+            elif task['type'] == 'turn':
+                self.model.turn_formation(*task['args'])
+
             elif task['type'] == 'random': # for testing only
                 self.model.random(*task['args']) # (see RandomAgent below)
 
