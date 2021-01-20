@@ -230,19 +230,19 @@ testdata7 = [
     (np.array([[np.cos(1e-6), np.sin(1e-6)],
     [np.cos(1e-6 + 2*np.pi/3), np.sin(1e-6 + 2*np.pi/3)],
     [np.cos(1e-6 + 4*np.pi/3), np.sin(1e-6 + 4*np.pi/3)]], dtype=float),
-    np.array([10., 0.], dtype=float), 10., 1e-5),
+    [10., 0.], 10., 1e-5),
     (np.array([[np.cos(np.pi/2 - 1e-5), np.sin(np.pi/2 - 1e-5)],
     [np.cos(np.pi/2 - 1e-5 + 2*np.pi/3), np.sin(np.pi/2 - 1e-5 + 2*np.pi/3)],
     [np.cos(np.pi/2 - 1e-5 + 4*np.pi/3), np.sin(np.pi/2 - 1e-5 + 4*np.pi/3)]],
-    dtype=float), np.array([0., 20.], dtype=float), 20., 1e-4),
+    dtype=float), [0., 20.], 20., 1e-4),
     (np.array([[np.cos(np.pi/4 - 1e-4), np.sin(np.pi/4 - 1e-4)],
     [np.cos(np.pi/4 - 1e-4 + 2*np.pi/3), np.sin(np.pi/4 - 1e-4 + 2*np.pi/3)],
     [np.cos(np.pi/4 - 1e-4 + 4*np.pi/3), np.sin(np.pi/4 - 1e-4 + 4*np.pi/3)]],
-    dtype=float), np.array([30., 30.], dtype=float), 50., 1e-3),
+    dtype=float), [30., 30.], 50., 1e-3),
     (np.array([[np.cos(-np.pi/4 - 1e-3), np.sin(-np.pi/4 - 1e-3)],
     [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
     [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]],
-    dtype=float), np.array([50., -50.], dtype=float), 100., 1e-2),
+    dtype=float), [50., -50.], 100., 1e-2),
             ]
 
 @pytest.mark.parametrize("points,target,speed,error,", testdata7)
@@ -263,19 +263,19 @@ testdata8 = [
     (np.array([[np.cos(np.pi/4 + 1e-8), np.sin(np.pi/4 + 1e-8)],
     [np.cos(np.pi/4 + 2*np.pi/3 + 1e-8), np.sin(np.pi/4 + 2*np.pi/3 + 1e-8)],
     [np.cos(np.pi/4 + 4*np.pi/3 + 1e-8), np.sin(np.pi/4 + 4*np.pi/3 + 1e-8)]],
-    dtype=float), np.array([10., 10.], dtype=float), 0.001, 1e-7),
+    dtype=float), [10., 10.], 0.001, 1e-7),
     (np.array([[np.cos(np.pi/4 - 1e-7), np.sin(np.pi/4 - 1e-7)],
     [np.cos(np.pi/4 + 2*np.pi/3 - 1e-7), np.sin(np.pi/4 + 2*np.pi/3 - 1e-7)],
     [np.cos(np.pi/4 + 4*np.pi/3 - 1e-7), np.sin(np.pi/4 + 4*np.pi/3 - 1e-7)]],
-    dtype=float), np.array([20., 20.], dtype=float), 0.002, 1e-6),
+    dtype=float), [20., 20.], 0.002, 1e-6),
     (np.array([[np.cos(np.pi/2 + 1e-6), np.sin(np.pi/2 + 1e-6)],
     [np.cos(np.pi/2 + 2*np.pi/3 + 1e-6), np.sin(np.pi/2 + 2*np.pi/3 + 1e-6)],
     [np.cos(np.pi/2 + 4*np.pi/3 + 1e-6), np.sin(np.pi/2 + 4*np.pi/3 + 1e-6)]],
-    dtype=float), np.array([0., 50.],dtype=float), 0.01, 1e-5),
+    dtype=float), [0., 50.], 0.01, 1e-5),
     (np.array([[np.cos(-np.pi/2 + 1e-5), np.sin(-np.pi/2 + 1e-5)],
     [np.cos(-np.pi/2 + 2*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 2*np.pi/3 + 1e-5)],
     [np.cos(-np.pi/2 + 4*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 4*np.pi/3 + 1e-5)]],
-    dtype=float), np.array([-100., -100], dtype=float), 0.05, 1e-4)
+    dtype=float), [-100., -100], 0.05, 1e-4)
             ]
 
 @pytest.mark.parametrize("points,target,delta,error", testdata8)

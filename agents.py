@@ -116,7 +116,7 @@ class MultiAgent(object):
             self.task_ready = False
 
             center_of_mass = np.mean(self.positions, axis=0)
-            to_target = target_point - center_of_mass
+            to_target = np.array(target_point, dtype=float) - center_of_mass
             direction = self._direction(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
 
