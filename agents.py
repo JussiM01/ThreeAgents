@@ -151,7 +151,8 @@ class MultiAgent(object):
 
                 conj_prod = self._conjugate_product(lead_direction,
                     self.target_direction)
-                adjusted_angle = np.asin(conj_prod.imag)
+                adjusted_angle = np.arcsin(conj_prod.imag)[0]
+                print('A', adjusted_angle)
                 new_lead = self._rotate(lead_position, adjusted_angle)
                 adjusted_speed = np.linalg.norm(
                     new_lead - lead_position)/self.time_delta
@@ -179,7 +180,7 @@ class MultiAgent(object):
     def _about_to_over_turn(self, direction_diff, angle):
 
         lead_point = self.positions[self.lead_index]
-        planned_lead_point = _rotate(self, lead_point, angle*self.rotation_sign)
+        planned_lead_point = self._rotate(lead_point, angle*self.rotation_sign)
         planned_direction = self._direction(planned_lead_point)
         planned_diff = np.linalg.norm(planned_direction - self.target_direction)
 
