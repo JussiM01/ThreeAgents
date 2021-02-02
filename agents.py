@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-
+import copy
 
 
 class MultiAgent(object):
@@ -21,7 +21,9 @@ class MultiAgent(object):
         self.course_direction = None
         self.course_speed = None
         self.rotation_center = None
+        self.dist_center_to_points = None
         self.target_direction = None
+        self.target_vectors = None
         self.rotation_speed = None
         self.lead_index = None
         self.rotation_sign = None
@@ -120,12 +122,17 @@ class MultiAgent(object):
             direction = self._direction(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
 
+            self.dist_center_to_points = self.target_distance/np.sqrt(3)
             self.rotation_center = center_of_mass
             self.target_direction = direction
             self.rotation_speed = cliped_speed
             self.lead_index = self._closest_to(center_of_mass, direction)
             self.rotation_sign = self._rotation_sign(center_of_mass, direction,
                 self.lead_index)
+
+            target_vector = self.target_direction*self.dist_center_to_points
+            self.target_vectors = np.stack([self._rotate(target_vector, theta)
+                for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
         lead_position = self.positions[self.lead_index]
         lead_direction = self._direction(lead_position - self.rotation_center)
@@ -142,25 +149,23 @@ class MultiAgent(object):
 
         else:
 
-            if self.formation_type == 'triangle':
-                dist_center_to_points = self.target_distance/np.sqrt(3)
-
-            angle = self.rotation_speed*self.time_delta/dist_center_to_points
+            angle = (self.rotation_speed*self.time_delta
+                /self.dist_center_to_points)
 
             if self._about_to_over_turn(direction_diff, angle):
 
-                conj_prod = self._conjugate_product(lead_direction,
-                    self.target_direction)
-                adjusted_angle = np.arcsin(conj_prod.imag)[0]
-                new_lead = self._rotate(lead_position, adjusted_angle)
-                adjusted_speed = np.linalg.norm(
-                    new_lead - lead_position)/self.time_delta
+                vecs = copy.deepcopy(self.positions) - self.rotation_center
+
+                for i in range(3):
+                    ind = np.argmin(np.linalg.norm(vecs[i]
+                        - self.target_vectors, axis=1))
+                    new_point = self.rotation_center + self.target_vectors[ind]
+
+                    self.positions[i] = new_point
+                    self.velocities[i] = (new_point - vecs[i])/self.time_delta
 
             else:
-                adjusted_angle = angle
-                adjusted_speed = self.rotation_speed
-
-            self._turn_step(adjusted_angle, adjusted_speed)
+                self._turn_step(angle, speed)
 
 
     def _turn_step(self, angle, speed):
@@ -168,8 +173,7 @@ class MultiAgent(object):
         center_to_points = self.positions - self.rotation_center
         new_points = self.rotation_center + self._rotate_all(center_to_points,
             angle*self.rotation_sign)
-
-        diff_vectors = new_points - self.positions
+        diff_vectors = new_points - center_to_points
         diff_directions = self._directions(diff_vectors)
 
         self.positions = new_points
@@ -179,8 +183,9 @@ class MultiAgent(object):
     def _about_to_over_turn(self, direction_diff, angle):
 
         lead_point = self.positions[self.lead_index]
-        planned_lead_point = self._rotate(lead_point, angle*self.rotation_sign)
-        planned_direction = self._direction(planned_lead_point)
+        lead_direction = self._direction(lead_point - self.rotation_center)
+
+        planned_direction = self._rotate(lead_direction, angle*self.rotation_sign)
         planned_diff = np.linalg.norm(planned_direction - self.target_direction)
 
         return planned_diff > direction_diff
