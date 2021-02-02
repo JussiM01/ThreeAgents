@@ -22,7 +22,8 @@ def test_sign_reshape_step(points, target_distance, expected_sign):
     init_points = copy.deepcopy(points)
 
     model = MultiAgent(init_points, target_distance, 1., 100., 0.05, 0.001)
-    model._reshape_step('triangle', 1.)
+    model.formation_type = 'triangle'
+    model._reshape_step(1.)
 
     old_distances = [
         np.linalg.norm(points[0] - points[1]),
@@ -158,3 +159,139 @@ def test_over_shooting_prevention(points, target, delta, error):
     new_mean = np.mean(model.positions, axis=0)
 
     assert np.allclose(new_mean, target)
+
+
+sq = 1/np.sqrt(2)
+testdata5 = [
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi,
+    np.array([[0., -1.], [-1., 0.], [0., 1.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi,
+    np.array([[0., -1.], [-1., 0.], [0., 1.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/2,
+    np.array([[-1., 0.], [0., 1.], [1., 0.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/2,
+    np.array([[1., 0.], [0., -1.], [-1., 0.]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/4,
+    np.array([[-sq, sq], [sq, sq], [sq, -sq]], dtype=float)),
+    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/4,
+    np.array([[sq, sq], [sq, -sq], [-sq, -sq]], dtype=float))
+    ]
+
+@pytest.mark.parametrize("vectors,angle,expected", testdata5)
+def test_rotate_all(vectors, angle, expected):
+
+    points = np.array([[0., 1.], [2., 3.], [4., 5.]])
+
+    model = MultiAgent(points, 1., 1., 50., 0.005, 0.001)
+    new_vectors = model._rotate_all(vectors, angle)
+
+    assert np.allclose(new_vectors, expected)
+
+
+testdata6 = [
+    (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
+    [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
+    [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
+    0.1, -1, np.pi/8, 10*np.pi/8,
+    np.array([np.cos(np.pi/8), np.sin(np.pi/8)], dtype=float)),
+    (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
+    [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
+    [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
+    0.05, 1, np.pi/8, 20*np.pi/8,
+    np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
+    (np.array([[np.cos(np.pi/2), np.sin(np.pi/2)],
+    [np.cos(np.pi/2 + 2*np.pi/3), np.sin(np.pi/2 + 2*np.pi/3)],
+    [np.cos(np.pi/2 + 4*np.pi/3), np.sin(np.pi/2 + 4*np.pi/3)]], dtype=float),
+    0.01, -1, np.pi/8, 100*np.pi/8,
+    np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
+    (np.array([[np.cos(-np.pi/2), np.sin(-np.pi/2)],
+    [np.cos(-np.pi/2 + 2*np.pi/3), np.sin(-np.pi/2 + 2*np.pi/3)],
+    [np.cos(-np.pi/2 + 4*np.pi/3), np.sin(-np.pi/2 + 4*np.pi/3)]], dtype=float),
+    0.005, 1, np.pi/8, 200*np.pi/8,
+    np.array([np.cos(-3*np.pi/8), np.sin(-3*np.pi/8)], dtype=float))
+            ]
+
+@pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata6)
+def test_turn_step(points, delta, sign, angle, speed, expected):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 1000., delta, 0.001)
+    model.rotation_sign = sign
+    model.rotation_center = np.array([0., 0.], dtype=float)
+    model._turn_step(angle, speed)
+
+    new_lead_position = model.positions[0,:]
+
+    assert np.allclose(new_lead_position, expected)
+
+
+testdata7 = [
+    (np.array([[np.cos(1e-6), np.sin(1e-6)],
+    [np.cos(1e-6 + 2*np.pi/3), np.sin(1e-6 + 2*np.pi/3)],
+    [np.cos(1e-6 + 4*np.pi/3), np.sin(1e-6 + 4*np.pi/3)]], dtype=float),
+    [10., 0.], 10., 1e-5),
+    (np.array([[np.cos(np.pi/2 - 1e-5), np.sin(np.pi/2 - 1e-5)],
+    [np.cos(np.pi/2 - 1e-5 + 2*np.pi/3), np.sin(np.pi/2 - 1e-5 + 2*np.pi/3)],
+    [np.cos(np.pi/2 - 1e-5 + 4*np.pi/3), np.sin(np.pi/2 - 1e-5 + 4*np.pi/3)]],
+    dtype=float), [0., 20.], 20., 1e-4),
+    (np.array([[np.cos(np.pi/4 - 1e-4), np.sin(np.pi/4 - 1e-4)],
+    [np.cos(np.pi/4 - 1e-4 + 2*np.pi/3), np.sin(np.pi/4 - 1e-4 + 2*np.pi/3)],
+    [np.cos(np.pi/4 - 1e-4 + 4*np.pi/3), np.sin(np.pi/4 - 1e-4 + 4*np.pi/3)]],
+    dtype=float), [30., 30.], 50., 1e-3),
+    (np.array([[np.cos(-np.pi/4 - 1e-3), np.sin(-np.pi/4 - 1e-3)],
+    [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
+    [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]],
+    dtype=float), [50., -50.], 100., 1e-2),
+            ]
+
+@pytest.mark.parametrize("points,target,speed,error,", testdata7)
+def test_stopping_turn_formation(points, target, speed, error):
+
+    init_points = copy.deepcopy(points)
+
+    model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+    model.formation_type = 'triangle'
+    model.turn_formation(target, speed)
+
+    new_positions = model.positions
+
+    assert np.array_equal(points, new_positions)
+
+
+testdata8 = [
+    (np.array([[np.cos(np.pi/4 + 1e-8), np.sin(np.pi/4 + 1e-8)],
+    [np.cos(np.pi/4 + 2*np.pi/3 + 1e-8), np.sin(np.pi/4 + 2*np.pi/3 + 1e-8)],
+    [np.cos(np.pi/4 + 4*np.pi/3 + 1e-8), np.sin(np.pi/4 + 4*np.pi/3 + 1e-8)]],
+    dtype=float), [10., 10.], 0.001, 1e-7),
+    (np.array([[np.cos(np.pi/4 - 1e-7), np.sin(np.pi/4 - 1e-7)],
+    [np.cos(np.pi/4 + 2*np.pi/3 - 1e-7), np.sin(np.pi/4 + 2*np.pi/3 - 1e-7)],
+    [np.cos(np.pi/4 + 4*np.pi/3 - 1e-7), np.sin(np.pi/4 + 4*np.pi/3 - 1e-7)]],
+    dtype=float), [20., 20.], 0.002, 1e-6),
+    (np.array([[np.cos(np.pi/2 + 1e-6), np.sin(np.pi/2 + 1e-6)],
+    [np.cos(np.pi/2 + 2*np.pi/3 + 1e-6), np.sin(np.pi/2 + 2*np.pi/3 + 1e-6)],
+    [np.cos(np.pi/2 + 4*np.pi/3 + 1e-6), np.sin(np.pi/2 + 4*np.pi/3 + 1e-6)]],
+    dtype=float), [0., 50.], 0.01, 1e-5),
+    (np.array([[np.cos(-np.pi/2 + 1e-5), np.sin(-np.pi/2 + 1e-5)],
+    [np.cos(-np.pi/2 + 2*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 2*np.pi/3 + 1e-5)],
+    [np.cos(-np.pi/2 + 4*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 4*np.pi/3 + 1e-5)]],
+    dtype=float), [-100., -100], 0.05, 1e-4)
+            ]
+
+@pytest.mark.parametrize("points,target,delta,error", testdata8)
+def test_over_turning_prevention(points, target, delta, error):
+
+    init_points = copy.deepcopy(points)
+    rotation_center = np.mean(points)
+
+    model = MultiAgent(init_points, 1., 1., 1000., delta, error)
+    model.formation_type = 'triangle'
+    model.turn_formation(target, 100.)
+
+    target_direction = model._direction(target - rotation_center)
+    center_to_points = model.positions - rotation_center
+    directions = model._directions(center_to_points)
+
+    differences = np.linalg.norm(directions - target_direction, axis=1)
+
+    assert np.min(differences) < error

@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-
+import copy
 
 
 class MultiAgent(object):
@@ -9,8 +9,6 @@ class MultiAgent(object):
             time_delta, accepted_error):
 
         self.positions = positions
-        self.formation_velocities = np.zeros(positions.shape)
-        self.rotation_velocities = np.zeros(positions.shape)
         self.velocities = np.zeros(positions.shape)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
@@ -18,9 +16,17 @@ class MultiAgent(object):
         self.num_agents = positions.shape[0]
         self.time_delta = time_delta
         self.accepted_error = accepted_error
+        self.formation_type = None
         self.course_target = None
         self.course_direction = None
         self.course_speed = None
+        self.rotation_center = None
+        self.dist_center_to_points = None
+        self.target_direction = None
+        self.target_vectors = None
+        self.rotation_speed = None
+        self.lead_index = None
+        self.rotation_sign = None
         self.task_ready = True
 
 
@@ -63,27 +69,29 @@ class MultiAgent(object):
         self.task_ready = False
 
         if formation_type == 'triangle':
+            self.formation_type = formation_type
             dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
             dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
             dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
 
-            error = abs(max([dist_01, dist_02, dist_12]) - self.target_distance)
+            error = max([abs(d - self.target_distance)
+                for d in [dist_01, dist_02, dist_12]])
 
             if error < self.accepted_error:
                 self.task_ready = True
 
             else:
-                self._reshape_step(formation_type, speed)
+                self._reshape_step(speed)
 
         else:
             raise NotImplementedError
 
 
-    def _reshape_step(self, formation_type, speed):
+    def _reshape_step(self, speed):
 
         velocities = []
 
-        if formation_type == 'triangle':
+        if self.formation_type == 'triangle':
 
             for i in range(self.num_agents):
                 vectors_to_all = self.positions - self.positions[i,:]
@@ -99,11 +107,127 @@ class MultiAgent(object):
         self.positions += self.velocities*self.time_delta
 
 
-    def turn_formation(self, direction, speed):
-        '''Turn the formation around its center of mass until it faces the given
-        direction.'''
+    def turn_formation(self, target_point, speed):
+        '''Turn the formation around its center of mass until it faces the
+        direction of a given target point.'''
 
-        raise NotImplementedError
+        if self.formation_type != 'triangle':
+            raise NotImplementedError
+
+        if self.rotation_center is None:
+            self.task_ready = False
+
+            center_of_mass = np.mean(self.positions, axis=0)
+            to_target = np.array(target_point, dtype=float) - center_of_mass
+            direction = self._direction(to_target)
+            cliped_speed = speed if speed <= self.max_speed else self.max_speed
+
+            self.dist_center_to_points = self.target_distance/np.sqrt(3)
+            self.rotation_center = center_of_mass
+            self.target_direction = direction
+            self.rotation_speed = cliped_speed
+            self.lead_index = self._closest_to(center_of_mass, direction)
+            self.rotation_sign = self._rotation_sign(center_of_mass, direction,
+                self.lead_index)
+
+            target_vector = self.target_direction*self.dist_center_to_points
+            self.target_vectors = np.stack([self._rotate(target_vector, theta)
+                for theta in (0, 2*np.pi/3, 4*np.pi/3)])
+
+        lead_position = self.positions[self.lead_index]
+        lead_direction = self._direction(lead_position - self.rotation_center)
+        direction_diff = np.linalg.norm(lead_direction - self.target_direction)
+
+        if direction_diff < self.accepted_error:
+
+            self.rotation_center = None
+            self.target_direction = None
+            self.rotation_speed = None
+            self.lead_index = None
+            self.rotation_sign = None
+            self.task_ready = True
+
+        else:
+
+            angle = (self.rotation_speed*self.time_delta
+                /self.dist_center_to_points)
+
+            if self._about_to_over_turn(direction_diff, angle):
+
+                vecs = copy.deepcopy(self.positions) - self.rotation_center
+
+                for i in range(3):
+                    ind = np.argmin(np.linalg.norm(vecs[i]
+                        - self.target_vectors, axis=1))
+                    new_point = self.rotation_center + self.target_vectors[ind]
+
+                    self.positions[i] = new_point
+                    self.velocities[i] = (new_point - vecs[i])/self.time_delta
+
+            else:
+                self._turn_step(angle, speed)
+
+
+    def _turn_step(self, angle, speed):
+
+        center_to_points = self.positions - self.rotation_center
+        new_points = self.rotation_center + self._rotate_all(center_to_points,
+            angle*self.rotation_sign)
+        diff_vectors = new_points - center_to_points
+        diff_directions = self._directions(diff_vectors)
+
+        self.positions = new_points
+        self.velocities = diff_directions*speed
+
+
+    def _about_to_over_turn(self, direction_diff, angle):
+
+        lead_point = self.positions[self.lead_index]
+        lead_direction = self._direction(lead_point - self.rotation_center)
+
+        planned_direction = self._rotate(lead_direction, angle*self.rotation_sign)
+        planned_diff = np.linalg.norm(planned_direction - self.target_direction)
+
+        return planned_diff > direction_diff
+
+
+    def _closest_to(self, center_point, direction_to_target):
+
+        center_to_points = self.positions - center_point
+        directions = self._directions(center_to_points)
+        differences = np.linalg.norm(directions - direction_to_target, axis=1)
+
+        return np.argmin(differences)
+
+
+    def _conjugate_product(self, vector1, vector2):
+
+        vec1_complex = np.array([vector1[0] + 1j*vector1[1]])
+        vec2_complex = np.array([vector2[0] + 1j*vector2[1]])
+
+        return vec1_complex*vec2_complex.conj()
+
+
+    def _rotation_sign(self, center_point, direction_to_target, lead_index):
+
+        center_to_point = self.positions[lead_index,:] - center_point
+        direction = self._direction(center_to_point)
+        product = self._conjugate_product(direction, direction_to_target)
+
+        return -1*np.sign(product.imag)[0]
+
+
+    def _rotate(self, vector, angle):
+
+        rotation_matrix = np.array(
+            [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+
+        return rotation_matrix.dot(vector)
+
+
+    def _rotate_all(self, points, angle):
+
+        return np.apply_along_axis(lambda x: self._rotate(x, angle), 1, points)
 
 
     def shift_formation(self, target_point, speed):
@@ -128,7 +252,7 @@ class MultiAgent(object):
             self.course_target = None
             self.course_direction = None
             self.course_speed = None
-            self.tasks_done = True
+            self.task_ready = True
 
         else:
 
@@ -161,56 +285,3 @@ class MultiAgent(object):
         velocities = np.tile(direction*speed, [self.num_agents, 1])
         self.velocities = self._cliped(velocities)
         self.positions += self.velocities*self.time_delta
-
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--random_seed', type=int, default=0)
-    parser.add_argument('-n', '--num_agents', type=int, default=3)
-    parser.add_argument('-d', '--distance', type=float, default=10.0)
-    parser.add_argument('-b', '--bond_value', type=float, default=10.0)
-    parser.add_argument('-to', '--top_speed', type=float, default=1.0)
-    parser.add_argument('-td', '--time_delta', type=float, default=0.01)
-    parser.add_argument('-e', '--episode_lenght', type=int, default=1000)
-    parser.add_argument('-a', '--accepted_error', type=float, default=1e-3)
-
-    args = parser.parse_args()
-
-    initial_positions = np.random.uniform(0, 10, (args.num_agents, 2))
-
-    model = MultiAgent(
-        initial_positions,
-        args.distance,
-        args.bond_value,
-        args.top_speed,
-        args.time_delta,
-        args.accepted_error
-        )
-
-    # print('\n### moving all points to same direction ###\n')
-    #
-    # for i in range(args.episode_lenght):
-    #     model.move_all(np.array([1.0, 1.0]), 1.0)
-    #     print('\n\nFRAME NUMBER: ', i)
-    #     print('\nPOSITIONS:\n', model.positions)
-    #     print('\nvelocities:\n', model.velocities)
-
-    print('\n### adjusting the fromation ###\n')
-
-    for i in range(args.episode_lenght):
-
-        if i == 0:
-            model.reshape_formation('triangle', args.top_speed)
-
-        elif (i !=0) and (not model.task_ready):
-            model.reshape_formation('triangle', args.top_speed)
-
-        else:
-            print('TASK READY')
-            break
-
-        print('\n\nFRAME NUMBER: ', i)
-        print('\nPOSITIONS:\n', model.positions)
-        print('\nvelocities:\n', model.velocities)
