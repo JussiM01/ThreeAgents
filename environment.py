@@ -1,25 +1,23 @@
 import numpy as np
 
+NORTH = np.array([0., 1.], dtype=float)
+ORIGIN = np.array([0., 0.], dtype=float)
 
 class Env(object):
 
     def __init__(self, vector_field, update_map, time_delta):
 
         self.vector_field = vector_field
-        self.update_map = update_map
         self.time_delta = time_delta
-
-
-    def _update(self):
-
-        update = self.update_map(self.vector_field, self.time_delta)
-        self.vector_field += update
+        self.time_now = 0
 
 
     def evaluate(self, points):
 
-        self._update()
-        vectors = np.apply_along_axis(lambda x: self.vector_field(x), 1, points)
+        t = self.time_now
+        f = lambda x: vector_field(x, t)
+        vectors = np.apply_along_axis(f(x), 1, points)
+        self.time_now += self.time_delta
 
         return vectors
 
@@ -32,29 +30,33 @@ class Env(object):
 
 class VectorField(object):
 
-    def __init__(self, arg):
+    def __init__(self, value_map):
 
-        self.arg = arg
-
-
-    def __add__(self, other):
-
-        raise NotImplementedError
+        self.value_map = value_map
 
 
-    def __call__(self, point):
+    def __call__(self, point, time):
 
-        raise NotImplementedError
+        return value_map(point, time)
 
 
 
-class UpdateMap(object):
+class FlowTube(object):
 
-    def __init__(self, arg):
+    def __init__(self, flow_map, fluctuation, center=ORIGIN, direction=NORTH):
 
-        self.arg = arg
+        self.flow_map = flow_map
+        self.fluctuation = fluctuation
+        self.center = center
+        self.direction = direction
+
+        if direction != NORTH:
+            raise NotImplementedError
 
 
-    def __call__(self, vector_field, time_delta):
+    def __call__(point, time):
 
-        raise NotImplementedError
+        strenght = self.flow_map(point)*self.fluctuation(time)
+        vector = strenght*self.direction
+
+        return vector
