@@ -16,7 +16,7 @@ class Env(object):
 
         t = self.time_now
         f = lambda x: vector_field(x, t)
-        vectors = np.apply_along_axis(f(x), 1, points)
+        vectors = np.apply_along_axis(f, 1, points)
         self.time_now += self.time_delta
 
         return vectors
