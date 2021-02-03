@@ -80,3 +80,13 @@ class BumpMap(object):
 
         else:
             return 0.
+
+
+
+class StaticUpFlow(FlowTube):
+
+    def __init__(self, center, width):
+        
+        bump_map = BumpMap(center, width)
+        static_map = lambda t: 1.
+        super().__init__(flow_map, static_map)
