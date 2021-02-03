@@ -60,3 +60,23 @@ class FlowTube(object):
         vector = strenght*self.direction
 
         return vector
+
+
+
+class BumpMap(object):
+
+    def __init__(self, center, width):
+
+        self.center = center
+        self.width = width
+
+    def __call__(num_float):
+
+        r = abs(num_float - self.center)
+        radius = self.width*0.5
+
+        if (r < self.radius):
+            return np.exp(1/radius)*np.exp(1/(r - radius))
+
+        else:
+            return 0.
