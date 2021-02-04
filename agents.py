@@ -6,10 +6,12 @@ import copy
 class MultiAgent(object):
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-            time_delta, accepted_error):
+            time_delta, accepted_error, env=None):
 
-        self.positions = positions
+        self.positions = copy.deepcopy(positions)
         self.velocities = np.zeros(positions.shape)
+        self.targeted_positions = copy.deepcopy(positions)
+        self.disturbancies = np.zeros(positions.shape)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
         self.max_speed = max_speed
@@ -28,6 +30,7 @@ class MultiAgent(object):
         self.lead_index = None
         self.rotation_sign = None
         self.task_ready = True
+        self.env = env
 
 
     def _direction(self, vector):
@@ -62,6 +65,26 @@ class MultiAgent(object):
 
         else:
             return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
+
+
+        def _straight_move_update(self, uncut_velocities): # NOTE: SOMETHING ELSE NEEDED FOR _turn_step
+
+            pure_velocities = self._cliped(uncut_velocities)
+            self.velocities = pure_velocities
+
+            if self.env is None:
+
+                self.positions += self.velocities*self.time_delta
+                self.targeted_positions += self.velocities*self.time_delta
+
+            else:
+
+                disturbancies = self.env.evaluate(self.positions)
+                self.disturbancies = disturbancies
+                disturbed_velocities = pure_velocities + disturbancies
+
+                self.positions += disturbed_velocities*self.time_delta
+                self.targeted_positions += pure_velocities*self.time_delta
 
 
     def reshape_formation(self, formation_type, speed):
@@ -103,8 +126,7 @@ class MultiAgent(object):
                 velocities.append(velocity)
 
         velocities = np.stack(velocities, axis=0)
-        self.velocities = self._cliped(velocities)
-        self.positions += self.velocities*self.time_delta
+        self._straight_move_update(velocities)
 
 
     def turn_formation(self, target_point, speed):
@@ -176,8 +198,8 @@ class MultiAgent(object):
         diff_vectors = new_points - center_to_points
         diff_directions = self._directions(diff_vectors)
 
-        self.positions = new_points
-        self.velocities = diff_directions*speed
+        self.positions = new_points # NOTE: CHANGE TO WORK WITH ENV
+        self.velocities = diff_directions*speed # NOTE: CHANGE TO WORK WITH ENV
 
 
     def _about_to_over_turn(self, direction_diff, angle):
@@ -283,5 +305,4 @@ class MultiAgent(object):
         '''Move all agents to given direction with the given speed without
         changing the angle of the formation.'''
         velocities = np.tile(direction*speed, [self.num_agents, 1])
-        self.velocities = self._cliped(velocities)
-        self.positions += self.velocities*self.time_delta
+        self._straight_move_update(velocities)
