@@ -42,6 +42,8 @@ testdata0 = [
 def test_staticupflow(center, width, mid_value, points, expected):
 
     upflow = StaticUpFlow(center, width, mid_value)
-    vectors = [upflow(point, 0.) for point in points]
 
-    assert np.allclose(vectors, expected)
+    for t in range(10):
+        vectors = [upflow(point, t) for point in points]
+
+        assert np.allclose(vectors, expected)
