@@ -5,7 +5,7 @@ NORTH = np.array([0., 1.], dtype=float)
 
 class Env(object):
 
-    def __init__(self, vector_field, update_map, time_delta):
+    def __init__(self, vector_field, time_delta):
 
         self.vector_field = vector_field
         self.time_delta = time_delta
@@ -25,19 +25,6 @@ class Env(object):
     def visualize(self):
 
         raise NotImplementedError
-
-
-
-class VectorField(object):
-
-    def __init__(self, value_map):
-
-        self.value_map = value_map
-
-
-    def __call__(self, point, time):
-
-        return value_map(point, time)
 
 
 
