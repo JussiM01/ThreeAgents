@@ -1,7 +1,7 @@
 import numpy as np
 
 NORTH = np.array([0., 1.], dtype=float)
-ORIGIN = np.array([0., 0.], dtype=float)
+
 
 class Env(object):
 
@@ -43,11 +43,11 @@ class VectorField(object):
 
 class FlowTube(object):
 
-    def __init__(self, flow_map, fluctuation, center=ORIGIN, direction=NORTH):
+    def __init__(self, flow_map, fluctuation, center_point, direction=NORTH):
 
         self.flow_map = flow_map
         self.fluctuation = fluctuation
-        self.center = center
+        self.center_point = center_point
         self.direction = direction
 
         if direction != NORTH:
@@ -56,7 +56,8 @@ class FlowTube(object):
 
     def __call__(point, time):
 
-        strenght = self.flow_map(point)*self.fluctuation(time)
+        normalized_point = point - self.center_point
+        strenght = self.flow_map(normalized_point)*self.fluctuation(time)
         vector = strenght*self.direction
 
         return vector
@@ -89,4 +90,5 @@ class StaticUpFlow(FlowTube):
 
         bump_map = BumpMap(center, width)
         static_map = lambda t: mid_value
-        super().__init__(flow_map, static_map)
+        mid_point = np.array([center, 0.], dtype=float)
+        super().__init__(flow_map, static_map, mid_point)
