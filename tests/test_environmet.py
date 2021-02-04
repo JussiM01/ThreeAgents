@@ -1,7 +1,7 @@
 import pytest
 import copy
 import numpy as np
-from environment import StaticUpFlow
+from environment import Env, StaticUpFlow
 
 
 
@@ -47,3 +47,23 @@ def test_staticupflow(center, width, mid_value, points, expected):
         vectors = [upflow(point, t) for point in points]
 
         assert np.allclose(vectors, expected)
+
+
+testdata1 = [
+    (np.array([[-1., 0.,], [0., 5.], [1., 2.]], dtype=float),
+    np.array([[0., 0.,], [0., 1.], [0., 0.]], dtype=float)),
+    (np.array([[9., -1.], [1., 5.], [7., 8.]], dtype=float),
+    np.array([[0., 0.,], [0., 0.], [0., 0.]], dtype=float)),
+    (np.array([[0., -9.], [0., 2.], [0., 1.]], dtype=float),
+    np.array([[0., 1.,], [0., 1.], [0., 1.]], dtype=float))
+    ]
+
+@pytest.mark.parametrize("points,expected", testdata1)
+def test_env_with_staticupflow(points, expected):
+
+    upflow = StaticUpFlow(0., 2., 1.)
+    env = Env(upflow, 0.01)
+
+    vectors = env.evaluate(points)
+
+    assert np.allclose(vectors, expected)
