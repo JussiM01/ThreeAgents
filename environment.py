@@ -50,14 +50,13 @@ class FlowTube(object):
         self.center_point = center_point
         self.direction = direction
 
-        if direction != NORTH:
+        if not np.array_equal(direction, NORTH):
             raise NotImplementedError
 
 
-    def __call__(point, time):
+    def __call__(self, point, time):
 
-        normalized_point = point - self.center_point
-        strenght = self.flow_map(normalized_point)*self.fluctuation(time)
+        strenght = self.flow_map(point)*self.fluctuation(time)
         vector = strenght*self.direction
 
         return vector
@@ -71,7 +70,7 @@ class BumpMap(object):
         self.center = center
         self.width = width
 
-    def __call__(num_float):
+    def __call__(self, num_float):
 
         r2 = (num_float - self.center)**2
         rad_squared = (self.width*0.5)**2
@@ -89,6 +88,6 @@ class StaticUpFlow(FlowTube):
     def __init__(self, center, width, mid_value):
 
         bump_map = BumpMap(center, width)
+        bump_func = lambda p: bump_map(p[0])
         static_map = lambda t: mid_value
-        mid_point = np.array([center, 0.], dtype=float)
-        super().__init__(flow_map, static_map, mid_point)
+        super().__init__(bump_func, static_map, center)
