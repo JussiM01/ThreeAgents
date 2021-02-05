@@ -21,7 +21,7 @@
     "env": {
         "params": {
             "center": 0.0,
-            "mid_value": 10,
+            "mid_value": 10.0,
             "width": 4.0
         },
         "vectorfield": "StaticUpFlow"
