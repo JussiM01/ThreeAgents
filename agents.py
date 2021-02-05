@@ -67,24 +67,24 @@ class MultiAgent(object):
             return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
 
 
-        def _straight_move_update(self, uncut_velocities): # NOTE: SOMETHING ELSE NEEDED FOR _turn_step
+    def _straight_move_update(self, uncut_velocities): # NOTE: SOMETHING ELSE NEEDED FOR _turn_step
 
-            pure_velocities = self._cliped(uncut_velocities)
-            self.velocities = pure_velocities
+        pure_velocities = self._cliped(uncut_velocities)
+        self.velocities = pure_velocities
 
-            if self.env is None:
+        if self.env is None:
 
-                self.positions += self.velocities*self.time_delta
-                self.targeted_positions += self.velocities*self.time_delta
+            self.positions += self.velocities*self.time_delta
+            self.targeted_positions += self.velocities*self.time_delta
 
-            else:
+        else:
 
-                disturbancies = self.env.evaluate(self.positions)
-                self.disturbancies = disturbancies
-                disturbed_velocities = pure_velocities + disturbancies
+            disturbancies = self.env.evaluate(self.positions)
+            self.disturbancies = disturbancies
+            disturbed_velocities = pure_velocities + disturbancies
 
-                self.positions += disturbed_velocities*self.time_delta
-                self.targeted_positions += pure_velocities*self.time_delta
+            self.positions += disturbed_velocities*self.time_delta
+            self.targeted_positions += pure_velocities*self.time_delta
 
 
     def reshape_formation(self, formation_type, speed):
