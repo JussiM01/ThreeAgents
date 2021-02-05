@@ -18,6 +18,9 @@
         "y_max": 0.8,
         "y_min": 0.1
     },
+    "env": {
+        "vectorfield": null
+    },
     "model": {
         "accepted_error": 0.005,
         "bond_strength": 1.0,
