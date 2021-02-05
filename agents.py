@@ -139,7 +139,7 @@ class MultiAgent(object):
         if self.rotation_center is None:
             self.task_ready = False
 
-            center_of_mass = np.mean(self.positions, axis=0)
+            center_of_mass = np.mean(self.targeted_positions, axis=0) # NOTE: MAYBE USE self.targeted_positions INSTEAD?
             to_target = np.array(target_point, dtype=float) - center_of_mass
             direction = self._direction(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
@@ -156,7 +156,7 @@ class MultiAgent(object):
             self.target_vectors = np.stack([self._rotate(target_vector, theta)
                 for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
-        lead_position = self.positions[self.lead_index]
+        lead_position = self.targeted_positions[self.lead_index] # NOTE: MAYBE USE self.targeted_positions INSTEAD?
         lead_direction = self._direction(lead_position - self.rotation_center)
         direction_diff = np.linalg.norm(lead_direction - self.target_direction)
 
@@ -176,15 +176,29 @@ class MultiAgent(object):
 
             if self._about_to_over_turn(direction_diff, angle):
 
-                vecs = copy.deepcopy(self.positions) - self.rotation_center
+                vecs = copy.deepcopy(
+                    self.targeted_positions) - self.rotation_center # NOTE: MAYBE USE self.targeted_positions INSTEAD?
 
                 for i in range(3):
                     ind = np.argmin(np.linalg.norm(vecs[i]
                         - self.target_vectors, axis=1))
                     new_point = self.rotation_center + self.target_vectors[ind]
 
-                    self.positions[i] = new_point
-                    self.velocities[i] = (new_point - vecs[i])/self.time_delta
+                    if self.env is None:
+
+                        self.targeted_positions[i] = new_point # NOTE: MAYBE USE self.targeted_positions INSTEAD?
+                        self.positions[i] = new_point
+                        self.velocities[i] = (
+                            new_point - vecs[i])/self.time_delta
+
+                    else:
+
+                        self.targeted_positions[i] = new_point # NOTE: MAYBE USE self.targeted_positions INSTEAD?
+                        self.velocities[i] = (
+                            new_point - vecs[i])/self.time_delta
+                        disturbance = self.env.evaluate(new_point)
+                        self.positions[i] + self.velocity[i] + disturbance
+                        self.disturbancies[i] = disturbance
 
             else:
                 self._turn_step(angle, speed)
@@ -192,19 +206,29 @@ class MultiAgent(object):
 
     def _turn_step(self, angle, speed):
 
-        center_to_points = self.positions - self.rotation_center
-        new_points = self.rotation_center + self._rotate_all(center_to_points,
-            angle*self.rotation_sign)
+        center_to_points = self.targeted_positions - self.rotation_center
+        new_points = self.rotation_center + self._rotate_all(
+            center_to_points, angle*self.rotation_sign)
         diff_vectors = new_points - center_to_points
         diff_directions = self._directions(diff_vectors)
+        self.targeted_positions = new_points
 
-        self.positions = new_points # NOTE: CHANGE TO WORK WITH ENV
-        self.velocities = diff_directions*speed # NOTE: CHANGE TO WORK WITH ENV
+        if self.env is None:
+
+            self.positions = new_points
+            self.velocities = diff_directions*speed
+
+        else:
+
+            disturbancies = self.env.evaluate(self.positions)
+            self.disturbancies = disturbancies
+            self.positions = new_points + disturbancies*self.time_delta
+            self.velocities = diff_directions*speed
 
 
     def _about_to_over_turn(self, direction_diff, angle):
 
-        lead_point = self.positions[self.lead_index]
+        lead_point = self.positions[self.lead_index] # NOTE: MAYBE USE self.targeted_positions INSTEAD?
         lead_direction = self._direction(lead_point - self.rotation_center)
 
         planned_direction = self._rotate(lead_direction, angle*self.rotation_sign)
@@ -215,7 +239,7 @@ class MultiAgent(object):
 
     def _closest_to(self, center_point, direction_to_target):
 
-        center_to_points = self.positions - center_point
+        center_to_points = self.positions - center_point # NOTE: MAYBE USE self.targeted_positions INSTEAD?
         directions = self._directions(center_to_points)
         differences = np.linalg.norm(directions - direction_to_target, axis=1)
 
@@ -232,7 +256,7 @@ class MultiAgent(object):
 
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
 
-        center_to_point = self.positions[lead_index,:] - center_point
+        center_to_point = self.positions[lead_index,:] - center_point # NOTE: MAYBE USE self.targeted_positions INSTEAD?
         direction = self._direction(center_to_point)
         product = self._conjugate_product(direction, direction_to_target)
 
@@ -256,7 +280,7 @@ class MultiAgent(object):
         '''Move the formation towards the target point with the given speed.
         (and make course corrections if there are any disturbancies).''' # NOTE: ADD COURSE CORRECTION LATER
 
-        center_of_mass = np.mean(self.positions, axis=0)
+        center_of_mass = np.mean(self.positions, axis=0) # NOTE: MAYBE USE self.targeted_positions INSTEAD?
 
         if self.course_target is None:
 
