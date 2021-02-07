@@ -196,8 +196,10 @@ class MultiAgent(object):
                         self.targeted_positions[i] = new_point
                         self.velocities[i] = (
                             new_point - vecs[i])/self.time_delta
-                        disturbance = self.env.evaluate(new_point)
-                        self.positions[i] + self.velocity[i] + disturbance
+                        disturbance = self.env.evaluate(
+                            np.expand_dims(new_point, axis=0))
+                        self.positions[i] = (new_point +
+                            disturbance[0]*self.time_delta)
                         self.disturbancies[i] = disturbance
 
             else:
