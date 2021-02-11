@@ -3,7 +3,7 @@ from matplotlib.animation import FuncAnimation
 import numpy as np
 
 
-def init_canvas(params, points):
+def init_animation(params, points):
 
     fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
     ax = fig.add_axes([params['x_min'], params['y_min'], params['x_max'],
@@ -50,7 +50,7 @@ class Animation(object):
 
     def __init__(self, positions, plot_params, task_list, model):
 
-        fig, scatter = init_canvas(plot_params, positions)
+        fig, scatter = init_animation(plot_params, positions)
         self.fig = fig
         self.scatter = scatter
         self.model = model
