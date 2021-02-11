@@ -48,7 +48,7 @@ def init_canvas(params, points):
 
 class Animation(object):
 
-    def __init__(self, positions, plot_params, task_list, model, env=None):
+    def __init__(self, positions, plot_params, task_list, model):
 
         fig, scatter = init_canvas(plot_params, positions)
         self.fig = fig
@@ -57,9 +57,6 @@ class Animation(object):
         self.task_list = task_list
         self.last = len(task_list) - 1
         self.task_index = 0
-
-        if env != None:
-            raise NotImplementedError
 
 
     def _update_plot(self, frame_number, points, velocity_vectors, tasks_done):
@@ -110,7 +107,7 @@ class Animation(object):
 
     def run(self):
 
-        animation = FuncAnimation(self.fig, self.update, blit=True) # NOTE: MAKE THINGS WORK WITH "blit=True"
+        animation = FuncAnimation(self.fig, self.update, blit=True)
         plt.show()
 
 
