@@ -105,10 +105,12 @@ class Animation(object):
 
         self._update_plot(i, positions, velocities, all_tasks_done)
 
+        return self.scatter,
+
 
     def run(self):
 
-        animation = FuncAnimation(self.fig, self.update) #, blit=True) # NOTE: MAKE THINGS WORK WITH "blit=True"
+        animation = FuncAnimation(self.fig, self.update, blit=True) # NOTE: MAKE THINGS WORK WITH "blit=True"
         plt.show()
 
 
