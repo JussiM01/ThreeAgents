@@ -48,8 +48,10 @@ def init_animation(params, points):
 
 class Animation(object):
 
-    def __init__(self, positions, plot_params, task_list, model):
+    def __init__(self, plot_params, task_list, model):
 
+        self.model = model
+        positions = model.positions
         fig, scatter = init_animation(plot_params, positions)
         self.fig = fig
         self.scatter = scatter
