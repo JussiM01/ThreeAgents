@@ -65,5 +65,5 @@ if env_init['vectorfield'] is not None:
 
 agents = MultiAgent(**model_init)
 
-animation = Animation(initial_positions, anim_init, tasks, agents)
+animation = Animation(anim_init, tasks, agents)
 animation.run()
