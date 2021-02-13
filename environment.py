@@ -5,11 +5,14 @@ NORTH = np.array([0., 1.], dtype=float)
 
 class Env(object):
 
-    def __init__(self, vector_field, time_delta):
+    def __init__(self, vector_field, time_delta, num_dots=None, sampler=None):
 
         self.vector_field = vector_field
         self.time_delta = time_delta
         self.time_now = 0
+
+        if num_dots is not None:
+            self.dots = sampler(num_dots)
 
 
     def evaluate(self, points):
@@ -24,7 +27,11 @@ class Env(object):
 
     def visualize(self):
 
-        raise NotImplementedError
+        vectors = self.evaluate(self.dots)
+        diff = vectors*self.time_delta
+        self.dots += diff
+
+        return self.dots
 
 
 
@@ -78,3 +85,21 @@ class StaticUpFlow(FlowTube):
         bump_func = lambda p: bump_map(p[0])
         static_map = lambda t: mid_value
         super().__init__(bump_func, static_map, center)
+
+
+
+# class BumpSampler(object):
+#
+#     def __init__(self, x_range, y_range):
+#
+#         normalization = ... ?
+#         bump_map = BumpMap(center, width)
+#         bump_pdf = lambda x: normalization*bump_map(x)
+#
+#     def __call__(num_points):
+#
+#         xs = center + ...
+#         ys = np.random.uniform(x_range[0], x_range[1], (num_points, 1))
+#         points = np.concatenate([xs, ys], axis=1)
+#
+#         return points
