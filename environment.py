@@ -5,14 +5,16 @@ NORTH = np.array([0., 1.], dtype=float)
 
 class Env(object):
 
-    def __init__(self, vector_field, time_delta, num_dots=None, sampler=None):
+    def __init__(self, vector_field, time_delta, visuals_init=None):
 
         self.vector_field = vector_field
         self.time_delta = time_delta
         self.time_now = 0
 
-        if num_dots is not None:
-            self.dots = sampler(num_dots)
+        if visuals_init is not None:
+            sampler = visuals_init['sampler']
+            self.wraparoundmap = WrapAroundMap(**visuals_init['values'])
+            self.dots = sampler(visuals_init['num_dots'])
 
 
     def evaluate(self, points):
@@ -29,7 +31,7 @@ class Env(object):
 
         vectors = self.evaluate(self.dots)
         diff = vectors*self.time_delta
-        self.dots += diff
+        self.dots = self.wraparoundmap(self.dots + diff)
 
         return self.dots
 
@@ -103,3 +105,22 @@ class StaticUpFlow(FlowTube):
 #         points = np.concatenate([xs, ys], axis=1)
 #
 #         return points
+
+
+
+class WrapAroundMap(object):
+
+    def __init__(self, min_x, max_x, min_y, max_y):
+
+        self.min_x = min_x
+        self.max_x = max_x
+        self.min_y = min_y
+        self.max_y = max_y
+
+    def __call__(self, array):
+
+        min_array = np.array([[self.min_x, self.min_y]], dtype=float)
+        upper_bounds = (np.array([[self.max_x, self.max_y]], dtype=float) -
+            min_array)
+
+        return min_array + np.remainder(array - min_array, upper_bounds)
