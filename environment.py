@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import truncnorm
 
 NORTH = np.array([0., 1.], dtype=float)
 
@@ -72,7 +73,7 @@ class BumpMap(object):
         rad_squared = (self.width*0.5)**2
 
         if (r2 < rad_squared):
-            return np.exp(1/rad_squared)*np.exp(1/(r2 - rad_squared))
+            return np.exp(1/rad_squared)*np.exp(-1/(rad_squared - r2))
 
         else:
             return 0.
@@ -90,21 +91,19 @@ class StaticUpFlow(FlowTube):
 
 
 
-# class BumpSampler(object):
-#
-#     def __init__(self, x_range, y_range):
-#
-#         normalization = ... ?
-#         bump_map = BumpMap(center, width)
-#         bump_pdf = lambda x: normalization*bump_map(x)
-#
-#     def __call__(num_points):
-#
-#         xs = center + ...
-#         ys = np.random.uniform(x_range[0], x_range[1], (num_points, 1))
-#         points = np.concatenate([xs, ys], axis=1)
-#
-#         return points
+class TubeSampler(object):
+
+    def __init__(self, x_range, y_range):
+
+        self.tr = truncnorm(x_range[0], x_range[1])
+
+    def __call__(self, num_points):
+
+        xs = self.tr.rvs((num_points, 1))
+        ys = np.random.uniform(y_range[0], y_range[1], (num_points, 1))
+        points = np.concatenate([xs, ys], axis=1)
+
+        return points
 
 
 
