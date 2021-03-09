@@ -62,7 +62,8 @@ if env_init['vectorfield'] is not None:
 
     vectorfield = StaticUpFlow(**env_init['params'])
     visuals_init = env_init['visuals']
-    model_init['env'] = Env(vectorfield, model_init['time_delta'], visuals_init)
+    time_delta = model_init['time_delta']
+    model_init['env'] = Env(vectorfield, time_delta, visuals_init)
 
 agents = MultiAgent(**model_init)
 
