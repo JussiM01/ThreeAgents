@@ -100,11 +100,12 @@ class TubeSampler(object):
     def __init__(self, x_range, y_range):
 
         self.tr = truncnorm(x_range[0], x_range[1])
+        self.y_vals = y_range
 
     def __call__(self, num_points):
 
         xs = self.tr.rvs((num_points, 1))
-        ys = np.random.uniform(y_range[0], y_range[1], (num_points, 1))
+        ys = np.random.uniform(self.y_vals[0], self.y_vals[1], (num_points, 1))
         points = np.concatenate([xs, ys], axis=1)
 
         return points
