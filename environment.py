@@ -13,9 +13,8 @@ class Env(object):
         self.time_now = 0
 
         if visuals_init is not None:
-            sampler = visuals_init['sampler']
             self.wraparoundmap = WrapAroundMap(**visuals_init['values'])
-            self.dots = sampler(visuals_init['num_dots'])
+            self.dots = TubeSampler(**visuals_init['sampler_args'])
 
 
     def evaluate(self, points):
