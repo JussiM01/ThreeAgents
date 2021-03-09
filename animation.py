@@ -7,23 +7,11 @@ def init_scatter(params, ax, points):
 
     size = np.array((params['pointsize']), dtype=float)
     sizes = np.repeat((size), points.shape[0], axis=0)
-
-    if params['facecolors'] == 'black':
-        facecolor = np.array([[0, 0, 0, 1]], dtype=float)
-
-    else:
-        raise NotImplementedError
-
+    facecolor = np.array([params['facecolors']], dtype=float)
     facecolors = np.repeat(facecolor, points.shape[0], axis=0)
-
-    if params['edgecolors'] == 'black':
-        edgecolor = np.array([[0, 0, 0, 1]], dtype=float)
-
-    else:
-        raise NotImplementedError
-
+    edgecolor = np.array([params['edgecolors']], dtype=float)
     edgecolors = np.repeat(edgecolor, points.shape[0], axis=0)
-
+    
     scatter = ax.scatter(points[:,0], points[:,1], s=sizes, lw=0.5,
         facecolors=facecolors,  edgecolors=edgecolors)
 
@@ -50,7 +38,7 @@ def init_animation(params, points, dots=None):
     # NOTE: ADD LATER GOAL POINT(S) PLOTTING & STATS WRITING !
 
     if dots is not None:
-        
+
         env_scatter_params = {
             'pointsize': 1.0,
             'edgecolors': np.array([[1, 0, 0, 1]], dtype=float),

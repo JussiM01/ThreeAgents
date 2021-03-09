@@ -4,8 +4,18 @@
         "ax_x_min": -10.0,
         "ax_y_max": 10.0,
         "ax_y_min": -10.0,
-        "edgecolors": "black",
-        "facecolors": "black",
+        "edgecolors": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+        ],
+        "facecolors": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+        ],
         "fig_hight": 7,
         "fig_width": 7,
         "frameon": true,
