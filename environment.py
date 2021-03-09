@@ -16,6 +16,10 @@ class Env(object):
             self.wraparoundmap = WrapAroundMap(**visuals_init['values'])
             sampler = TubeSampler(**visuals_init['sampler_init'])
             self.dots = sampler(visuals_init['num_dots'])
+            self.use_visuals = True
+
+        else:
+            self.use_visuals = False
 
 
     def evaluate(self, points):
