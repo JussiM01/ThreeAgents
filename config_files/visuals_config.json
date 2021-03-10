@@ -35,8 +35,8 @@
             "width": 4.0
         },
         "vectorfield": "StaticUpFlow",
-        "visuals_init": {
-            "num_dots": 100,
+        "visuals": {
+            "num_dots": 5000,
             "sampler_init": {
                 "x_range": [
                     -2.0,

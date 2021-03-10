@@ -11,7 +11,6 @@ def init_scatter(params, ax, points):
     facecolors = np.repeat(facecolor, points.shape[0], axis=0)
     edgecolor = np.array([params['edgecolors']], dtype=float)
     edgecolors = np.repeat(edgecolor, points.shape[0], axis=0)
-    
     scatter = ax.scatter(points[:,0], points[:,1], s=sizes, lw=0.5,
         facecolors=facecolors,  edgecolors=edgecolors)
 
@@ -40,9 +39,9 @@ def init_animation(params, points, dots=None):
     if dots is not None:
 
         env_scatter_params = {
-            'pointsize': 1.0,
-            'edgecolors': np.array([[1, 0, 0, 1]], dtype=float),
-            'facecolors': np.array([[1, 0, 0, 1]], dtype=float)
+            'pointsize': 0.025,
+            'edgecolors': [1, 0, 0, 1],
+            'facecolors': [1, 0, 0, 1]
             }
         env_scatter = init_scatter(env_scatter_params, ax, dots)
 
@@ -64,10 +63,10 @@ class Animation(object):
         self.task_index = 0
         self.use_visuals = False
 
-        if self.model.env.use_visuals:
+        if self.model.env and self.model.env.use_visuals:
 
             self.use_visuals = True
-            dots = self.env.dots
+            dots = self.model.env.dots
             fig, env_scatter, scatter = init_animation(
                 plot_params, positions, dots)
             self.fig = fig
