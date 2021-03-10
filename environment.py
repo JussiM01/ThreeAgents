@@ -1,15 +1,25 @@
 import numpy as np
+from scipy.stats import truncnorm
 
 NORTH = np.array([0., 1.], dtype=float)
 
 
 class Env(object):
 
-    def __init__(self, vector_field, time_delta):
+    def __init__(self, vector_field, time_delta, visuals_init=None):
 
         self.vector_field = vector_field
         self.time_delta = time_delta
         self.time_now = 0
+
+        if visuals_init is not None:
+            self.wraparoundmap = WrapAroundMap(**visuals_init['values'])
+            sampler = TubeSampler(**visuals_init['sampler_init'])
+            self.dots = sampler(visuals_init['num_dots'])
+            self.use_visuals = True
+
+        else:
+            self.use_visuals = False
 
 
     def evaluate(self, points):
@@ -24,7 +34,11 @@ class Env(object):
 
     def visualize(self):
 
-        raise NotImplementedError
+        vectors = self.evaluate(self.dots)
+        diff = vectors*self.time_delta
+        self.dots = self.wraparoundmap(self.dots + diff)
+
+        return self.dots
 
 
 
@@ -63,7 +77,7 @@ class BumpMap(object):
         rad_squared = (self.width*0.5)**2
 
         if (r2 < rad_squared):
-            return np.exp(1/rad_squared)*np.exp(1/(r2 - rad_squared))
+            return np.exp(1/rad_squared)*np.exp(-1/(rad_squared - r2))
 
         else:
             return 0.
@@ -78,3 +92,39 @@ class StaticUpFlow(FlowTube):
         bump_func = lambda p: bump_map(p[0])
         static_map = lambda t: mid_value
         super().__init__(bump_func, static_map, center)
+
+
+
+class TubeSampler(object):
+
+    def __init__(self, x_range, y_range):
+
+        self.tr = truncnorm(x_range[0], x_range[1])
+        self.y_vals = y_range
+
+    def __call__(self, num_points):
+
+        xs = self.tr.rvs((num_points, 1))
+        ys = np.random.uniform(self.y_vals[0], self.y_vals[1], (num_points, 1))
+        points = np.concatenate([xs, ys], axis=1)
+
+        return points
+
+
+
+class WrapAroundMap(object):
+
+    def __init__(self, min_x, max_x, min_y, max_y):
+
+        self.min_x = min_x
+        self.max_x = max_x
+        self.min_y = min_y
+        self.max_y = max_y
+
+    def __call__(self, array):
+
+        min_array = np.array([[self.min_x, self.min_y]], dtype=float)
+        upper_bounds = (np.array([[self.max_x, self.max_y]], dtype=float) -
+            min_array)
+
+        return min_array + np.remainder(array - min_array, upper_bounds)

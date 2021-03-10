@@ -61,9 +61,11 @@ model_init['positions'] = initial_positions
 if env_init['vectorfield'] is not None:
 
     vectorfield = StaticUpFlow(**env_init['params'])
-    model_init['env'] = Env(vectorfield, model_init['time_delta'])
+    visuals_init = env_init['visuals']
+    time_delta = model_init['time_delta']
+    model_init['env'] = Env(vectorfield, time_delta, visuals_init)
 
 agents = MultiAgent(**model_init)
 
-animation = Animation(initial_positions, anim_init, tasks, agents)
+animation = Animation(anim_init, tasks, agents)
 animation.run()
