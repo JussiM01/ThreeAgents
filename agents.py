@@ -306,13 +306,13 @@ class MultiAgent(object):
 
             if self._about_to_over_shoots(center_of_mass):
                 adjusted_direction = self._direction(cm_to_target)
-                adjusted_velocity = cm_to_target/self.time_delta
+                adjusted_speed = dist_cm_to_target/self.time_delta
 
             else:
                 adjusted_direction = self.course_direction
-                adjusted_velocity = self.course_speed*adjusted_direction
+                adjusted_speed = self.course_speed
 
-            self._shift_step(adjusted_velocity)
+            self._shift_step(adjusted_direction, adjusted_speed)
 
 
     def _about_to_over_shoots(self, current_cm):
@@ -327,8 +327,8 @@ class MultiAgent(object):
         return planned_dist > dist_to_target
 
 
-    def _shift_step(self, velocity):
+    def _shift_step(self, direction, speed):
         '''Move all agents to given direction with the given speed without
         changing the angle of the formation.'''
-        velocities = np.tile(velocity, [self.num_agents, 1])
+        velocities = np.tile(direction*speed, [self.num_agents, 1])
         self._straight_move_update(velocities)
