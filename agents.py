@@ -217,7 +217,7 @@ class MultiAgent(object):
 
         if self.env is None:
 
-            self.positions = new_points
+            self.positions = copy.deepcopy(new_points)
             self.velocities = diff_directions*speed
 
         else:
@@ -289,7 +289,7 @@ class MultiAgent(object):
             self.task_ready = False
             self.course_target = np.array(target_point, dtype=float)
             self.course_direction = self._direction(
-                center_of_mass - self.course_target)
+                self.course_target - center_of_mass)
             self.course_speed = speed
 
         cm_to_target = self.course_target - center_of_mass
