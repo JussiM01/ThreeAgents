@@ -317,14 +317,14 @@ class MultiAgent(object):
 
     def _about_to_over_shoots(self, current_cm):
 
-        dist_to_target = np.linalg.norm(self.course_target - current_cm)
+        current_diff = current_cm - self.course_target
         velocity = self.course_direction*self.course_speed
 
         planned_move = velocity*self.time_delta
         planned_next = current_cm + planned_move
-        planned_dist = np.linalg.norm(self.course_target - planned_next)
+        planned_diff = planned_next - self.course_target
 
-        return planned_dist > dist_to_target
+        return current_diff.dot(planned_diff) < 0
 
 
     def _shift_step(self, direction, speed):
