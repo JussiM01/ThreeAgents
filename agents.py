@@ -6,11 +6,12 @@ import copy
 class MultiAgent(object):
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-            time_delta, accepted_error, env=None):
+            time_delta, accepted_error, env=None, correction_const=[1.0, 1.0]):
 
         self.positions = copy.deepcopy(positions)
         self.velocities = np.zeros(positions.shape)
         self.targeted_positions = copy.deepcopy(positions)
+        self.targeted_velocities = np.zeros(positions.shape)
         self.disturbancies = np.zeros(positions.shape)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
@@ -18,6 +19,7 @@ class MultiAgent(object):
         self.num_agents = positions.shape[0]
         self.time_delta = time_delta
         self.accepted_error = accepted_error
+        self.correction_const = correction_const
         self.formation_type = None
         self.course_target = None
         self.course_direction = None
@@ -67,24 +69,38 @@ class MultiAgent(object):
             return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
 
 
+    def _course_correction(self, velocities):
+
+        velocities_diff = self.targeted_velocities - velocities
+        positions_diff = self.targeted_positions - self.positions
+        adjusted_velocities = (velocities +
+            self.correction_const[0]*velocities_diff +
+            self.correction_const[1]*positions_diff/self.time_delta)
+
+        return self._cliped(adjusted_velocities)
+
     def _straight_move_update(self, uncut_velocities):
 
         pure_velocities = self._cliped(uncut_velocities)
-        self.velocities = pure_velocities
+        self.targeted_velocities = pure_velocities
 
         if self.env is None:
 
+            self.velocities = pure_velocities
             self.positions += self.velocities*self.time_delta
             self.targeted_positions += self.velocities*self.time_delta
 
         else:
-
+            old_disturbancies = self.disturbancies
             disturbancies = self.env.evaluate(self.positions)
             self.disturbancies = disturbancies
-            disturbed_velocities = pure_velocities + disturbancies
+            velocities = pure_velocities + old_disturbancies
+            corrected_velocities = self._course_correction(velocities)
+            disturbed_velocities = corrected_velocities + disturbancies
 
             self.positions += disturbed_velocities*self.time_delta
             self.targeted_positions += pure_velocities*self.time_delta
+            self.velocities = corrected_velocities
 
 
     def reshape_formation(self, formation_type, speed):
@@ -214,6 +230,7 @@ class MultiAgent(object):
         diff_vectors = new_points - center_to_points
         diff_directions = self._directions(diff_vectors)
         self.targeted_positions = new_points
+        self.targeted_velocities = diff_directions*speed
 
         if self.env is None:
 
@@ -222,10 +239,15 @@ class MultiAgent(object):
 
         else:
 
+            old_disturbancies = self.disturbancies
             disturbancies = self.env.evaluate(self.positions)
             self.disturbancies = disturbancies
-            self.positions = new_points + disturbancies*self.time_delta
-            self.velocities = diff_directions*speed
+
+            velocities = diff_directions*speed + old_disturbancies
+            corrected_velocities = self._course_correction(velocities)
+            self.positions += (corrected_velocities +
+                disturbancies)*self.time_delta
+            self.velocities = corrected_velocities + disturbancies
 
 
     def _about_to_over_turn(self, direction_diff, angle):
@@ -233,7 +255,8 @@ class MultiAgent(object):
         lead_point = self.targeted_positions[self.lead_index]
         lead_direction = self._direction(lead_point - self.rotation_center)
 
-        planned_direction = self._rotate(lead_direction, angle*self.rotation_sign)
+        planned_direction = self._rotate(
+            lead_direction, angle*self.rotation_sign)
         planned_diff = np.linalg.norm(planned_direction - self.target_direction)
 
         return planned_diff > direction_diff
@@ -280,7 +303,7 @@ class MultiAgent(object):
 
     def shift_formation(self, target_point, speed):
         '''Move the formation towards the target point with the given speed.
-        (and make course corrections if there are any disturbancies).''' # NOTE: ADD COURSE CORRECTION LATER
+        (and make course corrections if there are any disturbancies).'''
 
         center_of_mass = np.mean(self.targeted_positions, axis=0)
 
