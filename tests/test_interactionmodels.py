@@ -1,7 +1,7 @@
 import pytest
 import copy
 import numpy as np
-from agents import MultiAgent
+from interactionmodels import CentralControl
 
 
 
@@ -21,7 +21,7 @@ def test_sign_reshape_step(points, target_distance, expected_sign):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, target_distance, 1., 100., 0.05, 0.001)
+    model = CentralControl(init_points, target_distance, 1., 100., 0.05, 0.001)
     model.formation_type = 'triangle'
     model._reshape_step(1.)
 
@@ -63,7 +63,7 @@ def test_stopping_reshape_formation(points, accepted_error):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, 2., 1., 100., 0.05, accepted_error)
+    model = CentralControl(init_points, 2., 1., 100., 0.05, accepted_error)
     model.reshape_formation('triangle', 1.)
 
     new_positions = model.positions
@@ -97,7 +97,7 @@ def test_shift_step(points, delta, direction, speed, expected):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
+    model = CentralControl(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
     model._shift_step(direction, speed)
 
     new_positions = model.positions
@@ -125,7 +125,7 @@ def test_stopping_shift_formation(points, target, error):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+    model = CentralControl(init_points, 1., 1., 50., 0.01, error)
     model.shift_formation(target, 10.)
 
     new_positions = model.positions
@@ -153,7 +153,7 @@ def test_over_shooting_prevention(points, target, delta, error):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, 1., 1., 50., delta, error)
+    model = CentralControl(init_points, 1., 1., 50., delta, error)
     model.shift_formation(target, 20.)
 
     new_mean = np.mean(model.positions, axis=0)
@@ -182,7 +182,7 @@ def test_rotate_all(vectors, angle, expected):
 
     points = np.array([[0., 1.], [2., 3.], [4., 5.]])
 
-    model = MultiAgent(points, 1., 1., 50., 0.005, 0.001)
+    model = CentralControl(points, 1., 1., 50., 0.005, 0.001)
     new_vectors = model._rotate_all(vectors, angle)
 
     assert np.allclose(new_vectors, expected)
@@ -216,7 +216,7 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, 1., 1., 1000., delta, 0.001)
+    model = CentralControl(init_points, 1., 1., 1000., delta, 0.001)
     model.rotation_sign = sign
     model.rotation_center = np.array([0., 0.], dtype=float)
     model._turn_step(angle, speed)
@@ -250,7 +250,7 @@ def test_stopping_turn_formation(points, target, speed, error):
 
     init_points = copy.deepcopy(points)
 
-    model = MultiAgent(init_points, 1., 1., 50., 0.01, error)
+    model = CentralControl(init_points, 1., 1., 50., 0.01, error)
     model.formation_type = 'triangle'
     model.turn_formation(target, speed)
 
@@ -284,7 +284,7 @@ def test_over_turning_prevention(points, target, delta, error):
     init_points = copy.deepcopy(points)
     rotation_center = np.mean(points)
 
-    model = MultiAgent(init_points, 1., 1., 1000., delta, error)
+    model = CentralControl(init_points, 1., 1., 1000., delta, error)
     model.formation_type = 'triangle'
     model.turn_formation(target, 100.)
 

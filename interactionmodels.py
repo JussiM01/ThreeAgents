@@ -3,7 +3,7 @@ import numpy as np
 import copy
 
 
-class MultiAgent(object):
+class CentralControl(object):
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
             time_delta, accepted_error, env=None, correction_const=[1.0, 1.0]):

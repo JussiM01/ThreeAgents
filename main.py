@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 import numpy as np
-from agents import MultiAgent
+from interactionmodels import CentralControl
 from animation import Animation
 from environment import Env, StaticUpFlow # NOTE: ADD MORE LATER
 
@@ -65,7 +65,7 @@ if env_init['vectorfield'] is not None:
     time_delta = model_init['time_delta']
     model_init['env'] = Env(vectorfield, time_delta, visuals_init)
 
-agents = MultiAgent(**model_init)
+interactionmodel = CentralControl(**model_init)
 
-animation = Animation(anim_init, tasks, agents)
+animation = Animation(anim_init, tasks, interactionmodel)
 animation.run()
