@@ -96,17 +96,7 @@ class CentralControl(BaseModel):
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
         self.correction_const = correction_const
-        self.formation_type = None
-        self.course_target = None
-        self.course_direction = None
-        self.course_speed = None
-        self.rotation_center = None
-        self.dist_center_to_points = None
-        self.target_direction = None
-        self.target_vectors = None
-        self.rotation_speed = None
-        self.lead_index = None
-        self.rotation_sign = None
+        self.task_params = {}
         self.task_ready = True
 
     def _course_correction(self, velocities):
@@ -124,7 +114,7 @@ class CentralControl(BaseModel):
         self.task_ready = False
 
         if formation_type == 'triangle':
-            self.formation_type = formation_type
+            self.task_params['formation_type'] = formation_type
             dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
             dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
             dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
@@ -146,7 +136,7 @@ class CentralControl(BaseModel):
 
         velocities = []
 
-        if self.formation_type == 'triangle':
+        if self.task_params['formation_type'] == 'triangle':
 
             for i in range(self.num_agents):
                 vectors_to_all = self.positions - self.positions[i,:]
@@ -165,10 +155,10 @@ class CentralControl(BaseModel):
         '''Turn the formation around its center of mass until it faces the
         direction of a given target point.'''
 
-        if self.formation_type != 'triangle':
+        if self.task_params['formation_type'] != 'triangle':
             raise NotImplementedError
 
-        if self.rotation_center is None:
+        if 'rotation_center' not in self.task_params:
             self.task_ready = False
 
             center_of_mass = np.mean(self.targeted_positions, axis=0)
@@ -176,45 +166,48 @@ class CentralControl(BaseModel):
             direction = self._direction(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
 
-            self.dist_center_to_points = self.target_distance/np.sqrt(3)
-            self.rotation_center = center_of_mass
-            self.target_direction = direction
-            self.rotation_speed = cliped_speed
-            self.lead_index = self._closest_to(center_of_mass, direction)
-            self.rotation_sign = self._rotation_sign(center_of_mass, direction,
-                self.lead_index)
+            self.task_params['dist_center_to_points'] = (self.target_distance
+                /np.sqrt(3))
+            self.task_params['rotation_center'] = center_of_mass
+            self.task_params['target_direction'] = direction
+            self.task_params['rotation_speed'] = cliped_speed
+            self.task_params['lead_index'] = self._closest_to(
+                center_of_mass, direction)
+            self.task_params['rotation_sign'] = self._rotation_sign(
+                center_of_mass, direction, self.task_params['lead_index'])
 
-            target_vector = self.target_direction*self.dist_center_to_points
-            self.target_vectors = np.stack([self._rotate(target_vector, theta)
+            target_vector = (self.task_params['target_direction']
+                *self.task_params['dist_center_to_points'])
+            self.task_params['target_vectors'] = np.stack(
+                [self._rotate(target_vector, theta)
                 for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
-        lead_position = self.targeted_positions[self.lead_index]
-        lead_direction = self._direction(lead_position - self.rotation_center)
-        direction_diff = np.linalg.norm(lead_direction - self.target_direction)
+        lead_position = self.targeted_positions[self.task_params['lead_index']]
+        lead_direction = self._direction(lead_position
+            - self.task_params['rotation_center'])
+        direction_diff = np.linalg.norm(lead_direction
+            - self.task_params['target_direction'])
 
         if direction_diff < self.accepted_error:
 
-            self.rotation_center = None
-            self.target_direction = None
-            self.rotation_speed = None
-            self.lead_index = None
-            self.rotation_sign = None
+            self.task_params = {}
             self.task_ready = True
 
         else:
 
-            angle = (self.rotation_speed*self.time_delta
-                /self.dist_center_to_points)
+            angle = (self.task_params['rotation_speed']*self.time_delta
+                /self.task_params['dist_center_to_points'])
 
             if self._about_to_over_turn(direction_diff, angle):
 
-                vecs = copy.deepcopy(
-                    self.targeted_positions) - self.rotation_center
+                vecs = (copy.deepcopy(self.targeted_positions)
+                    - self.task_params['rotation_center'])
 
                 for i in range(3):
                     ind = np.argmin(np.linalg.norm(vecs[i]
-                        - self.target_vectors, axis=1))
-                    new_point = self.rotation_center + self.target_vectors[ind]
+                        - self.task_params['target_vectors'], axis=1))
+                    new_point = (self.task_params['rotation_center']
+                        + self.task_params['target_vectors'][ind])
 
                     if self.env is None:
 
@@ -240,9 +233,10 @@ class CentralControl(BaseModel):
 
     def _turn_step(self, angle, speed):
 
-        center_to_points = self.targeted_positions - self.rotation_center
-        new_points = self.rotation_center + self._rotate_all(
-            center_to_points, angle*self.rotation_sign)
+        center_to_points = (self.targeted_positions
+            - self.task_params['rotation_center'])
+        new_points = self.task_params['rotation_center'] + self._rotate_all(
+            center_to_points, angle*self.task_params['rotation_sign'])
         diff_vectors = new_points - center_to_points
         diff_directions = self._directions(diff_vectors)
         self.targeted_positions = new_points
@@ -268,12 +262,14 @@ class CentralControl(BaseModel):
 
     def _about_to_over_turn(self, direction_diff, angle):
 
-        lead_point = self.targeted_positions[self.lead_index]
-        lead_direction = self._direction(lead_point - self.rotation_center)
+        lead_point = self.targeted_positions[self.task_params['lead_index']]
+        lead_direction = self._direction(lead_point
+            - self.task_params['rotation_center'])
 
         planned_direction = self._rotate(
-            lead_direction, angle*self.rotation_sign)
-        planned_diff = np.linalg.norm(planned_direction - self.target_direction)
+            lead_direction, angle*self.task_params['rotation_sign'])
+        planned_diff = np.linalg.norm(planned_direction
+            - self.task_params['target_direction'])
 
         return planned_diff > direction_diff
 
@@ -323,22 +319,21 @@ class CentralControl(BaseModel):
 
         center_of_mass = np.mean(self.targeted_positions, axis=0)
 
-        if self.course_target is None:
+        if 'course_target' not in self.task_params:
 
             self.task_ready = False
-            self.course_target = np.array(target_point, dtype=float)
-            self.course_direction = self._direction(
-                self.course_target - center_of_mass)
-            self.course_speed = speed
+            self.task_params['course_target'] = np.array(
+                target_point, dtype=float)
+            self.task_params['course_direction'] = self._direction(
+                self.task_params['course_target'] - center_of_mass)
+            self.task_params['course_speed'] = speed
 
-        cm_to_target = self.course_target - center_of_mass
+        cm_to_target = self.task_params['course_target'] - center_of_mass
         dist_cm_to_target = np.linalg.norm(cm_to_target)
 
         if dist_cm_to_target < self.accepted_error:
 
-            self.course_target = None
-            self.course_direction = None
-            self.course_speed = None
+            self.task_params = {}
             self.task_ready = True
 
         else:
@@ -348,20 +343,21 @@ class CentralControl(BaseModel):
                 adjusted_speed = dist_cm_to_target/self.time_delta
 
             else:
-                adjusted_direction = self.course_direction
-                adjusted_speed = self.course_speed
+                adjusted_direction = self.task_params['course_direction']
+                adjusted_speed = self.task_params['course_speed']
 
             self._shift_step(adjusted_direction, adjusted_speed)
 
 
     def _about_to_over_shoots(self, current_cm):
 
-        current_diff = current_cm - self.course_target
-        velocity = self.course_direction*self.course_speed
+        current_diff = current_cm - self.task_params['course_target']
+        velocity = (self.task_params['course_direction']
+            *self.task_params['course_speed'])
 
         planned_move = velocity*self.time_delta
         planned_next = current_cm + planned_move
-        planned_diff = planned_next - self.course_target
+        planned_diff = planned_next - self.task_params['course_target']
 
         return current_diff.dot(planned_diff) < 0
 

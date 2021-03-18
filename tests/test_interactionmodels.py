@@ -22,7 +22,7 @@ def test_sign_reshape_step(points, target_distance, expected_sign):
     init_points = copy.deepcopy(points)
 
     model = CentralControl(init_points, target_distance, 1., 100., 0.05, 0.001)
-    model.formation_type = 'triangle'
+    model.task_params['formation_type'] = 'triangle'
     model._reshape_step(1.)
 
     old_distances = [
@@ -217,8 +217,8 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
     init_points = copy.deepcopy(points)
 
     model = CentralControl(init_points, 1., 1., 1000., delta, 0.001)
-    model.rotation_sign = sign
-    model.rotation_center = np.array([0., 0.], dtype=float)
+    model.task_params['rotation_sign'] = sign
+    model.task_params['rotation_center'] = np.array([0., 0.], dtype=float)
     model._turn_step(angle, speed)
 
     new_lead_position = model.positions[0,:]
@@ -251,7 +251,7 @@ def test_stopping_turn_formation(points, target, speed, error):
     init_points = copy.deepcopy(points)
 
     model = CentralControl(init_points, 1., 1., 50., 0.01, error)
-    model.formation_type = 'triangle'
+    model.task_params['formation_type'] = 'triangle'
     model.turn_formation(target, speed)
 
     new_positions = model.positions
@@ -285,7 +285,7 @@ def test_over_turning_prevention(points, target, delta, error):
     rotation_center = np.mean(points)
 
     model = CentralControl(init_points, 1., 1., 1000., delta, error)
-    model.formation_type = 'triangle'
+    model.task_params['formation_type'] = 'triangle'
     model.turn_formation(target, 100.)
 
     target_direction = model._direction(target - rotation_center)
