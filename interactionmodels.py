@@ -3,22 +3,98 @@ import numpy as np
 import copy
 
 
-class CentralControl(object):
+class BaseModel(object):
+    """BaseModel for the interactionmodels.
 
-    def __init__(self, positions, target_distance, bond_strength, max_speed,
-            time_delta, accepted_error, env=None, correction_const=[1.0, 1.0]):
+    This class is used as a container for basic attributes and shared private
+    methods. The actual functionality is implemented within its subclasses.
+    """
 
+    def __init__(self, positions, max_speed, time_delta, accepted_error,
+            env=None):
+        """Inits the BaseModel with agents' initial positions, their maximum
+        speed, unit time lenght, allowed error and optionally the environment.
+        """
         self.positions = copy.deepcopy(positions)
         self.velocities = np.zeros(positions.shape)
         self.targeted_positions = copy.deepcopy(positions)
         self.targeted_velocities = np.zeros(positions.shape)
         self.disturbancies = np.zeros(positions.shape)
-        self.target_distance =  target_distance
-        self.bond_strength = bond_strength
         self.max_speed = max_speed
         self.num_agents = positions.shape[0]
         self.time_delta = time_delta
         self.accepted_error = accepted_error
+        self.env = env
+
+    def _straight_move_update(self, uncut_velocities):
+        """Moves the agents according to their velocities, which include
+        disturbancies from the environment (if not equal to None) and
+        course corrections.
+            The targeted positions are updated similarly but without the
+        disturbancies.
+
+        Parameters
+        ----------
+            uncut_velocites: numpy.ndarray
+                Array of shape (3, 2) containing the velocities (without
+                corrections and disturbancies) of each agent.
+        """
+        pure_velocities = self._cliped(uncut_velocities)
+        self.targeted_velocities = pure_velocities
+
+        if self.env is None:
+
+            self.velocities = pure_velocities
+            self.positions += self.velocities*self.time_delta
+            self.targeted_positions += self.velocities*self.time_delta
+
+        else:
+
+            old_disturbancies = self.disturbancies
+            disturbancies = self.env.evaluate(self.positions)
+            self.disturbancies = disturbancies
+            velocities = pure_velocities + old_disturbancies
+            corrected_velocities = self._course_correction(velocities)
+            disturbed_velocities = corrected_velocities + disturbancies
+
+            self.positions += disturbed_velocities*self.time_delta
+            self.targeted_positions += pure_velocities*self.time_delta
+            self.velocities = corrected_velocities
+
+    def _course_correction(self, velocities):
+        raise NotImplementedError
+
+    def _direction(self, vector):
+        norm = np.linalg.norm(vector)
+        return vector if norm == 0 else vector/norm
+
+    def _directions(self, vectors):
+        return np.apply_along_axis(lambda x: self._direction(x), 1, vectors)
+
+    def _clip(self, velocity):
+        speed = np.linalg.norm(velocity)
+        if speed <= self.max_speed:
+            return velocity
+        else:
+            return self._direction(velocity)*self.max_speed
+
+    def _cliped(self, velocities):
+        speeds = np.linalg.norm(velocities, axis=1)
+        if np.max(speeds) <= self.max_speed:
+            return velocities
+        else:
+            return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
+
+
+class CentralControl(BaseModel):
+
+    def __init__(self, positions, target_distance, bond_strength, max_speed,
+            time_delta, accepted_error, env=None, correction_const=[1.0, 1.0]):
+
+        super().__init__(positions, max_speed, time_delta, accepted_error, env)
+
+        self.target_distance =  target_distance
+        self.bond_strength = bond_strength
         self.correction_const = correction_const
         self.formation_type = None
         self.course_target = None
@@ -32,42 +108,6 @@ class CentralControl(object):
         self.lead_index = None
         self.rotation_sign = None
         self.task_ready = True
-        self.env = env
-
-
-    def _direction(self, vector):
-
-        norm = np.linalg.norm(vector)
-
-        return vector if norm == 0 else vector/norm
-
-
-    def _directions(self, vectors):
-
-        return np.apply_along_axis(lambda x: self._direction(x), 1, vectors)
-
-
-    def _clip(self, velocity):
-
-        speed = np.linalg.norm(velocity)
-
-        if speed <= self.max_speed:
-            return velocity
-
-        else:
-            return self._direction(velocity)*self.max_speed
-
-
-    def _cliped(self, velocities):
-
-        speeds = np.linalg.norm(velocities, axis=1)
-
-        if np.max(speeds) <= self.max_speed:
-            return velocities
-
-        else:
-            return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
-
 
     def _course_correction(self, velocities):
 
@@ -78,30 +118,6 @@ class CentralControl(object):
             self.correction_const[1]*positions_diff/self.time_delta)
 
         return self._cliped(adjusted_velocities)
-
-    def _straight_move_update(self, uncut_velocities):
-
-        pure_velocities = self._cliped(uncut_velocities)
-        self.targeted_velocities = pure_velocities
-
-        if self.env is None:
-
-            self.velocities = pure_velocities
-            self.positions += self.velocities*self.time_delta
-            self.targeted_positions += self.velocities*self.time_delta
-
-        else:
-            old_disturbancies = self.disturbancies
-            disturbancies = self.env.evaluate(self.positions)
-            self.disturbancies = disturbancies
-            velocities = pure_velocities + old_disturbancies
-            corrected_velocities = self._course_correction(velocities)
-            disturbed_velocities = corrected_velocities + disturbancies
-
-            self.positions += disturbed_velocities*self.time_delta
-            self.targeted_positions += pure_velocities*self.time_delta
-            self.velocities = corrected_velocities
-
 
     def reshape_formation(self, formation_type, speed):
 
