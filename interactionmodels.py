@@ -26,7 +26,7 @@ class BaseModel(object):
         self.accepted_error = accepted_error
         self.env = env
 
-    def _straight_move_update(self, uncut_velocities):
+    def _move(self, uncut_velocities):
         """Moves the agents according to their velocities, which include
         disturbancies from the environment (if not equal to None) and
         course corrections.
@@ -35,7 +35,7 @@ class BaseModel(object):
 
         Parameters
         ----------
-            uncut_velocites: numpy.ndarray
+            uncut_velocites: numpy.ndarray (dtype: float)
                 Array of shape (3, 2) containing the velocities (without
                 corrections and disturbancies) of each agent.
         """
@@ -148,7 +148,7 @@ class CentralControl(BaseModel):
                 velocities.append(velocity)
 
         velocities = np.stack(velocities, axis=0)
-        self._straight_move_update(velocities)
+        self._move(velocities)
 
 
     def turn_formation(self, target_point, speed):
@@ -366,4 +366,4 @@ class CentralControl(BaseModel):
         '''Move all agents to given direction with the given speed without
         changing the angle of the formation.'''
         velocities = np.tile(direction*speed, [self.num_agents, 1])
-        self._straight_move_update(velocities)
+        self._move(velocities)
