@@ -12,9 +12,6 @@ class BaseModel(object):
 
     def __init__(self, positions, max_speed, time_delta, accepted_error,
             env=None):
-        """Inits the BaseModel with agents' initial positions, their maximum
-        speed, unit time lenght, allowed error and optionally the environment.
-        """
         self.positions = copy.deepcopy(positions)
         self.velocities = np.zeros(positions.shape)
         self.targeted_positions = copy.deepcopy(positions)
