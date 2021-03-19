@@ -4,7 +4,7 @@ import copy
 
 
 class BaseModel(object):
-    """BaseModel for the interactionmodels.
+    """Base model for the interactionmodels.
 
     This class is used as a container for basic attributes and shared private
     methods. The actual functionality is implemented within its subclasses.
