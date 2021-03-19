@@ -87,12 +87,35 @@ class BaseModel(object):
 
 
 class CentralControl(BaseModel):
+    """Class representing centrally controlled agents.
+
+    This class models agents that execute tasks from central controller,
+    optionally under disturbances from environment. In the later situation
+    the controller applies also course corrections.
+
+    Parameters
+    ----------
+        positions: numpy.ndarray (dtype: float)
+            Array of shape (3, 2) representing the agents positions.
+        target_distance: float
+            Target distance between the agents in the triangle formation.
+        bond_strength: float
+            Strenght constant for the triangle formation reshaping.
+        max_speed: float
+            Maximum allowed speed for all agents.
+        time_delta: float
+            Lenght of the unit time increment.
+        accepted_error: float
+            Tasks are done when distance to target is less than this.
+        env: environment.Env
+            Object representing the environment.
+        correction_const: list (types: [float, float])
+            Constants for velocity and position based course corrections.
+    """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
             time_delta, accepted_error, env=None, correction_const=[1.0, 1.0]):
-
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
-
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
         self.correction_const = correction_const
