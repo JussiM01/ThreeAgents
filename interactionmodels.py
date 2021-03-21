@@ -32,7 +32,7 @@ class BaseModel(object):
 
         Parameters
         ----------
-            uncut_velocites: numpy.ndarray (dtype: float)
+            uncut_velocities: numpy.ndarray (dtype: float)
                 Array of shape (3, 2) containing the velocities (without
                 corrections and disturbancies) of each agent.
         """
@@ -120,7 +120,18 @@ class CentralControl(BaseModel):
         self.task_ready = True
 
     def _course_correction(self, velocities):
+        """Method for updatting veclocities to include course corrections.
 
+        Adds velocity components for velocity and position based course
+        corrections to the given velocities. These are calculated based on
+        previous disturbancies and atempt to change the velocities and
+        positions towards targeted velocites and positions.
+
+        Parameters
+        ----------
+            velocities: numpy.ndarray (dtype: float)
+                Array of shape (3, 2) containing the velocities of each agent.
+        """
         velocities_diff = self.targeted_velocities - velocities
         positions_diff = self.targeted_positions - self.positions
         adjusted_velocities = (velocities +
