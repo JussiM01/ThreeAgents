@@ -131,6 +131,13 @@ class CentralControl(BaseModel):
         ----------
             velocities: numpy.ndarray (dtype: float)
                 Array of shape (3, 2) containing the velocities of each agent.
+
+        Returns
+        -------
+
+            adjusted_velocities: numpy.ndarray (dtype: float)
+                Array of shape (3, 2) containing the course corrected velocites
+                of each agent.
         """
         velocities_diff = self.targeted_velocities - velocities
         positions_diff = self.targeted_positions - self.positions
@@ -326,7 +333,7 @@ class CentralControl(BaseModel):
             self.velocities = corrected_velocities + disturbancies
 
     def _about_to_over_turn(self, direction_diff, angle):
-
+        """Check if the formation is about to turn more than intended."""
         lead_point = self.targeted_positions[self.task_params['lead_index']]
         lead_direction = self._direction(lead_point
             - self.task_params['rotation_center'])
@@ -378,8 +385,20 @@ class CentralControl(BaseModel):
 
 
     def shift_formation(self, target_point, speed):
-        '''Move the formation towards the target point with the given speed.
-        (and make course corrections if there are any disturbancies).'''
+        """Method for shifting the formation towards a given target point.
+
+        Moves the formation towards the target point with the given speed
+        and make course corrections if there are disturbancies. The task
+        is finished when center point of the formation is within distance
+        of `self.accepted_error` away from target.
+
+        Parameters
+        ----------
+            target_point: list (types [float, float])
+                List containing the coordinates of the target point.
+            speed: flot
+                speed of the shifting.
+        """
 
         center_of_mass = np.mean(self.targeted_positions, axis=0)
 
@@ -413,7 +432,7 @@ class CentralControl(BaseModel):
 
 
     def _about_to_over_shoots(self, current_cm):
-
+        """Check if the formation is about to pass the target."""
         current_diff = current_cm - self.task_params['course_target']
         velocity = (self.task_params['course_direction']
             *self.task_params['course_speed'])
@@ -425,7 +444,6 @@ class CentralControl(BaseModel):
 
 
     def _shift_step(self, direction, speed):
-        '''Move all agents to given direction with the given speed without
-        changing the angle of the formation.'''
+        """Moves all agents to given direction with the given speed."""
         velocities = np.tile(direction*speed, [self.num_agents, 1])
         self._move(velocities)
