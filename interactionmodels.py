@@ -82,6 +82,15 @@ class BaseModel(object):
         else:
             return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
 
+    def _rotate(self, vector, angle):
+        rotation_matrix = np.array(
+            [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+
+        return rotation_matrix.dot(vector)
+
+    def _rotate_all(self, points, angle):
+        return np.apply_along_axis(lambda x: self._rotate(x, angle), 1, points)
+
 
 class CentralControl(BaseModel):
     """Class representing centrally controlled agents.
@@ -333,7 +342,7 @@ class CentralControl(BaseModel):
             self.velocities = corrected_velocities + disturbancies
 
     def _about_to_over_turn(self, direction_diff, angle):
-        """Check if the formation is about to turn more than intended."""
+        """Checks if the formation is about to turn more than intended."""
         lead_point = self.targeted_positions[self.task_params['lead_index']]
         lead_direction = self._direction(lead_point
             - self.task_params['rotation_center'])
@@ -346,7 +355,7 @@ class CentralControl(BaseModel):
 
 
     def _closest_to(self, center_point, direction_to_target):
-
+        """Finds index of the agent that is closest to target direction."""
         center_to_points = self.targeted_positions - center_point
         directions = self._directions(center_to_points)
         differences = np.linalg.norm(directions - direction_to_target, axis=1)
@@ -355,7 +364,7 @@ class CentralControl(BaseModel):
 
 
     def _conjugate_product(self, vector1, vector2):
-
+        """Product of vector1 with vector2's conjugate (as complex numbers)."""
         vec1_complex = np.array([vector1[0] + 1j*vector1[1]])
         vec2_complex = np.array([vector2[0] + 1j*vector2[1]])
 
@@ -363,26 +372,12 @@ class CentralControl(BaseModel):
 
 
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
-
+        """Calculates rotation sign (clockwise or counter clockwise)."""
         center_to_point = self.targeted_positions[lead_index,:] - center_point
         direction = self._direction(center_to_point)
         product = self._conjugate_product(direction, direction_to_target)
 
         return -1*np.sign(product.imag)[0]
-
-
-    def _rotate(self, vector, angle):
-
-        rotation_matrix = np.array(
-            [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-
-        return rotation_matrix.dot(vector)
-
-
-    def _rotate_all(self, points, angle):
-
-        return np.apply_along_axis(lambda x: self._rotate(x, angle), 1, points)
-
 
     def shift_formation(self, target_point, speed):
         """Method for shifting the formation towards a given target point.
@@ -430,9 +425,8 @@ class CentralControl(BaseModel):
 
             self._shift_step(adjusted_direction, adjusted_speed)
 
-
     def _about_to_over_shoots(self, current_cm):
-        """Check if the formation is about to pass the target."""
+        """Checks if the formation is about to pass the target."""
         current_diff = current_cm - self.task_params['course_target']
         velocity = (self.task_params['course_direction']
             *self.task_params['course_speed'])
@@ -441,7 +435,6 @@ class CentralControl(BaseModel):
         planned_diff = planned_next - self.task_params['course_target']
 
         return current_diff.dot(planned_diff) < 0
-
 
     def _shift_step(self, direction, speed):
         """Moves all agents to given direction with the given speed."""
