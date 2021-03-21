@@ -43,20 +43,17 @@ class BaseModel(object):
         self.targeted_velocities = pure_velocities
 
         if self.env is None:
-
             self.velocities = pure_velocities
             self.positions += self.velocities*self.time_delta
             self.targeted_positions += self.velocities*self.time_delta
 
         else:
-
             old_disturbancies = self.disturbancies
             disturbancies = self.env.evaluate(self.positions)
             self.disturbancies = disturbancies
             velocities = pure_velocities + old_disturbancies
             corrected_velocities = self._course_correction(velocities)
             disturbed_velocities = corrected_velocities + disturbancies
-
             self.positions += disturbed_velocities*self.time_delta
             self.targeted_positions += pure_velocities*self.time_delta
             self.velocities = corrected_velocities
@@ -179,13 +176,26 @@ class CentralControl(BaseModel):
         else:
             raise NotImplementedError
 
-
     def _reshape_step(self, speed):
+        """Method for single time step formation reshaping.
 
+        This method is run when reshape_formation is called, unless the
+        acceptance criteria is met. It moves the agent towards desired form.
+        Currently only triangle shape is supported. In it the agents are
+        in an uniform triangle within `self.target_distance` away from
+        each other (or reasonably close to it). The agents movement speeds
+        are based on their deviation from the desired distance, speed and the
+        attribute `self.bond_strength`. The movement velocities are products
+        of these (see the code for exact details).
+
+        Parameters
+        ----------
+            speed: float
+                Speed parameter for the agent reshape movements.
+        """
         velocities = []
 
         if self.task_params['formation_type'] == 'triangle':
-
             for i in range(self.num_agents):
                 vectors_to_all = self.positions - self.positions[i,:]
                 deviations = np.linalg.norm(
@@ -198,22 +208,28 @@ class CentralControl(BaseModel):
         velocities = np.stack(velocities, axis=0)
         self._move(velocities)
 
-
     def turn_formation(self, target_point, speed):
-        '''Turn the formation around its center of mass until it faces the
-        direction of a given target point.'''
+        """Method for turning the formation around its center point.
 
+        Turns the formation around its center until it faces the direction of
+        given target point (upto maximum error of `self.accepted_error`).
+
+        Parameters
+        ----------
+            target_point: list (types [float, float])
+                List containing the coordinates of the target point.
+            speed: flot
+                speed of the rotation.
+        """
         if self.task_params['formation_type'] != 'triangle':
             raise NotImplementedError
 
         if 'rotation_center' not in self.task_params:
             self.task_ready = False
-
             center_of_mass = np.mean(self.targeted_positions, axis=0)
             to_target = np.array(target_point, dtype=float) - center_of_mass
             direction = self._direction(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
-
             self.task_params['dist_center_to_points'] = (self.target_distance
                 /np.sqrt(3))
             self.task_params['rotation_center'] = center_of_mass
@@ -223,7 +239,6 @@ class CentralControl(BaseModel):
                 center_of_mass, direction)
             self.task_params['rotation_sign'] = self._rotation_sign(
                 center_of_mass, direction, self.task_params['lead_index'])
-
             target_vector = (self.task_params['target_direction']
                 *self.task_params['dist_center_to_points'])
             self.task_params['target_vectors'] = np.stack(
@@ -237,20 +252,16 @@ class CentralControl(BaseModel):
             - self.task_params['target_direction'])
 
         if direction_diff < self.accepted_error:
-
             self.task_params = {}
             self.task_ready = True
 
         else:
-
             angle = (self.task_params['rotation_speed']*self.time_delta
                 /self.task_params['dist_center_to_points'])
 
             if self._about_to_over_turn(direction_diff, angle):
-
                 vecs = (copy.deepcopy(self.targeted_positions)
                     - self.task_params['rotation_center'])
-
                 for i in range(3):
                     ind = np.argmin(np.linalg.norm(vecs[i]
                         - self.task_params['target_vectors'], axis=1))
@@ -258,14 +269,12 @@ class CentralControl(BaseModel):
                         + self.task_params['target_vectors'][ind])
 
                     if self.env is None:
-
                         self.targeted_positions[i] = new_point
                         self.positions[i] = new_point
                         self.velocities[i] = (
                             new_point - vecs[i])/self.time_delta
 
                     else:
-
                         self.targeted_positions[i] = new_point
                         self.velocities[i] = (
                             new_point - vecs[i])/self.time_delta
@@ -278,9 +287,21 @@ class CentralControl(BaseModel):
             else:
                 self._turn_step(angle, speed)
 
-
     def _turn_step(self, angle, speed):
+        """Method for single time step formation turning movement.
 
+        This method is run when turn_formation method is called. It tunrs the
+        formation around its center by given angle. The angle and speed are
+        calculated in the turn_formation method and depend on each other but
+        are both passed as args for convienience.
+
+        Parameters
+        ----------
+            angle: float
+                Angle of the turn.
+            speed: float
+                Speed that is needed for this movement.
+        """
         center_to_points = (self.targeted_positions
             - self.task_params['rotation_center'])
         new_points = self.task_params['rotation_center'] + self._rotate_all(
@@ -291,29 +312,24 @@ class CentralControl(BaseModel):
         self.targeted_velocities = diff_directions*speed
 
         if self.env is None:
-
             self.positions = copy.deepcopy(new_points)
             self.velocities = diff_directions*speed
 
         else:
-
             old_disturbancies = self.disturbancies
             disturbancies = self.env.evaluate(self.positions)
             self.disturbancies = disturbancies
-
             velocities = diff_directions*speed + old_disturbancies
             corrected_velocities = self._course_correction(velocities)
             self.positions += (corrected_velocities +
                 disturbancies)*self.time_delta
             self.velocities = corrected_velocities + disturbancies
 
-
     def _about_to_over_turn(self, direction_diff, angle):
 
         lead_point = self.targeted_positions[self.task_params['lead_index']]
         lead_direction = self._direction(lead_point
             - self.task_params['rotation_center'])
-
         planned_direction = self._rotate(
             lead_direction, angle*self.task_params['rotation_sign'])
         planned_diff = np.linalg.norm(planned_direction
@@ -368,7 +384,6 @@ class CentralControl(BaseModel):
         center_of_mass = np.mean(self.targeted_positions, axis=0)
 
         if 'course_target' not in self.task_params:
-
             self.task_ready = False
             self.task_params['course_target'] = np.array(
                 target_point, dtype=float)
@@ -402,7 +417,6 @@ class CentralControl(BaseModel):
         current_diff = current_cm - self.task_params['course_target']
         velocity = (self.task_params['course_direction']
             *self.task_params['course_speed'])
-
         planned_move = velocity*self.time_delta
         planned_next = current_cm + planned_move
         planned_diff = planned_next - self.task_params['course_target']
