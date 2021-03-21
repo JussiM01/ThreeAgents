@@ -40,14 +40,11 @@ testdata0 = [
 
 @pytest.mark.parametrize("center,width,mid_value,points,expected", testdata0)
 def test_staticupflow(center, width, mid_value, points, expected):
-
     upflow = StaticUpFlow(center, width, mid_value)
-
     for t in range(10):
         vectors = [upflow(point, t) for point in points]
-
+        
         assert np.allclose(vectors, expected)
-
 
 testdata1 = [
     (np.array([[-1., 0.,], [0., 5.], [1., 2.]], dtype=float),
@@ -60,10 +57,8 @@ testdata1 = [
 
 @pytest.mark.parametrize("points,expected", testdata1)
 def test_env_with_staticupflow(points, expected):
-
     upflow = StaticUpFlow(0., 2., 1.)
     env = Env(upflow, 0.01)
-
     vectors = env.evaluate(points)
 
     assert np.allclose(vectors, expected)
