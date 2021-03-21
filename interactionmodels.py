@@ -24,7 +24,10 @@ class BaseModel(object):
         self.env = env
 
     def _move(self, uncut_velocities):
-        """Moves the agents according to their velocities, which include
+        """
+        Method for moving the agents positions based on their velocites.
+
+        Moves the agents according to their velocities, which include
         disturbancies from the environment (if not equal to None) and
         course corrections.
             The targeted positions are updated similarly but without the
