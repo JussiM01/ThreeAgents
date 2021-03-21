@@ -123,9 +123,9 @@ class CentralControl(BaseModel):
         """Method for updatting veclocities to include course corrections.
 
         Adds velocity components for velocity and position based course
-        corrections to the given velocities. These are calculated based on
-        previous disturbancies and atempt to change the velocities and
-        positions towards targeted velocites and positions.
+        corrections to the given velocities. These are calculated based
+        on previous disturbancies and attempt to change the velocities
+        and positions towards their targeted versions.
 
         Parameters
         ----------
@@ -141,7 +141,21 @@ class CentralControl(BaseModel):
         return self._cliped(adjusted_velocities)
 
     def reshape_formation(self, formation_type, speed):
+        """Method for reshaping the agents' formation to given shape
 
+        Moves the agent towards positions fo the given formation type. This
+        task is accepted as done when the postions are close enough to wanted
+        positions (ie. the distance is less than `self.accepted_error`).
+
+        Parameters
+        ----------
+            formation_type: str
+                Name of the formation type (currently only the `triangle`
+                formation type is supported).
+            speed: float
+                Speed parameter for the reshaping (see `_reshape_step` for
+                details).
+        """
         self.task_ready = False
 
         if formation_type == 'triangle':
