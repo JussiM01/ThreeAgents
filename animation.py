@@ -4,7 +4,7 @@ import numpy as np
 
 
 def init_scatter(params, ax, points):
-    """Fuction for intializing a scatter artist.
+    """Function for intializing a scatter artist.
 
     Sets the sizes and colors of the points that the scatter artist will
     be handling (points for the agents or the visualization dots).
@@ -47,13 +47,13 @@ def init_animation(params, points, dots=None):
     Returns:
     --------
         if dots are None:
-            fig, scatter: (
+            (fig, scatter): (
                 matplotlib.figure.Figure,
                 matplotlib.axes.collections.PathCollection
                 )
             Tuple with the figure and the scatter artist for the agents.
         else:
-            fig, env_scatter, scatter: (
+            (fig, env_scatter, scatter): (
                 matplotlib.figure.Figure,
                 matplotlib.axes.collections.PathCollection
                 )
@@ -113,24 +113,33 @@ class Animation(object):
             self.fig = fig
             self.scatter = scatter
 
-
-    def _update_plot(self, frame_number, points, velocity_vectors, tasks_done):
-
-        # ADD LATER OTHER UPDATES HERE
-
-        self.scatter.set_offsets(points)
-
-        if self.use_visuals:
-
-            dots = self.model.env.visualize()
-            self.env_scatter.set_offsets(dots)
-
     def update(self, i):
+        """Method for updating the animation frames.
 
+        Executes one time unit update of the current movement task and postibly
+        sets a new task for the next frame. Also plots the agents postions and
+        the vector field visualization.
+
+        Parameters:
+            i: int
+                The frame number.
+
+        Returns:
+        --------
+            if self.use_visuals None:
+                (scatter,): (
+                    matplotlib.axes.collections.PathCollection,
+                    )
+                Tuple with only the scatter artist for the agents.
+            else:
+                (env_scatter, scatter): (
+                    matplotlib.axes.collections.PathCollection,
+                    matplotlib.axes.collections.PathCollection
+                    )
+                Tuple with the scatter artists for both the agents and the dots.
+        """
         if self.task_index > self.last:
-            positions = self.model.positions
-            velocities = np.zeros(self.model.positions.shape, dtype=float)
-            all_tasks_done = True
+            points = self.model.positions
 
         else:
             task = self.task_list[self.task_index]
@@ -150,19 +159,20 @@ class Animation(object):
             if self.model.task_ready:
                 self.task_index +=1
 
-            positions = self.model.positions
-            velocities = self.model.velocities
-            all_tasks_done = False
+            points = self.model.positions
 
-        self._update_plot(i, positions, velocities, all_tasks_done)
+        self.scatter.set_offsets(points)
 
         if self.use_visuals:
+            dots = self.model.env.visualize()
+            self.env_scatter.set_offsets(dots)
+
             return self.env_scatter, self.scatter
 
         else:
             return self.scatter,
 
     def run(self):
-
+        """Runs the animation."""
         animation = FuncAnimation(self.fig, self.update, blit=True)
         plt.show()
