@@ -211,7 +211,7 @@ class WrapAroundMap(object):
         self.max_y = max_y
 
     def __call__(self, array):
-        """Applies the wrap around mapping to array of vectors."""
+        """Applies the wrap around mapping to an array of vectors."""
         min_array = np.array([[self.min_x, self.min_y]], dtype=float)
         upper_bounds = (np.array([[self.max_x, self.max_y]], dtype=float)
             - min_array)

@@ -364,7 +364,7 @@ class CentralControl(BaseModel):
 
 
     def _conjugate_product(self, vector1, vector2):
-        """Product of vector1 with vector2's conjugate (as complex numbers)."""
+        """Multiplies as complex numbers vector1 and conjugate of vector2."""
         vec1_complex = np.array([vector1[0] + 1j*vector1[1]])
         vec2_complex = np.array([vector2[0] + 1j*vector2[1]])
 
