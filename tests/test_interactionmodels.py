@@ -107,6 +107,7 @@ testdata3 = [
 def test_stopping_shift_formation(points, target, error):
     init_points = copy.deepcopy(points)
     model = CentralControl(init_points, 1., 1., 50., 0.01, error)
+    model.task_params['formation_type'] = 'triangle'
     model.shift_formation(target, 10.)
     new_positions = model.positions
 

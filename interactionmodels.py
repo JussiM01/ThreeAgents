@@ -120,13 +120,18 @@ class CentralControl(BaseModel):
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-            time_delta, accepted_error, env=None, correction_const=[1.0, 1.0]):
+            time_delta, accepted_error, env=None, correction_const=[1.0, 1.0],
+            task_params=None):
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
         self.correction_const = correction_const
-        self.task_params = {}
-        self.task_ready = True
+
+        if task_params is None:
+            self.task_params = {'task_ready': True}
+
+        else:
+            self.task_params = task_params
 
     def _course_correction(self, velocities):
         """Method for updatting veclocities to include course corrections.
@@ -172,7 +177,7 @@ class CentralControl(BaseModel):
                 Speed parameter for the reshaping (see `_reshape_step` for
                 details).
         """
-        self.task_ready = False
+        self.task_params['task_ready'] = False
 
         if formation_type == 'triangle':
             self.task_params['formation_type'] = formation_type
@@ -184,7 +189,8 @@ class CentralControl(BaseModel):
                 for d in [dist_01, dist_02, dist_12]])
 
             if error < self.accepted_error:
-                self.task_ready = True
+                self.task_params = {
+                    'task_ready': True, 'formation_type': formation_type}
 
             else:
                 self._reshape_step(speed)
@@ -241,7 +247,7 @@ class CentralControl(BaseModel):
             raise NotImplementedError
 
         if 'rotation_center' not in self.task_params:
-            self.task_ready = False
+            self.task_params['task_ready'] = False
             center_of_mass = np.mean(self.targeted_positions, axis=0)
             to_target = np.array(target_point, dtype=float) - center_of_mass
             direction = self._direction(to_target)
@@ -268,8 +274,10 @@ class CentralControl(BaseModel):
             - self.task_params['target_direction'])
 
         if direction_diff < self.accepted_error:
-            self.task_params = {}
-            self.task_ready = True
+            formation_type = self.task_params['formation_type']
+            self.task_params = {
+                'task_ready': True, 'formation_type': formation_type}
+
 
         else:
             angle = (self.task_params['rotation_speed']*self.time_delta
@@ -398,7 +406,7 @@ class CentralControl(BaseModel):
         center_of_mass = np.mean(self.targeted_positions, axis=0)
 
         if 'course_target' not in self.task_params:
-            self.task_ready = False
+            self.task_params['task_ready'] = False
             self.task_params['course_target'] = np.array(
                 target_point, dtype=float)
             self.task_params['course_direction'] = self._direction(
@@ -409,9 +417,9 @@ class CentralControl(BaseModel):
         dist_cm_to_target = np.linalg.norm(cm_to_target)
 
         if dist_cm_to_target < self.accepted_error:
-
-            self.task_params = {}
-            self.task_ready = True
+            formation_type = self.task_params['formation_type']
+            self.task_params = {
+                'task_ready': True, 'formation_type': formation_type}
 
         else:
 

@@ -160,7 +160,7 @@ class Animation(object):
             else:
                 raise NotImplementedError
 
-            if self.model.task_ready:
+            if self.model.task_params['task_ready']:
                 self.task_index +=1
 
             points = self.model.positions
