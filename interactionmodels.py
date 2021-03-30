@@ -133,6 +133,13 @@ class CentralControl(BaseModel):
         else:
             self.task_params = task_params
 
+    def __repr__(self):
+        args = (self.positions, self.target_distance, self.bond_strength,
+            self.max_speed, self.time_delta, self.accepted_error, self.env,
+            self.correction_const, self.task_params)
+        repr = 'CentralControl({}, {}, {}, {}, {}, {}, {}, {}, {})'
+        return repr.format(*args)
+
     def _course_correction(self, velocities):
         """Method for updatting veclocities to include course corrections.
 
