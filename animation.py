@@ -90,7 +90,7 @@ def init_animation(params, points, dots=None):
 class Animation(object):
 
     def __init__(self, plot_params, task_list, model):
-
+        self.plot_params = plot_params
         self.model = model
         positions = model.positions
         self.task_list = task_list
@@ -112,6 +112,10 @@ class Animation(object):
             fig, scatter = init_animation(plot_params, positions)
             self.fig = fig
             self.scatter = scatter
+
+    def __repr__(self):
+        args = self.plot_params, self.task_list, self.model
+        return 'Animation({}, {}, {})'.format(*args)
 
     def update(self, i):
         """Method for updating the animation frames.
