@@ -107,6 +107,7 @@ class Animation(object):
             Interaction model for the agents and (optionally) the environment.
 
     """
+    
     def __init__(self, plot_params, task_list, model):
         self.plot_params = plot_params
         self.model = model
