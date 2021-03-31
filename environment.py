@@ -21,6 +21,7 @@ class Env(object):
             visualization (or None if visualization is not used).
 
     """
+
     def __init__(self, vector_field, time_delta, visuals_init=None):
         self.vector_field = vector_field
         self.time_delta = time_delta
@@ -120,6 +121,7 @@ class FlowTube(object):
 
 class BumpMap(object):
     """Class for representing a bump function."""
+
     def __init__(self, center, width):
 
         self.center = center
@@ -139,6 +141,7 @@ class BumpMap(object):
 
 class StaticUpFlow(FlowTube):
     """Static bump function valued flow towards postive y-direction."""
+
     def __init__(self, center, width, mid_value):
         bump_map = BumpMap(center, width)
         bump_func = lambda p: bump_map(p[0])
@@ -161,6 +164,7 @@ class TubeSampler(object):
             List with minimum and and maximum values of the sampling range.
 
     """
+
     def __init__(self, x_range, y_range):
         self.tr = truncnorm(x_range[0], x_range[1])
         self.y_vals = y_range
@@ -209,8 +213,9 @@ class WrapAroundMap(object):
             Minimum value of y.
         max_y: float
             Minimum value of y.
-            
+
     """
+
     def __init__(self, min_x, max_x, min_y, max_y):
         self.min_x = min_x
         self.max_x = max_x
