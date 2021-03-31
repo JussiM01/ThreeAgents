@@ -19,6 +19,7 @@ class Env(object):
         visuals_init: dict or None
             Dictionary containing the parameters for intialisation of the
             visualization (or None if visualization is not used).
+
     """
     def __init__(self, vector_field, time_delta, visuals_init=None):
         self.vector_field = vector_field
@@ -49,6 +50,7 @@ class Env(object):
         -------
             vectors: numpy.ndarray (dtype: float)
                 Array of shape (num_points, 2) containing the vectors.
+
         """
 
         t = self.time_now
@@ -69,6 +71,7 @@ class Env(object):
             self.dots: numpy.ndarray (dtype: float)
                 Array of shape (num_points, 2) containing the visualization
                 points.
+
         """
         vectors = self.evaluate(self.dots)
         diff = vectors*self.time_delta
@@ -95,6 +98,7 @@ class FlowTube(object):
         direction: numpy.ndarray (dtype: float)
             Array of shape (2,). The direction of the flow (currently only
             [0.0, 1.0] is supported).
+
         """
 
     def __init__(self, flow_map, fluctuation, center_point, direction=NORTH):
@@ -155,6 +159,7 @@ class TubeSampler(object):
             List with minimum and and maximum values of the sampling range.
         y_range:  list ([float, float])
             List with minimum and and maximum values of the sampling range.
+
     """
     def __init__(self, x_range, y_range):
         self.tr = truncnorm(x_range[0], x_range[1])
@@ -176,6 +181,7 @@ class TubeSampler(object):
         -------
             points:  numpy.ndarray (dtype: float)
                 Array of shape (num_points, 2) containing the points.
+
         """
         xs = self.tr.rvs((num_points, 1))
         ys = np.random.uniform(self.y_vals[0], self.y_vals[1], (num_points, 1))
@@ -203,6 +209,7 @@ class WrapAroundMap(object):
             Minimum value of y.
         max_y: float
             Minimum value of y.
+            
     """
     def __init__(self, min_x, max_x, min_y, max_y):
         self.min_x = min_x

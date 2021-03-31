@@ -8,6 +8,7 @@ class BaseModel(object):
 
     This class is used as a container for basic attributes and shared private
     methods. The actual functionality is implemented within its subclasses.
+
     """
 
     def __init__(self, positions, max_speed, time_delta, accepted_error,
@@ -38,6 +39,7 @@ class BaseModel(object):
             uncut_velocities: numpy.ndarray (dtype: float)
                 Array of shape (3, 2) containing the velocities (without
                 corrections and disturbancies) of each agent.
+
         """
         pure_velocities = self._cliped(uncut_velocities)
         self.targeted_velocities = pure_velocities
@@ -117,6 +119,7 @@ class CentralControl(BaseModel):
             Object representing the environment.
         correction_const: list (types: [float, float])
             Constants for velocity and position based course corrections.
+
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
@@ -159,6 +162,7 @@ class CentralControl(BaseModel):
             adjusted_velocities: numpy.ndarray (dtype: float)
                 Array of shape (3, 2) containing the course corrected velocites
                 of each agent.
+
         """
         velocities_diff = self.targeted_velocities - velocities
         positions_diff = self.targeted_positions - self.positions
@@ -183,6 +187,7 @@ class CentralControl(BaseModel):
             speed: float
                 Speed parameter for the reshaping (see `_reshape_step` for
                 details).
+
         """
         self.task_params['task_ready'] = False
 
@@ -221,6 +226,7 @@ class CentralControl(BaseModel):
         ----------
             speed: float
                 Speed parameter for the agent reshape movements.
+
         """
         velocities = []
 
@@ -249,6 +255,7 @@ class CentralControl(BaseModel):
                 List containing the coordinates of the target point.
             speed: flot
                 speed of the rotation.
+
         """
         if self.task_params['formation_type'] != 'triangle':
             raise NotImplementedError
@@ -332,6 +339,7 @@ class CentralControl(BaseModel):
                 Angle of the turn.
             speed: float
                 Speed that is needed for this movement.
+
         """
         center_to_points = (self.targeted_positions
             - self.task_params['rotation_center'])
@@ -408,6 +416,7 @@ class CentralControl(BaseModel):
                 List containing the coordinates of the target point.
             speed: flot
                 speed of the shifting.
+                
         """
 
         center_of_mass = np.mean(self.targeted_positions, axis=0)
