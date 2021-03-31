@@ -16,9 +16,11 @@ def init_scatter(params, ax, points):
         ax: matplotlib.axes.Axes
             Axes object of the figure used for the animation.
 
-    Returns:
+    Returns
+    -------
         scatter: matplotlib.axes.collections.PathCollection
             Scatter artist handling the plotting of the given points.
+
     """
     size = np.array((params['pointsize']), dtype=float)
     sizes = np.repeat((size), points.shape[0], axis=0)
@@ -44,8 +46,8 @@ def init_animation(params, points, dots=None):
         points:
         dots:
 
-    Returns:
-    --------
+    Returns
+    -------
         if dots are None:
             (fig, scatter): (
                 matplotlib.figure.Figure,
@@ -59,6 +61,7 @@ def init_animation(params, points, dots=None):
                 )
             Tuple with the figure and the scatter artists for both the agents
             and the dots.
+
     """
     fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
     ax = fig.add_axes([params['x_min'], params['y_min'], params['x_max'],
@@ -88,7 +91,22 @@ def init_animation(params, points, dots=None):
 
 
 class Animation(object):
+    """Class for the animation object.
 
+    This class is used for showing the agent's movents. If an environment is
+    used its vector field can be also visualized in the animation.
+
+    Parameters
+    ----------
+        plot_params: dict
+            Parameters for intializing the animation figure and the artists
+            used for the visualizations.
+        task_list: list
+            List of the agents' movent tasks.
+        model:
+            Interaction model for the agents and (optionally) the environment.
+
+    """
     def __init__(self, plot_params, task_list, model):
         self.plot_params = plot_params
         self.model = model
@@ -120,16 +138,17 @@ class Animation(object):
     def update(self, i):
         """Method for updating the animation frames.
 
-        Executes one time unit update of the current movement task and postibly
+        Executes one time unit update of the current movement task and possibly
         sets a new task for the next frame. Also plots the agents postions and
         the vector field visualization.
 
-        Parameters:
+        Parameters
+        ----------
             i: int
                 The frame number.
 
-        Returns:
-        --------
+        Returns
+        -------
             if self.use_visuals None:
                 (scatter,): (
                     matplotlib.axes.collections.PathCollection,
@@ -141,6 +160,7 @@ class Animation(object):
                     matplotlib.axes.collections.PathCollection
                     )
                 Tuple with the scatter artists for both the agents and the dots.
+
         """
         if self.task_index > self.last:
             points = self.model.positions
