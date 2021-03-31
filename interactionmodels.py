@@ -416,7 +416,7 @@ class CentralControl(BaseModel):
                 List containing the coordinates of the target point.
             speed: flot
                 speed of the shifting.
-                
+
         """
 
         center_of_mass = np.mean(self.targeted_positions, axis=0)
