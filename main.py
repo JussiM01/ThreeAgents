@@ -9,6 +9,7 @@ from environment import Env, StaticUpFlow
 
 
 def load_config(filename):
+    """Loads the configuration file."""
     config_file = os.path.join('config_files',  filename)
     with open(config_file, 'r') as f:
         config = json.load(f)
@@ -16,6 +17,7 @@ def load_config(filename):
     return config
 
 def random_intial_positions(anim_dict, parsed_args):
+    """Intializes the agents' positions randomly according to a given range."""
     x_axis_len = anim_dict['ax_x_max'] - anim_dict['ax_x_min']
     y_axis_len = anim_dict['ax_y_max'] - anim_dict['ax_y_min']
 
@@ -33,6 +35,7 @@ def random_intial_positions(anim_dict, parsed_args):
     return initial_positions
 
 def main(config_dict, parsed_args):
+    """Sets up everything and runs the animation."""
     anim_init = config_dict['animation']
     model_init = config_dict['model']
     env_init = config_dict['env']
