@@ -1,41 +1,26 @@
 import argparse
-import json
-import os
 import numpy as np
 from interactionmodels import CentralControl
 from animation import Animation
 from environment import Env, StaticUpFlow
+from utils import load_config, random_intial_positions
 
-
-
-def load_config(filename):
-    """Loads the configuration file."""
-    config_file = os.path.join('config_files',  filename)
-    with open(config_file, 'r') as f:
-        config = json.load(f)
-
-    return config
-
-def random_intial_positions(anim_dict, parsed_args):
-    """Intializes the agents' positions randomly according to a given range."""
-    x_axis_len = anim_dict['ax_x_max'] - anim_dict['ax_x_min']
-    y_axis_len = anim_dict['ax_y_max'] - anim_dict['ax_y_min']
-
-    # set the starting ranges for the agents intial positions
-    start_min_x = anim_dict['ax_x_min'] + x_axis_len*parsed_args.x_min
-    start_max_x = anim_dict['ax_x_min'] + x_axis_len*parsed_args.x_max
-    start_min_y = anim_dict['ax_y_min'] + y_axis_len*parsed_args.y_min
-    start_max_y = anim_dict['ax_y_min'] + y_axis_len*parsed_args.y_max
-
-    # choose the agents intial positions randomly from these ranges
-    points_x = np.random.uniform(start_min_x, start_max_x, (3, 1))
-    points_y = np.random.uniform(start_min_y, start_max_y, (3, 1))
-    initial_positions = np.concatenate([points_x, points_y], axis=1)
-
-    return initial_positions
 
 def main(config_dict, parsed_args):
-    """Sets up everything and runs the animation."""
+    """Sets up everything and runs the animation.
+
+    This function first intializes animation, interaction model and environment
+    (optional) and then runs the animation.
+
+    Parameters
+    ----------
+        config_dict: dict
+            Dictionary containing the parameters for initializing everything.
+        parsed_args: argparse.Namespace
+            Parsed arguments containing the parameters that are used for
+            sampling the agents' initial positions.
+
+    """
     anim_init = config_dict['animation']
     model_init = config_dict['model']
     env_init = config_dict['env']
@@ -54,6 +39,7 @@ def main(config_dict, parsed_args):
 
     animation = Animation(anim_init, tasks, interactionmodel)
     animation.run()
+
 
 if __name__ == '__main__':
 
