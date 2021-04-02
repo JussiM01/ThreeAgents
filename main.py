@@ -1,3 +1,9 @@
+"""A simple multi-agent simulation with three agents moving in a formation.
+
+Configuration for the simulation along with the movement tasks for the agents
+are given in a configuration file. For more details see the project's README.
+
+"""
 import argparse
 import numpy as np
 from interactionmodels import CentralControl
@@ -43,7 +49,8 @@ def main(config_dict, parsed_args):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-f', '--conf_file', type=str, default='visuals.json')
     parser.add_argument('-r', '--random_seed', type=int, default=0)
     parser.add_argument('-x0', '--x_min', type=float, default=0.1)
