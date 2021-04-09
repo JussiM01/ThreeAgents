@@ -132,7 +132,7 @@ class BumpMap:
         r2 = (num_float - self.center)**2
         rad_squared = (self.width*0.5)**2
 
-        if (r2 < rad_squared):
+        if r2 < rad_squared:
             return np.exp(1/rad_squared)*np.exp(-1/(rad_squared - r2))
 
         else:
