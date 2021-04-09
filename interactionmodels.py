@@ -73,15 +73,13 @@ class BaseModel(object):
         speed = np.linalg.norm(velocity)
         if speed <= self.max_speed:
             return velocity
-        else:
-            return self._direction(velocity)*self.max_speed
+        return self._direction(velocity)*self.max_speed
 
     def _cliped(self, velocities):
         speeds = np.linalg.norm(velocities, axis=1)
         if np.max(speeds) <= self.max_speed:
             return velocities
-        else:
-            return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
+        return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
 
     def _rotate(self, vector, angle):
         rotation_matrix = np.array(
