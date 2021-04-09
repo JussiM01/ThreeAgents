@@ -135,8 +135,7 @@ class BumpMap:
         if r2 < rad_squared:
             return np.exp(1/rad_squared)*np.exp(-1/(rad_squared - r2))
 
-        else:
-            return 0.
+        return 0.
 
 
 class StaticUpFlow(FlowTube):
