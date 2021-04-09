@@ -86,8 +86,7 @@ def init_animation(params, points, dots=None):
 
         return fig, env_scatter, scatter
 
-    else:
-        return fig, scatter
+    return fig, scatter
 
 
 class Animation(object):
@@ -107,7 +106,7 @@ class Animation(object):
             Interaction model for the agents and (optionally) the environment.
 
     """
-    
+
     def __init__(self, plot_params, task_list, model):
         self.plot_params = plot_params
         self.model = model
@@ -194,8 +193,7 @@ class Animation(object):
 
             return self.env_scatter, self.scatter
 
-        else:
-            return self.scatter,
+        return self.scatter,
 
     def run(self):
         """Runs the animation."""
