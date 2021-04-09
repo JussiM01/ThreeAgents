@@ -89,7 +89,7 @@ def init_animation(params, points, dots=None):
     return fig, scatter
 
 
-class Animation(object):
+class Animation:
     """Class for the animation object.
 
     This class is used for showing the agent's movents. If an environment is
