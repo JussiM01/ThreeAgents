@@ -4,7 +4,7 @@ from scipy.stats import truncnorm
 NORTH = np.array([0., 1.], dtype=float)
 
 
-class Env(object):
+class Env:
     """Class for representing the environment.
 
     Contains a vector field and methods that are used for its visualization
@@ -81,7 +81,7 @@ class Env(object):
         return self.dots
 
 
-class FlowTube(object):
+class FlowTube:
     """Class for representing a simple tubular flow.
 
     Model of a vector field representing a flow towards given direction
@@ -119,7 +119,7 @@ class FlowTube(object):
         return vector
 
 
-class BumpMap(object):
+class BumpMap:
     """Class for representing a bump function."""
 
     def __init__(self, center, width):
@@ -149,7 +149,7 @@ class StaticUpFlow(FlowTube):
         super().__init__(bump_func, static_map, center)
 
 
-class TubeSampler(object):
+class TubeSampler:
     """Class for sampling points from regtangular area.
 
     This class is used for sampling points used for StaticUpFlow visualization.
@@ -194,7 +194,7 @@ class TubeSampler(object):
         return points
 
 
-class WrapAroundMap(object):
+class WrapAroundMap:
     """Class for constructing a function which wraps around the boundaries.
 
     This class is used for sending the visualization points which are about
