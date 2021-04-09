@@ -32,7 +32,7 @@ def main(config_dict, parsed_args):
     env_init = config_dict['env']
     tasks = config_dict['tasks']
 
-    initial_positions = random_intial_positions(anim_init, args)
+    initial_positions = random_intial_positions(anim_init, parsed_args)
     model_init['positions'] = initial_positions
 
     if env_init['vectorfield'] is not None:
