@@ -2,7 +2,7 @@ import copy
 import numpy as np
 
 
-class BaseModel(object):
+class BaseModel:
     """Base model for the interactionmodels.
 
     This class is used as a container for basic attributes and shared private
