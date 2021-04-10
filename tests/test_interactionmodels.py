@@ -1,6 +1,6 @@
-import pytest
 import copy
 import numpy as np
+import pytest
 from interactionmodels import CentralControl
 
 

@@ -1,6 +1,5 @@
-import pytest
-import copy
 import numpy as np
+import pytest
 from environment import Env, StaticUpFlow
 
 
