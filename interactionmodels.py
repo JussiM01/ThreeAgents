@@ -120,16 +120,19 @@ class CentralControl(BaseModel):
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-            time_delta, accepted_error, env=None, correction_const=[1.0, 1.0],
+            time_delta, accepted_error, env=None, correction_const=None,
             task_params=None):
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
-        self.correction_const = correction_const
+
+        if correction_const is None:
+            self.correction_const = [1.0, 1.0]
+        else:
+            self.correction_const = correction_const
 
         if task_params is None:
             self.task_params = {'task_ready': True}
-
         else:
             self.task_params = task_params
 
