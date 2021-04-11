@@ -82,15 +82,6 @@ class BaseModel:
             return velocities
         return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
 
-    def rotate(self, vector, angle):
-        rotation_matrix = np.array(
-            [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-
-        return rotation_matrix.dot(vector)
-
-    def rotate_all(self, points, angle):
-        return np.apply_along_axis(lambda x: rotate(x, angle), 1, points)
-
 
 class CentralControl(BaseModel):
     """Class representing centrally controlled agents.
