@@ -3,6 +3,8 @@ import os
 import numpy as np
 
 
+#---- Helpers for main.py ---------------------------------------
+
 def load_config(filename):
     """Loads the configuration file."""
     config_file = os.path.join('config_files',  filename)
@@ -28,3 +30,14 @@ def random_intial_positions(anim_dict, parsed_args):
     initial_positions = np.concatenate([points_x, points_y], axis=1)
 
     return initial_positions
+
+#---- Helpers for interactionmodels.py -----------------------------------------
+
+def rotate(vector, angle):
+    rotation_matrix = np.array(
+        [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+
+    return rotation_matrix.dot(vector)
+
+def rotate_all(points, angle):
+    return np.apply_along_axis(lambda x: rotate(x, angle), 1, points)
