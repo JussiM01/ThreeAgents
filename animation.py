@@ -1,92 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import numpy as np
-
-
-def init_scatter(params, ax, points):
-    """Function for intializing a scatter artist.
-
-    Sets the sizes and colors of the points that the scatter artist will
-    be handling (points for the agents or the visualization dots).
-
-    Parameters
-    ----------
-        params: dict
-            Dictionary which contains parameters for the sizes and colors.
-        ax: matplotlib.axes.Axes
-            Axes object of the figure used for the animation.
-
-    Returns
-    -------
-        scatter: matplotlib.axes.collections.PathCollection
-            Scatter artist handling the plotting of the given points.
-
-    """
-    size = np.array((params['pointsize']), dtype=float)
-    sizes = np.repeat((size), points.shape[0], axis=0)
-    facecolor = np.array([params['facecolors']], dtype=float)
-    facecolors = np.repeat(facecolor, points.shape[0], axis=0)
-    edgecolor = np.array([params['edgecolors']], dtype=float)
-    edgecolors = np.repeat(edgecolor, points.shape[0], axis=0)
-    scatter = ax.scatter(points[:,0], points[:,1], s=sizes, lw=0.5,
-        facecolors=facecolors,  edgecolors=edgecolors)
-
-    return scatter
-
-def init_animation(params, points, dots=None):
-    """Function for intializing the figure and artists needed for the animation.
-
-    Sets the figure according to given parameters and intializes the artists
-    that will be drawing to it.
-
-    Parameters
-    ----------
-        params: dict
-            Dictionary which contains parameters for the figure and the artists.
-        points:
-        dots:
-
-    Returns
-    -------
-        if dots are None:
-            (fig, scatter): (
-                matplotlib.figure.Figure,
-                matplotlib.axes.collections.PathCollection
-                )
-            Tuple with the figure and the scatter artist for the agents.
-        else:
-            (fig, env_scatter, scatter): (
-                matplotlib.figure.Figure,
-                matplotlib.axes.collections.PathCollection
-                )
-            Tuple with the figure and the scatter artists for both the agents
-            and the dots.
-
-    """
-    fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
-    ax = fig.add_axes([params['x_min'], params['y_min'], params['x_max'],
-        params['y_max']], frameon=params['frameon'])
-    ax.set_xlim(params['ax_x_min'], params['ax_x_max'])
-    ax.set_ylim(params['ax_y_min'], params['ax_y_max'])
-
-    if params['remove_thicks']:
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-    ax.grid(params['use_grid'])
-    scatter = init_scatter(params, ax, points)
-
-    if dots is not None:
-        env_scatter_params = {
-            'pointsize': 0.025,
-            'edgecolors': [1, 0, 0, 1],
-            'facecolors': [1, 0, 0, 1]
-            }
-        env_scatter = init_scatter(env_scatter_params, ax, dots)
-
-        return fig, env_scatter, scatter
-
-    return fig, scatter
+from utils import init_animation
 
 
 class Animation:
@@ -197,5 +111,5 @@ class Animation:
 
     def run(self):
         """Runs the animation."""
-        animation = FuncAnimation(self.fig, self.update, blit=True)
+        _ = FuncAnimation(self.fig, self.update, blit=True)
         plt.show()
