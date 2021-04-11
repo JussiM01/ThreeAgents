@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from utils import rotate, rotate_all
 
 
 class BaseModel:
@@ -81,14 +82,14 @@ class BaseModel:
             return velocities
         return np.apply_along_axis(lambda x: self._clip(x), 1, velocities)
 
-    def _rotate(self, vector, angle):
+    def rotate(self, vector, angle):
         rotation_matrix = np.array(
             [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
 
         return rotation_matrix.dot(vector)
 
-    def _rotate_all(self, points, angle):
-        return np.apply_along_axis(lambda x: self._rotate(x, angle), 1, points)
+    def rotate_all(self, points, angle):
+        return np.apply_along_axis(lambda x: rotate(x, angle), 1, points)
 
 
 class CentralControl(BaseModel):
@@ -278,7 +279,7 @@ class CentralControl(BaseModel):
             target_vector = (self.task_params['target_direction']
                 *self.task_params['dist_center_to_points'])
             self.task_params['target_vectors'] = np.stack(
-                [self._rotate(target_vector, theta)
+                [rotate(target_vector, theta)
                 for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
         lead_position = self.targeted_positions[self.task_params['lead_index']]
@@ -343,7 +344,7 @@ class CentralControl(BaseModel):
         """
         center_to_points = (self.targeted_positions
             - self.task_params['rotation_center'])
-        new_points = self.task_params['rotation_center'] + self._rotate_all(
+        new_points = self.task_params['rotation_center'] + rotate_all(
             center_to_points, angle*self.task_params['rotation_sign'])
         diff_vectors = new_points - center_to_points
         diff_directions = self._directions(diff_vectors)
@@ -369,7 +370,7 @@ class CentralControl(BaseModel):
         lead_point = self.targeted_positions[self.task_params['lead_index']]
         lead_direction = self._direction(lead_point
             - self.task_params['rotation_center'])
-        planned_direction = self._rotate(
+        planned_direction = rotate(
             lead_direction, angle*self.task_params['rotation_sign'])
         planned_diff = np.linalg.norm(planned_direction
             - self.task_params['target_direction'])
