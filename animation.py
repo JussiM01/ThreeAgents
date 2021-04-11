@@ -73,7 +73,7 @@ class Animation:
                     matplotlib.axes.collections.PathCollection,
                     matplotlib.axes.collections.PathCollection
                     )
-                Tuple with the scatter artists for both the agents and the dots.
+                Tuple with scatter artists for both the agents and the dots.
 
         """
         if self.task_index > self.last:
@@ -95,7 +95,7 @@ class Animation:
                 raise NotImplementedError
 
             if self.model.task_params['task_ready']:
-                self.task_index +=1
+                self.task_index += 1
 
             points = self.model.positions
 
