@@ -49,7 +49,8 @@ def main(config_dict, parsed_args):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description=__doc__,
+    parser = argparse.ArgumentParser(
+        description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-f', '--conf_file', type=str, default='visuals.json')
     parser.add_argument('-r', '--random_seed', type=int, default=0)
