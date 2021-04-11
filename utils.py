@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-#---- Helpers for main.py ------------------------------------------------------
+# --- Helpers for main.py -----------------------------------------------------
 
 def load_config(filename):
     """Loads the configuration file."""
@@ -13,6 +13,7 @@ def load_config(filename):
         config = json.load(f)
 
     return config
+
 
 def random_intial_positions(anim_dict, parsed_args):
     """Intializes the agents' positions randomly according to a given range."""
@@ -32,7 +33,8 @@ def random_intial_positions(anim_dict, parsed_args):
 
     return initial_positions
 
-#---- Helpers for interactionmodels.py -----------------------------------------
+
+# --- Helpers for interactionmodels.py ----------------------------------------
 
 def conjugate_product(vector1, vector2):
     """Multiplies as complex numbers vector1 and conjugate of vector2."""
@@ -41,16 +43,19 @@ def conjugate_product(vector1, vector2):
 
     return vec1_complex*vec2_complex.conj()
 
+
 def rotate(vector, angle):
     rotation_matrix = np.array(
         [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
 
     return rotation_matrix.dot(vector)
 
+
 def rotate_all(points, angle):
     return np.apply_along_axis(lambda x: rotate(x, angle), 1, points)
 
-#---- Helpers for animation.py -------------------------------------------------
+
+# --- Helpers for animation.py ------------------------------------------------
 
 def init_scatter(params, ax, points):
     """Function for intializing a scatter artist.
@@ -77,13 +82,15 @@ def init_scatter(params, ax, points):
     facecolors = np.repeat(facecolor, points.shape[0], axis=0)
     edgecolor = np.array([params['edgecolors']], dtype=float)
     edgecolors = np.repeat(edgecolor, points.shape[0], axis=0)
-    scatter = ax.scatter(points[:,0], points[:,1], s=sizes, lw=0.5,
-        facecolors=facecolors,  edgecolors=edgecolors)
+    scatter = ax.scatter(
+        points[:, 0], points[:, 1], s=sizes, lw=0.5, facecolors=facecolors,
+        edgecolors=edgecolors)
 
     return scatter
 
+
 def init_animation(params, points, dots=None):
-    """Function for intializing the figure and artists needed for the animation.
+    """Function for intializing the figure and artists for the animation.
 
     Sets the figure according to given parameters and intializes the artists
     that will be drawing to it.
@@ -91,7 +98,7 @@ def init_animation(params, points, dots=None):
     Parameters
     ----------
         params: dict
-            Dictionary which contains parameters for the figure and the artists.
+            Dictionary which contains parameters for the figure and artists.
         points:
         dots:
 
@@ -113,8 +120,9 @@ def init_animation(params, points, dots=None):
 
     """
     fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
-    ax = fig.add_axes([params['x_min'], params['y_min'], params['x_max'],
-        params['y_max']], frameon=params['frameon'])
+    ax = fig.add_axes(
+        [params['x_min'], params['y_min'], params['x_max'], params['y_max']],
+        frameon=params['frameon'])
     ax.set_xlim(params['ax_x_min'], params['ax_x_max'])
     ax.set_ylim(params['ax_y_min'], params['ax_y_max'])
 
