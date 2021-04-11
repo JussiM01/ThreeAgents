@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import pytest
 from interactionmodels import CentralControl
+from utils import rotate_all
 
 
 testdata0 = [
@@ -137,31 +138,7 @@ def test_over_shooting_prevention(points, target, delta, error):
 
     assert np.allclose(new_mean, target)
 
-sq = 1/np.sqrt(2)
 testdata5 = [
-    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi,
-    np.array([[0., -1.], [-1., 0.], [0., 1.]], dtype=float)),
-    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi,
-    np.array([[0., -1.], [-1., 0.], [0., 1.]], dtype=float)),
-    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/2,
-    np.array([[-1., 0.], [0., 1.], [1., 0.]], dtype=float)),
-    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/2,
-    np.array([[1., 0.], [0., -1.], [-1., 0.]], dtype=float)),
-    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), np.pi/4,
-    np.array([[-sq, sq], [sq, sq], [sq, -sq]], dtype=float)),
-    (np.array([[0., 1.], [1., 0.], [0., -1.]], dtype=float), -np.pi/4,
-    np.array([[sq, sq], [sq, -sq], [-sq, -sq]], dtype=float))
-    ]
-
-@pytest.mark.parametrize("vectors,angle,expected", testdata5)
-def test_rotate_all(vectors, angle, expected):
-    points = np.array([[0., 1.], [2., 3.], [4., 5.]])
-    model = CentralControl(points, 1., 1., 50., 0.005, 0.001)
-    new_vectors = model._rotate_all(vectors, angle)
-
-    assert np.allclose(new_vectors, expected)
-
-testdata6 = [
     (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
     [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
     [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
@@ -184,7 +161,7 @@ testdata6 = [
     np.array([np.cos(-3*np.pi/8), np.sin(-3*np.pi/8)], dtype=float))
             ]
 
-@pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata6)
+@pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata5)
 def test_turn_step(points, delta, sign, angle, speed, expected):
     init_points = copy.deepcopy(points)
     model = CentralControl(init_points, 1., 1., 1000., delta, 0.001)
@@ -195,7 +172,7 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
 
     assert np.allclose(new_lead_position, expected)
 
-testdata7 = [
+testdata6 = [
     (np.array([[np.cos(1e-6), np.sin(1e-6)],
     [np.cos(1e-6 + 2*np.pi/3), np.sin(1e-6 + 2*np.pi/3)],
     [np.cos(1e-6 + 4*np.pi/3), np.sin(1e-6 + 4*np.pi/3)]], dtype=float),
@@ -214,7 +191,7 @@ testdata7 = [
     dtype=float), [50., -50.], 100., 1e-2),
             ]
 
-@pytest.mark.parametrize("points,target,speed,error,", testdata7)
+@pytest.mark.parametrize("points,target,speed,error,", testdata6)
 def test_stopping_turn_formation(points, target, speed, error):
     init_points = copy.deepcopy(points)
     model = CentralControl(init_points, 1., 1., 50., 0.01, error)
@@ -224,7 +201,7 @@ def test_stopping_turn_formation(points, target, speed, error):
 
     assert np.array_equal(points, new_positions)
 
-testdata8 = [
+testdata7 = [
     (np.array([[np.cos(np.pi/4 + 1e-8), np.sin(np.pi/4 + 1e-8)],
     [np.cos(np.pi/4 + 2*np.pi/3 + 1e-8), np.sin(np.pi/4 + 2*np.pi/3 + 1e-8)],
     [np.cos(np.pi/4 + 4*np.pi/3 + 1e-8), np.sin(np.pi/4 + 4*np.pi/3 + 1e-8)]],
@@ -243,7 +220,7 @@ testdata8 = [
     dtype=float), [-100., -100], 0.05, 1e-4)
             ]
 
-@pytest.mark.parametrize("points,target,delta,error", testdata8)
+@pytest.mark.parametrize("points,target,delta,error", testdata7)
 def test_over_turning_prevention(points, target, delta, error):
     init_points = copy.deepcopy(points)
     rotation_center = np.mean(points)
