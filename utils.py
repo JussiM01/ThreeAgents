@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 
-#---- Helpers for main.py ---------------------------------------
+#---- Helpers for main.py ------------------------------------------------------
 
 def load_config(filename):
     """Loads the configuration file."""
@@ -32,6 +32,13 @@ def random_intial_positions(anim_dict, parsed_args):
     return initial_positions
 
 #---- Helpers for interactionmodels.py -----------------------------------------
+
+def conjugate_product(vector1, vector2):
+    """Multiplies as complex numbers vector1 and conjugate of vector2."""
+    vec1_complex = np.array([vector1[0] + 1j*vector1[1]])
+    vec2_complex = np.array([vector2[0] + 1j*vector2[1]])
+
+    return vec1_complex*vec2_complex.conj()
 
 def rotate(vector, angle):
     rotation_matrix = np.array(

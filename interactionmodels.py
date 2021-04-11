@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from utils import rotate, rotate_all
+from utils import conjugate_product, rotate, rotate_all
 
 
 class BaseModel:
@@ -368,7 +368,6 @@ class CentralControl(BaseModel):
 
         return planned_diff > direction_diff
 
-
     def _closest_to(self, center_point, direction_to_target):
         """Finds index of the agent that is closest to target direction."""
         center_to_points = self.targeted_positions - center_point
@@ -377,20 +376,11 @@ class CentralControl(BaseModel):
 
         return np.argmin(differences)
 
-
-    def _conjugate_product(self, vector1, vector2):
-        """Multiplies as complex numbers vector1 and conjugate of vector2."""
-        vec1_complex = np.array([vector1[0] + 1j*vector1[1]])
-        vec2_complex = np.array([vector2[0] + 1j*vector2[1]])
-
-        return vec1_complex*vec2_complex.conj()
-
-
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
         """Calculates rotation sign (clockwise or counter clockwise)."""
         center_to_point = self.targeted_positions[lead_index,:] - center_point
         direction = self._direction(center_to_point)
-        product = self._conjugate_product(direction, direction_to_target)
+        product = conjugate_product(direction, direction_to_target)
 
         return -1*np.sign(product.imag)[0]
 
