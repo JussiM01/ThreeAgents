@@ -48,11 +48,11 @@ def test_staticupflow(center, width, mid_value, points, expected):
 
 testdata1 = [
     (np.array([[-1., 0.], [0., 5.], [1., 2.]], dtype=float),
-    np.array([[0., 0.], [0., 1.], [0., 0.]], dtype=float)),
+     np.array([[0., 0.], [0., 1.], [0., 0.]], dtype=float)),
     (np.array([[9., -1.], [1., 5.], [7., 8.]], dtype=float),
-    np.array([[0., 0.], [0., 0.], [0., 0.]], dtype=float)),
+     np.array([[0., 0.], [0., 0.], [0., 0.]], dtype=float)),
     (np.array([[0., -9.], [0., 2.], [0., 1.]], dtype=float),
-    np.array([[0., 1.], [0., 1.], [0., 1.]], dtype=float))
+     np.array([[0., 1.], [0., 1.], [0., 1.]], dtype=float))
     ]
 
 
