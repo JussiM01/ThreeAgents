@@ -225,6 +225,6 @@ class WrapAroundMap:
         """Applies the wrap around mapping to an array of vectors."""
         min_array = np.array([[self.min_x, self.min_y]], dtype=float)
         upper_bounds = (np.array([[self.max_x, self.max_y]], dtype=float)
-            - min_array)
+                        - min_array)
 
         return min_array + np.remainder(array - min_array, upper_bounds)
