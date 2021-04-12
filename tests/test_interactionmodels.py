@@ -16,6 +16,7 @@ testdata0 = [
     (np.array([[1.5, -0.5], [-0.5, 1.5], [-0.5, -0.5]], dtype=float), 3., -1.)
     ]
 
+
 @pytest.mark.parametrize("points,target_distance,expected_sign", testdata0)
 def test_sign_reshape_step(points, target_distance, expected_sign):
     init_points = copy.deepcopy(points)
@@ -39,16 +40,18 @@ def test_sign_reshape_step(points, target_distance, expected_sign):
     for i in range(3):
         assert differences[i]*expected_sign > 0
 
+
 testdata1 = [
-    (np.array([[-1. + 9e-7, 0.], [1., 0.], [0., np.sqrt(3)]],
-        dtype=float), 1e-6),
-    (np.array([[-1., 0.], [1., 0. + 9e-6], [0., np.sqrt(3)]],
-        dtype=float), 1e-5),
-    (np.array([[-1., 0.], [1., 0.], [0. + 9e-5, np.sqrt(3)]],
-        dtype=float), 1e-4),
+    (np.array([[-1. + 9e-7, 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
+     1e-6),
+    (np.array([[-1., 0.], [1., 0. + 9e-6], [0., np.sqrt(3)]], dtype=float),
+     1e-5),
+    (np.array([[-1., 0.], [1., 0.], [0. + 9e-5, np.sqrt(3)]], dtype=float),
+     1e-4),
     (np.array([[-1., 0. + 3e-4], [1. + 3e-4, 0.], [0., np.sqrt(3) + 3e-4]],
-        dtype=float), 1e-3)
+     dtype=float), 1e-3)
     ]
+
 
 @pytest.mark.parametrize("points,accepted_error", testdata1)
 def test_stopping_reshape_formation(points, accepted_error):
@@ -58,6 +61,7 @@ def test_stopping_reshape_formation(points, accepted_error):
     new_positions = model.positions
 
     assert np.array_equal(points, new_positions)
+
 
 testdata2 = [
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
@@ -80,6 +84,7 @@ testdata2 = [
         np.array([[0., 0.], [0., 2.], [np.sqrt(3), 1.]], dtype=float))
     ]
 
+
 @pytest.mark.parametrize("points,delta,direction,speed,expected", testdata2)
 def test_shift_step(points, delta, direction, speed, expected):
     init_points = copy.deepcopy(points)
@@ -88,6 +93,7 @@ def test_shift_step(points, delta, direction, speed, expected):
     new_positions = model.positions
 
     assert np.array_equal(new_positions, expected)
+
 
 testdata3 = [
     (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
@@ -104,6 +110,7 @@ testdata3 = [
         [-4.,np.sqrt(3)/3], 1e-3),
     ]
 
+
 @pytest.mark.parametrize("points,target,error,", testdata3)
 def test_stopping_shift_formation(points, target, error):
     init_points = copy.deepcopy(points)
@@ -113,6 +120,7 @@ def test_stopping_shift_formation(points, target, error):
     new_positions = model.positions
 
     assert np.array_equal(points, new_positions)
+
 
 testdata4 =  [
     (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
@@ -129,6 +137,7 @@ testdata4 =  [
         [-4.,np.sqrt(3)/3], 5e-5, 1e-7),
     ]
 
+
 @pytest.mark.parametrize("points,target,delta,error", testdata4)
 def test_over_shooting_prevention(points, target, delta, error):
     init_points = copy.deepcopy(points)
@@ -138,28 +147,30 @@ def test_over_shooting_prevention(points, target, delta, error):
 
     assert np.allclose(new_mean, target)
 
+
 testdata5 = [
     (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
-    [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
-    [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
-    0.1, -1, np.pi/8, 10*np.pi/8,
-    np.array([np.cos(np.pi/8), np.sin(np.pi/8)], dtype=float)),
+     [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
+     [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
+     0.1, -1, np.pi/8, 10*np.pi/8,
+     np.array([np.cos(np.pi/8), np.sin(np.pi/8)], dtype=float)),
     (np.array([[np.cos(np.pi/4), np.sin(np.pi/4)],
-    [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
-    [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
-    0.05, 1, np.pi/8, 20*np.pi/8,
-    np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
+     [np.cos(np.pi/4 + 2*np.pi/3), np.sin(np.pi/4 + 2*np.pi/3)],
+     [np.cos(np.pi/4 + 4*np.pi/3), np.sin(np.pi/4 + 4*np.pi/3)]], dtype=float),
+     0.05, 1, np.pi/8, 20*np.pi/8,
+     np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
     (np.array([[np.cos(np.pi/2), np.sin(np.pi/2)],
-    [np.cos(np.pi/2 + 2*np.pi/3), np.sin(np.pi/2 + 2*np.pi/3)],
-    [np.cos(np.pi/2 + 4*np.pi/3), np.sin(np.pi/2 + 4*np.pi/3)]], dtype=float),
-    0.01, -1, np.pi/8, 100*np.pi/8,
-    np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
+     [np.cos(np.pi/2 + 2*np.pi/3), np.sin(np.pi/2 + 2*np.pi/3)],
+     [np.cos(np.pi/2 + 4*np.pi/3), np.sin(np.pi/2 + 4*np.pi/3)]], dtype=float),
+     0.01, -1, np.pi/8, 100*np.pi/8,
+     np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
     (np.array([[np.cos(-np.pi/2), np.sin(-np.pi/2)],
-    [np.cos(-np.pi/2 + 2*np.pi/3), np.sin(-np.pi/2 + 2*np.pi/3)],
-    [np.cos(-np.pi/2 + 4*np.pi/3), np.sin(-np.pi/2 + 4*np.pi/3)]], dtype=float),
-    0.005, 1, np.pi/8, 200*np.pi/8,
-    np.array([np.cos(-3*np.pi/8), np.sin(-3*np.pi/8)], dtype=float))
+     [np.cos(-np.pi/2 + 2*np.pi/3), np.sin(-np.pi/2 + 2*np.pi/3)],
+     [np.cos(-np.pi/2 + 4*np.pi/3), np.sin(-np.pi/2 + 4*np.pi/3)]], dtype=float),
+     0.005, 1, np.pi/8, 200*np.pi/8,
+     np.array([np.cos(-3*np.pi/8), np.sin(-3*np.pi/8)], dtype=float))
             ]
+
 
 @pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata5)
 def test_turn_step(points, delta, sign, angle, speed, expected):
@@ -172,24 +183,26 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
 
     assert np.allclose(new_lead_position, expected)
 
+
 testdata6 = [
     (np.array([[np.cos(1e-6), np.sin(1e-6)],
-    [np.cos(1e-6 + 2*np.pi/3), np.sin(1e-6 + 2*np.pi/3)],
-    [np.cos(1e-6 + 4*np.pi/3), np.sin(1e-6 + 4*np.pi/3)]], dtype=float),
-    [10., 0.], 10., 1e-5),
+     [np.cos(1e-6 + 2*np.pi/3), np.sin(1e-6 + 2*np.pi/3)],
+     [np.cos(1e-6 + 4*np.pi/3), np.sin(1e-6 + 4*np.pi/3)]], dtype=float),
+     [10., 0.], 10., 1e-5),
     (np.array([[np.cos(np.pi/2 - 1e-5), np.sin(np.pi/2 - 1e-5)],
-    [np.cos(np.pi/2 - 1e-5 + 2*np.pi/3), np.sin(np.pi/2 - 1e-5 + 2*np.pi/3)],
-    [np.cos(np.pi/2 - 1e-5 + 4*np.pi/3), np.sin(np.pi/2 - 1e-5 + 4*np.pi/3)]],
-    dtype=float), [0., 20.], 20., 1e-4),
+     [np.cos(np.pi/2 - 1e-5 + 2*np.pi/3), np.sin(np.pi/2 - 1e-5 + 2*np.pi/3)],
+     [np.cos(np.pi/2 - 1e-5 + 4*np.pi/3), np.sin(np.pi/2 - 1e-5 + 4*np.pi/3)]],
+     dtype=float), [0., 20.], 20., 1e-4),
     (np.array([[np.cos(np.pi/4 - 1e-4), np.sin(np.pi/4 - 1e-4)],
-    [np.cos(np.pi/4 - 1e-4 + 2*np.pi/3), np.sin(np.pi/4 - 1e-4 + 2*np.pi/3)],
-    [np.cos(np.pi/4 - 1e-4 + 4*np.pi/3), np.sin(np.pi/4 - 1e-4 + 4*np.pi/3)]],
-    dtype=float), [30., 30.], 50., 1e-3),
+     [np.cos(np.pi/4 - 1e-4 + 2*np.pi/3), np.sin(np.pi/4 - 1e-4 + 2*np.pi/3)],
+     [np.cos(np.pi/4 - 1e-4 + 4*np.pi/3), np.sin(np.pi/4 - 1e-4 + 4*np.pi/3)]],
+     dtype=float), [30., 30.], 50., 1e-3),
     (np.array([[np.cos(-np.pi/4 - 1e-3), np.sin(-np.pi/4 - 1e-3)],
-    [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
-    [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]],
-    dtype=float), [50., -50.], 100., 1e-2),
+     [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
+     [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]],
+     dtype=float), [50., -50.], 100., 1e-2),
             ]
+
 
 @pytest.mark.parametrize("points,target,speed,error,", testdata6)
 def test_stopping_turn_formation(points, target, speed, error):
@@ -201,24 +214,26 @@ def test_stopping_turn_formation(points, target, speed, error):
 
     assert np.array_equal(points, new_positions)
 
+
 testdata7 = [
     (np.array([[np.cos(np.pi/4 + 1e-8), np.sin(np.pi/4 + 1e-8)],
-    [np.cos(np.pi/4 + 2*np.pi/3 + 1e-8), np.sin(np.pi/4 + 2*np.pi/3 + 1e-8)],
-    [np.cos(np.pi/4 + 4*np.pi/3 + 1e-8), np.sin(np.pi/4 + 4*np.pi/3 + 1e-8)]],
-    dtype=float), [10., 10.], 0.001, 1e-7),
+     [np.cos(np.pi/4 + 2*np.pi/3 + 1e-8), np.sin(np.pi/4 + 2*np.pi/3 + 1e-8)],
+     [np.cos(np.pi/4 + 4*np.pi/3 + 1e-8), np.sin(np.pi/4 + 4*np.pi/3 + 1e-8)]],
+     dtype=float), [10., 10.], 0.001, 1e-7),
     (np.array([[np.cos(np.pi/4 - 1e-7), np.sin(np.pi/4 - 1e-7)],
-    [np.cos(np.pi/4 + 2*np.pi/3 - 1e-7), np.sin(np.pi/4 + 2*np.pi/3 - 1e-7)],
-    [np.cos(np.pi/4 + 4*np.pi/3 - 1e-7), np.sin(np.pi/4 + 4*np.pi/3 - 1e-7)]],
-    dtype=float), [20., 20.], 0.002, 1e-6),
+     [np.cos(np.pi/4 + 2*np.pi/3 - 1e-7), np.sin(np.pi/4 + 2*np.pi/3 - 1e-7)],
+     [np.cos(np.pi/4 + 4*np.pi/3 - 1e-7), np.sin(np.pi/4 + 4*np.pi/3 - 1e-7)]],
+     dtype=float), [20., 20.], 0.002, 1e-6),
     (np.array([[np.cos(np.pi/2 + 1e-6), np.sin(np.pi/2 + 1e-6)],
-    [np.cos(np.pi/2 + 2*np.pi/3 + 1e-6), np.sin(np.pi/2 + 2*np.pi/3 + 1e-6)],
-    [np.cos(np.pi/2 + 4*np.pi/3 + 1e-6), np.sin(np.pi/2 + 4*np.pi/3 + 1e-6)]],
-    dtype=float), [0., 50.], 0.01, 1e-5),
+     [np.cos(np.pi/2 + 2*np.pi/3 + 1e-6), np.sin(np.pi/2 + 2*np.pi/3 + 1e-6)],
+     [np.cos(np.pi/2 + 4*np.pi/3 + 1e-6), np.sin(np.pi/2 + 4*np.pi/3 + 1e-6)]],
+     dtype=float), [0., 50.], 0.01, 1e-5),
     (np.array([[np.cos(-np.pi/2 + 1e-5), np.sin(-np.pi/2 + 1e-5)],
-    [np.cos(-np.pi/2 + 2*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 2*np.pi/3 + 1e-5)],
-    [np.cos(-np.pi/2 + 4*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 4*np.pi/3 + 1e-5)]],
-    dtype=float), [-100., -100], 0.05, 1e-4)
+     [np.cos(-np.pi/2 + 2*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 2*np.pi/3 + 1e-5)],
+     [np.cos(-np.pi/2 + 4*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 4*np.pi/3 + 1e-5)]],
+     dtype=float), [-100., -100], 0.05, 1e-4)
             ]
+
 
 @pytest.mark.parametrize("points,target,delta,error", testdata7)
 def test_over_turning_prevention(points, target, delta, error):
