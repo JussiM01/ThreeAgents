@@ -115,7 +115,7 @@ class CentralControl(BaseModel):
                  time_delta, accepted_error, env=None, correction_const=None,
                  task_params=None):
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
-        self.target_distance =  target_distance
+        self.target_distance = target_distance
         self.bond_strength = bond_strength
 
         if correction_const is None:
@@ -224,7 +224,7 @@ class CentralControl(BaseModel):
 
         if self.task_params['formation_type'] == 'triangle':
             for i in range(self.num_agents):
-                vectors_to_all = self.positions - self.positions[i,:]
+                vectors_to_all = self.positions - self.positions[i, :]
                 deviations = np.linalg.norm(
                     vectors_to_all, axis=1) - self.target_distance
                 deviations = np.expand_dims(deviations, axis=1)
@@ -283,7 +283,6 @@ class CentralControl(BaseModel):
             formation_type = self.task_params['formation_type']
             self.task_params = {
                 'task_ready': True, 'formation_type': formation_type}
-
 
         else:
             angle = (self.task_params['rotation_speed'] * self.time_delta
@@ -378,7 +377,7 @@ class CentralControl(BaseModel):
 
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
         """Calculates rotation sign (clockwise or counter clockwise)."""
-        center_to_point = self.targeted_positions[lead_index,:] - center_point
+        center_to_point = self.targeted_positions[lead_index, :] - center_point
         direction = self._direction(center_to_point)
         product = conjugate_product(direction, direction_to_target)
 
