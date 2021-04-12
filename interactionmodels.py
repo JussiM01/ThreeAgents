@@ -12,7 +12,7 @@ class BaseModel:
     """
 
     def __init__(self, positions, max_speed, time_delta, accepted_error,
-            env=None):
+                 env=None):
         self.positions = copy.deepcopy(positions)
         self.velocities = np.zeros(positions.shape)
         self.targeted_positions = copy.deepcopy(positions)
@@ -112,8 +112,8 @@ class CentralControl(BaseModel):
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-            time_delta, accepted_error, env=None, correction_const=None,
-            task_params=None):
+                 time_delta, accepted_error, env=None, correction_const=None,
+                 task_params=None):
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
         self.target_distance =  target_distance
         self.bond_strength = bond_strength
@@ -130,8 +130,8 @@ class CentralControl(BaseModel):
 
     def __repr__(self):
         args = (self.positions, self.target_distance, self.bond_strength,
-            self.max_speed, self.time_delta, self.accepted_error, self.env,
-            self.correction_const, self.task_params)
+                self.max_speed, self.time_delta, self.accepted_error, self.env,
+                self.correction_const, self.task_params)
         repr = 'CentralControl({}, {}, {}, {}, {}, {}, {}, {}, {})'
         return repr.format(*args)
 
@@ -158,9 +158,9 @@ class CentralControl(BaseModel):
         """
         velocities_diff = self.targeted_velocities - velocities
         positions_diff = self.targeted_positions - self.positions
-        adjusted_velocities = (velocities +
-            self.correction_const[0]*velocities_diff +
-            self.correction_const[1]*positions_diff/self.time_delta)
+        adjusted_velocities = (
+            velocities + self.correction_const[0]*velocities_diff
+            + self.correction_const[1]*positions_diff/self.time_delta)
 
         return self._cliped(adjusted_velocities)
 
@@ -190,7 +190,7 @@ class CentralControl(BaseModel):
             dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
 
             error = max([abs(d - self.target_distance)
-                for d in [dist_01, dist_02, dist_12]])
+                        for d in [dist_01, dist_02, dist_12]])
 
             if error < self.accepted_error:
                 self.task_params = {
@@ -259,7 +259,7 @@ class CentralControl(BaseModel):
             direction = self._direction(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
             self.task_params['dist_center_to_points'] = (self.target_distance
-                /np.sqrt(3))
+                                                         / np.sqrt(3))
             self.task_params['rotation_center'] = center_of_mass
             self.task_params['target_direction'] = direction
             self.task_params['rotation_speed'] = cliped_speed
@@ -268,16 +268,16 @@ class CentralControl(BaseModel):
             self.task_params['rotation_sign'] = self._rotation_sign(
                 center_of_mass, direction, self.task_params['lead_index'])
             target_vector = (self.task_params['target_direction']
-                *self.task_params['dist_center_to_points'])
+                             * self.task_params['dist_center_to_points'])
             self.task_params['target_vectors'] = np.stack(
                 [rotate(target_vector, theta)
-                for theta in (0, 2*np.pi/3, 4*np.pi/3)])
+                 for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
         lead_position = self.targeted_positions[self.task_params['lead_index']]
         lead_direction = self._direction(lead_position
-            - self.task_params['rotation_center'])
-        direction_diff = np.linalg.norm(lead_direction
-            - self.task_params['target_direction'])
+                                         - self.task_params['rotation_center'])
+        direction_diff = np.linalg.norm(
+            lead_direction - self.task_params['target_direction'])
 
         if direction_diff < self.accepted_error:
             formation_type = self.task_params['formation_type']
@@ -286,23 +286,23 @@ class CentralControl(BaseModel):
 
 
         else:
-            angle = (self.task_params['rotation_speed']*self.time_delta
-                /self.task_params['dist_center_to_points'])
+            angle = (self.task_params['rotation_speed'] * self.time_delta
+                     / self.task_params['dist_center_to_points'])
 
             if self._about_to_over_turn(direction_diff, angle):
                 vecs = (copy.deepcopy(self.targeted_positions)
-                    - self.task_params['rotation_center'])
+                        - self.task_params['rotation_center'])
                 for i in range(3):
-                    ind = np.argmin(np.linalg.norm(vecs[i]
-                        - self.task_params['target_vectors'], axis=1))
+                    ind = np.argmin(np.linalg.norm(
+                        vecs[i] - self.task_params['target_vectors'], axis=1))
                     new_point = (self.task_params['rotation_center']
-                        + self.task_params['target_vectors'][ind])
+                                 + self.task_params['target_vectors'][ind])
 
                     if self.env is None:
                         self.targeted_positions[i] = new_point
                         self.positions[i] = new_point
                         self.velocities[i] = (
-                            new_point - vecs[i])/self.time_delta
+                            new_point - vecs[i]) / self.time_delta
 
                     else:
                         self.targeted_positions[i] = new_point
@@ -310,8 +310,8 @@ class CentralControl(BaseModel):
                             new_point - vecs[i])/self.time_delta
                         disturbance = self.env.evaluate(
                             np.expand_dims(new_point, axis=0))
-                        self.positions[i] = (new_point +
-                            disturbance[0]*self.time_delta)
+                        self.positions[i] = (new_point + disturbance[0]
+                                             * self.time_delta)
                         self.disturbancies[i] = disturbance
 
             else:
@@ -334,7 +334,7 @@ class CentralControl(BaseModel):
 
         """
         center_to_points = (self.targeted_positions
-            - self.task_params['rotation_center'])
+                            - self.task_params['rotation_center'])
         new_points = self.task_params['rotation_center'] + rotate_all(
             center_to_points, angle*self.task_params['rotation_sign'])
         diff_vectors = new_points - center_to_points
@@ -353,18 +353,18 @@ class CentralControl(BaseModel):
             velocities = diff_directions*speed + old_disturbancies
             corrected_velocities = self._course_correction(velocities)
             self.positions += (corrected_velocities +
-                disturbancies)*self.time_delta
+                               disturbancies)*self.time_delta
             self.velocities = corrected_velocities + disturbancies
 
     def _about_to_over_turn(self, direction_diff, angle):
         """Checks if the formation is about to turn more than intended."""
         lead_point = self.targeted_positions[self.task_params['lead_index']]
         lead_direction = self._direction(lead_point
-            - self.task_params['rotation_center'])
+                                         - self.task_params['rotation_center'])
         planned_direction = rotate(
             lead_direction, angle*self.task_params['rotation_sign'])
         planned_diff = np.linalg.norm(planned_direction
-            - self.task_params['target_direction'])
+                                      - self.task_params['target_direction'])
 
         return planned_diff > direction_diff
 
@@ -435,7 +435,7 @@ class CentralControl(BaseModel):
         """Checks if the formation is about to pass the target."""
         current_diff = current_cm - self.task_params['course_target']
         velocity = (self.task_params['course_direction']
-            *self.task_params['course_speed'])
+                    * self.task_params['course_speed'])
         planned_move = velocity*self.time_delta
         planned_next = current_cm + planned_move
         planned_diff = planned_next - self.task_params['course_target']
