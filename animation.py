@@ -107,7 +107,7 @@ class Animation:
 
             return self.env_scatter, self.scatter
 
-        return self.scatter,
+        return (self.scatter,)
 
     def run(self):
         """Runs the animation."""
