@@ -2,7 +2,6 @@ import copy
 import numpy as np
 import pytest
 from interactionmodels import CentralControl
-from utils import rotate_all
 
 
 testdata0 = [
