@@ -45,6 +45,7 @@ def conjugate_product(vector1, vector2):
 
 
 def rotate(vector, angle):
+    """Rotates a vector by given angle."""
     rotation_matrix = np.array(
         [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
 
@@ -52,6 +53,7 @@ def rotate(vector, angle):
 
 
 def rotate_all(points, angle):
+    """Rotates array of vectors by given angle."""
     return np.apply_along_axis(lambda x: rotate(x, angle), 1, points)
 
 
