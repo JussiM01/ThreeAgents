@@ -1,6 +1,7 @@
 import copy
 import numpy as np
-from utils import conjugate_product, normalize, normalize_all, rotate, rotate_all
+from utils import (conjugate_product, normalize, normalize_all, rotate,
+                   rotate_all)
 
 
 class BaseModel:
@@ -274,8 +275,8 @@ class CentralControl(BaseModel):
                  for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
         lead_position = self.targeted_positions[self.task_params['lead_index']]
-        lead_direction = normalize(lead_position
-                                         - self.task_params['rotation_center'])
+        lead_direction = normalize(
+            lead_position - self.task_params['rotation_center'])
         direction_diff = np.linalg.norm(
             lead_direction - self.task_params['target_direction'])
 
@@ -358,8 +359,8 @@ class CentralControl(BaseModel):
     def _about_to_over_turn(self, direction_diff, angle):
         """Checks if the formation is about to turn more than intended."""
         lead_point = self.targeted_positions[self.task_params['lead_index']]
-        lead_direction = normalize(lead_point
-                                         - self.task_params['rotation_center'])
+        lead_direction = normalize(
+            lead_point - self.task_params['rotation_center'])
         planned_direction = rotate(
             lead_direction, angle*self.task_params['rotation_sign'])
         planned_diff = np.linalg.norm(planned_direction
