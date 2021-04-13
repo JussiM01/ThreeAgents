@@ -64,13 +64,6 @@ class BaseModel:
     def _course_correction(self, velocities):
         raise NotImplementedError
 
-    # def _direction(self, vector):
-    #     norm = np.linalg.norm(vector)
-    #     return vector if norm == 0 else vector/norm
-    #
-    # def _directions(self, vectors):
-    #     return np.apply_along_axis(lambda x: normalize(x), 1, vectors)
-
     def _clip(self, velocity):
         speed = np.linalg.norm(velocity)
         if speed <= self.max_speed:
