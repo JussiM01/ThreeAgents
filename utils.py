@@ -9,8 +9,8 @@ import numpy as np
 def load_config(filename):
     """Loads the configuration file."""
     config_file = os.path.join('config_files',  filename)
-    with open(config_file, 'r') as f:
-        config = json.load(f)
+    with open(config_file, 'r') as conf_file:
+        config = json.load(conf_file)
 
     return config
 
@@ -57,7 +57,7 @@ def rotate_all(points, angle):
 
 # --- Helpers for animation.py ------------------------------------------------
 
-def init_scatter(params, ax, points):
+def init_scatter(params, axes, points):
     """Function for intializing a scatter artist.
 
     Sets the sizes and colors of the points that the scatter artist will
@@ -67,7 +67,7 @@ def init_scatter(params, ax, points):
     ----------
         params: dict
             Dictionary which contains parameters for the sizes and colors.
-        ax: matplotlib.axes.Axes
+        axes: matplotlib.axes.Axes
             Axes object of the figure used for the animation.
 
     Returns
@@ -82,7 +82,7 @@ def init_scatter(params, ax, points):
     facecolors = np.repeat(facecolor, points.shape[0], axis=0)
     edgecolor = np.array([params['edgecolors']], dtype=float)
     edgecolors = np.repeat(edgecolor, points.shape[0], axis=0)
-    scatter = ax.scatter(
+    scatter = axes.scatter(
         points[:, 0], points[:, 1], s=sizes, lw=0.5, facecolors=facecolors,
         edgecolors=edgecolors)
 
@@ -120,18 +120,18 @@ def init_animation(params, points, dots=None):
 
     """
     fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
-    ax = fig.add_axes(
+    axes = fig.add_axes(
         [params['x_min'], params['y_min'], params['x_max'], params['y_max']],
         frameon=params['frameon'])
-    ax.set_xlim(params['ax_x_min'], params['ax_x_max'])
-    ax.set_ylim(params['ax_y_min'], params['ax_y_max'])
+    axes.set_xlim(params['ax_x_min'], params['ax_x_max'])
+    axes.set_ylim(params['ax_y_min'], params['ax_y_max'])
 
     if params['remove_thicks']:
-        ax.set_xticks([])
-        ax.set_yticks([])
+        axes.set_xticks([])
+        axes.set_yticks([])
 
-    ax.grid(params['use_grid'])
-    scatter = init_scatter(params, ax, points)
+    axes.grid(params['use_grid'])
+    scatter = init_scatter(params, axes, points)
 
     if dots is not None:
         env_scatter_params = {
@@ -139,7 +139,7 @@ def init_animation(params, points, dots=None):
             'edgecolors': [1, 0, 0, 1],
             'facecolors': [1, 0, 0, 1]
             }
-        env_scatter = init_scatter(env_scatter_params, ax, dots)
+        env_scatter = init_scatter(env_scatter_params, axes, dots)
 
         return fig, env_scatter, scatter
 
