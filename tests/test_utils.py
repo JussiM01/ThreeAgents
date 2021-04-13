@@ -22,7 +22,6 @@ testdata0 = [
 
 @pytest.mark.parametrize("vectors,angle,expected", testdata0)
 def test_rotate_all(vectors, angle, expected):
-    points = np.array([[0., 1.], [2., 3.], [4., 5.]])
     new_vectors = rotate_all(vectors, angle)
 
     assert np.allclose(new_vectors, expected)
