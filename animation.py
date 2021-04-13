@@ -1,61 +1,28 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import numpy as np
+from utils import init_animation
 
 
-def init_scatter(params, ax, points):
+class Animation:
+    """Class for the animation object.
 
-    size = np.array((params['pointsize']), dtype=float)
-    sizes = np.repeat((size), points.shape[0], axis=0)
-    facecolor = np.array([params['facecolors']], dtype=float)
-    facecolors = np.repeat(facecolor, points.shape[0], axis=0)
-    edgecolor = np.array([params['edgecolors']], dtype=float)
-    edgecolors = np.repeat(edgecolor, points.shape[0], axis=0)
-    scatter = ax.scatter(points[:,0], points[:,1], s=sizes, lw=0.5,
-        facecolors=facecolors,  edgecolors=edgecolors)
+    This class is used for showing the agent's movents. If an environment is
+    used its vector field can be also visualized in the animation.
 
-    return scatter
+    Parameters
+    ----------
+        plot_params: dict
+            Parameters for intializing the animation figure and the artists
+            used for the visualizations.
+        task_list: list
+            List of the agents' movent tasks.
+        model:
+            Interaction model for the agents and (optionally) the environment.
 
-
-def init_animation(params, points, dots=None):
-
-    fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
-    ax = fig.add_axes([params['x_min'], params['y_min'], params['x_max'],
-        params['y_max']], frameon=params['frameon'])
-
-    ax.set_xlim(params['ax_x_min'], params['ax_x_max'])
-    ax.set_ylim(params['ax_y_min'], params['ax_y_max'])
-
-    if params['remove_thicks']:
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-    ax.grid(params['use_grid'])
-
-    scatter = init_scatter(params, ax, points)
-
-    # NOTE: ADD LATER GOAL POINT(S) PLOTTING & STATS WRITING !
-
-    if dots is not None:
-
-        env_scatter_params = {
-            'pointsize': 0.025,
-            'edgecolors': [1, 0, 0, 1],
-            'facecolors': [1, 0, 0, 1]
-            }
-        env_scatter = init_scatter(env_scatter_params, ax, dots)
-
-        return fig, env_scatter, scatter
-
-    else:
-        return fig, scatter
-
-
-
-class Animation(object):
+    """
 
     def __init__(self, plot_params, task_list, model):
-
+        self.plot_params = plot_params
         self.model = model
         positions = model.positions
         self.task_list = task_list
@@ -78,29 +45,41 @@ class Animation(object):
             self.fig = fig
             self.scatter = scatter
 
-
-    def _update_plot(self, frame_number, points, velocity_vectors, tasks_done):
-
-        # ADD LATER OTHER UPDATES HERE
-
-        self.scatter.set_offsets(points)
-
-        if self.use_visuals:
-
-            dots = self.model.env.visualize()
-            self.env_scatter.set_offsets(dots)
-
+    def __repr__(self):
+        args = self.plot_params, self.task_list, self.model
+        return 'Animation({}, {}, {})'.format(*args)
 
     def update(self, i):
+        """Method for updating the animation frames.
 
+        Executes one time unit update of the current movement task and possibly
+        sets a new task for the next frame. Also plots the agents postions and
+        the vector field visualization.
+
+        Parameters
+        ----------
+            i: int
+                The frame number.
+
+        Returns
+        -------
+            if self.use_visuals None:
+                (scatter,): (
+                    matplotlib.axes.collections.PathCollection,
+                    )
+                Tuple with only the scatter artist for the agents.
+            else:
+                (env_scatter, scatter): (
+                    matplotlib.axes.collections.PathCollection,
+                    matplotlib.axes.collections.PathCollection
+                    )
+                Tuple with scatter artists for both the agents and the dots.
+
+        """
         if self.task_index > self.last:
-
-            positions = self.model.positions
-            velocities = np.zeros(self.model.positions.shape, dtype=float)
-            all_tasks_done = True
+            points = self.model.positions
 
         else:
-
             task = self.task_list[self.task_index]
 
             if task['type'] == 'reshape':
@@ -115,23 +94,22 @@ class Animation(object):
             else:
                 raise NotImplementedError
 
-            if self.model.task_ready:
-                self.task_index +=1
+            if self.model.task_params['task_ready']:
+                self.task_index += 1
 
-            positions = self.model.positions
-            velocities = self.model.velocities
-            all_tasks_done = False
+            points = self.model.positions
 
-        self._update_plot(i, positions, velocities, all_tasks_done)
+        self.scatter.set_offsets(points)
 
         if self.use_visuals:
+            dots = self.model.env.visualize()
+            self.env_scatter.set_offsets(dots)
+
             return self.env_scatter, self.scatter
 
-        else:
-            return self.scatter,
-
+        return (self.scatter,)
 
     def run(self):
-
-        animation = FuncAnimation(self.fig, self.update, blit=True)
+        """Runs the animation."""
+        _ = FuncAnimation(self.fig, self.update, blit=True)
         plt.show()
