@@ -44,6 +44,17 @@ def conjugate_product(vector1, vector2):
     return vec1_complex*vec2_complex.conj()
 
 
+def normalize(vector):
+    """Returns vector divided by its norm (or the vector if zero)."""
+    norm = np.linalg.norm(vector)
+    return vector if norm == 0 else vector/norm
+
+
+def normalize_all(vectors):
+    """Returns normalized vectors."""
+    return np.apply_along_axis(lambda x: normalize(x), 1, vectors)
+
+
 def rotate(vector, angle):
     """Rotates a vector by given angle."""
     rotation_matrix = np.array(

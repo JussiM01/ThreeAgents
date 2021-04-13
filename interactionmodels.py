@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from utils import conjugate_product, rotate, rotate_all
+from utils import conjugate_product, normalize, normalize_all, rotate, rotate_all
 
 
 class BaseModel:
@@ -63,18 +63,18 @@ class BaseModel:
     def _course_correction(self, velocities):
         raise NotImplementedError
 
-    def _direction(self, vector):
-        norm = np.linalg.norm(vector)
-        return vector if norm == 0 else vector/norm
-
-    def _directions(self, vectors):
-        return np.apply_along_axis(lambda x: self._direction(x), 1, vectors)
+    # def _direction(self, vector):
+    #     norm = np.linalg.norm(vector)
+    #     return vector if norm == 0 else vector/norm
+    #
+    # def _directions(self, vectors):
+    #     return np.apply_along_axis(lambda x: normalize(x), 1, vectors)
 
     def _clip(self, velocity):
         speed = np.linalg.norm(velocity)
         if speed <= self.max_speed:
             return velocity
-        return self._direction(velocity)*self.max_speed
+        return normalize(velocity)*self.max_speed
 
     def _cliped(self, velocities):
         speeds = np.linalg.norm(velocities, axis=1)
@@ -229,7 +229,7 @@ class CentralControl(BaseModel):
                     vectors_to_all, axis=1) - self.target_distance
                 deviations = np.expand_dims(deviations, axis=1)
                 velocity = self.bond_strength*speed*np.sum(
-                    deviations*self._directions(vectors_to_all), axis=0)
+                    deviations*normalize_all(vectors_to_all), axis=0)
                 velocities.append(velocity)
 
         velocities = np.stack(velocities, axis=0)
@@ -256,7 +256,7 @@ class CentralControl(BaseModel):
             self.task_params['task_ready'] = False
             center_of_mass = np.mean(self.targeted_positions, axis=0)
             to_target = np.array(target_point, dtype=float) - center_of_mass
-            direction = self._direction(to_target)
+            direction = normalize(to_target)
             cliped_speed = speed if speed <= self.max_speed else self.max_speed
             self.task_params['dist_center_to_points'] = (self.target_distance
                                                          / np.sqrt(3))
@@ -274,7 +274,7 @@ class CentralControl(BaseModel):
                  for theta in (0, 2*np.pi/3, 4*np.pi/3)])
 
         lead_position = self.targeted_positions[self.task_params['lead_index']]
-        lead_direction = self._direction(lead_position
+        lead_direction = normalize(lead_position
                                          - self.task_params['rotation_center'])
         direction_diff = np.linalg.norm(
             lead_direction - self.task_params['target_direction'])
@@ -337,7 +337,7 @@ class CentralControl(BaseModel):
         new_points = self.task_params['rotation_center'] + rotate_all(
             center_to_points, angle*self.task_params['rotation_sign'])
         diff_vectors = new_points - center_to_points
-        diff_directions = self._directions(diff_vectors)
+        diff_directions = normalize_all(diff_vectors)
         self.targeted_positions = new_points
         self.targeted_velocities = diff_directions*speed
 
@@ -358,7 +358,7 @@ class CentralControl(BaseModel):
     def _about_to_over_turn(self, direction_diff, angle):
         """Checks if the formation is about to turn more than intended."""
         lead_point = self.targeted_positions[self.task_params['lead_index']]
-        lead_direction = self._direction(lead_point
+        lead_direction = normalize(lead_point
                                          - self.task_params['rotation_center'])
         planned_direction = rotate(
             lead_direction, angle*self.task_params['rotation_sign'])
@@ -370,7 +370,7 @@ class CentralControl(BaseModel):
     def _closest_to(self, center_point, direction_to_target):
         """Finds index of the agent that is closest to target direction."""
         center_to_points = self.targeted_positions - center_point
-        directions = self._directions(center_to_points)
+        directions = normalize_all(center_to_points)
         differences = np.linalg.norm(directions - direction_to_target, axis=1)
 
         return np.argmin(differences)
@@ -378,7 +378,7 @@ class CentralControl(BaseModel):
     def _rotation_sign(self, center_point, direction_to_target, lead_index):
         """Calculates rotation sign (clockwise or counter clockwise)."""
         center_to_point = self.targeted_positions[lead_index, :] - center_point
-        direction = self._direction(center_to_point)
+        direction = normalize(center_to_point)
         product = conjugate_product(direction, direction_to_target)
 
         return -1*np.sign(product.imag)[0]
@@ -406,7 +406,7 @@ class CentralControl(BaseModel):
             self.task_params['task_ready'] = False
             self.task_params['course_target'] = np.array(
                 target_point, dtype=float)
-            self.task_params['course_direction'] = self._direction(
+            self.task_params['course_direction'] = normalize(
                 self.task_params['course_target'] - center_of_mass)
             self.task_params['course_speed'] = speed
 
@@ -421,7 +421,7 @@ class CentralControl(BaseModel):
         else:
 
             if self._about_to_over_shoots(center_of_mass):
-                adjusted_direction = self._direction(cm_to_target)
+                adjusted_direction = normalize(cm_to_target)
                 adjusted_speed = dist_cm_to_target/self.time_delta
 
             else:

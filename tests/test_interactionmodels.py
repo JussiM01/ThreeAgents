@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import pytest
 from interactionmodels import CentralControl
+from utils import normalize, normalize_all
 
 
 testdata0 = [
@@ -246,9 +247,9 @@ def test_over_turning_prevention(points, target, delta, error):
     model = CentralControl(init_points, 1., 1., 1000., delta, error)
     model.task_params['formation_type'] = 'triangle'
     model.turn_formation(target, 100.)
-    target_direction = model._direction(target - rotation_center)
+    target_direction = normalize(target - rotation_center)
     center_to_points = model.positions - rotation_center
-    directions = model._directions(center_to_points)
+    directions = normalize_all(center_to_points)
     differences = np.linalg.norm(directions - target_direction, axis=1)
 
     assert np.min(differences) < error
