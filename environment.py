@@ -53,7 +53,6 @@ class Env:
                 Array of shape (num_points, 2) containing the vectors.
 
         """
-
         t = self.time_now
         f = lambda x: self.vector_field(x, t)
         vectors = np.apply_along_axis(f, 1, points)
@@ -129,11 +128,11 @@ class BumpMap:
 
     def __call__(self, num_float):
         """Calculate the bump function value for a given float."""
-        r2 = (num_float - self.center)**2
-        rad_squared = (self.width*0.5)**2
+        dist_square = (num_float - self.center)**2
+        rad_square = (self.width*0.5)**2
 
-        if r2 < rad_squared:
-            return np.exp(1/rad_squared)*np.exp(-1/(rad_squared - r2))
+        if dist_square < rad_square:
+            return np.exp(1/rad_square)*np.exp(-1/(rad_square - dist_square))
 
         return 0.
 
@@ -165,7 +164,7 @@ class TubeSampler:
     """
 
     def __init__(self, x_range, y_range):
-        self.tr = truncnorm(x_range[0], x_range[1])
+        self.truncnorm = truncnorm(x_range[0], x_range[1])
         self.y_vals = y_range
 
     def __call__(self, num_points):
@@ -186,9 +185,10 @@ class TubeSampler:
                 Array of shape (num_points, 2) containing the points.
 
         """
-        xs = self.tr.rvs((num_points, 1))
-        ys = np.random.uniform(self.y_vals[0], self.y_vals[1], (num_points, 1))
-        points = np.concatenate([xs, ys], axis=1)
+        x_coordinates = self.truncnorm.rvs((num_points, 1))
+        y_coordinates = np.random.uniform(
+            self.y_vals[0], self.y_vals[1], (num_points, 1))
+        points = np.concatenate([x_coordinates, y_coordinates], axis=1)
 
         return points
 
