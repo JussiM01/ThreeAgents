@@ -72,15 +72,16 @@ testdata2 = [
         np.array([[-1, 0.2], [1., 0.2], [0., np.sqrt(3) + 0.2]], dtype=float)),
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
         0.02, np.array([0.5, 0.5], dtype=float), 50.,
-        np.array([[-0.5, 0.5], [1.5, 0.5], [0.5,np.sqrt(3)+0.5]], dtype=float)),
+        np.array([[-0.5, 0.5], [1.5, 0.5], [0.5, np.sqrt(3)+0.5]],
+                 dtype=float)),
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
-        0.02, np.array([-1., 0.], dtype=float), 100., # speed will be cliped
+        0.02, np.array([-1., 0.], dtype=float), 100.,  # speed will be cliped
         np.array([[-2., 0.], [0., 0.], [-1., np.sqrt(3)]], dtype=float)),
     (np.array([[-1., 0.], [1., 0.], [0., np.sqrt(3)]], dtype=float),
-        0.02, np.array([0., -1.], dtype=float), 100., # speed will be cliped
+        0.02, np.array([0., -1.], dtype=float), 100.,  # speed will be cliped
         np.array([[-1., -1.], [1., -1.], [0., np.sqrt(3) - 1.]], dtype=float)),
     (np.array([[0., -1.], [0., 1.], [np.sqrt(3), 0.]], dtype=float),
-        0.02, np.array([0., 1.], dtype=float), 100., # speed will be cliped
+        0.02, np.array([0., 1.], dtype=float), 100.,  # speed will be cliped
         np.array([[0., 0.], [0., 2.], [np.sqrt(3), 1.]], dtype=float))
     ]
 
@@ -88,7 +89,7 @@ testdata2 = [
 @pytest.mark.parametrize("points,delta,direction,speed,expected", testdata2)
 def test_shift_step(points, delta, direction, speed, expected):
     init_points = copy.deepcopy(points)
-    model = CentralControl(init_points, 1., 1., 50., delta, 0.001) # max speed = 50.
+    model = CentralControl(init_points, 1., 1., 50., delta, 0.001)
     model._shift_step(direction, speed)
     new_positions = model.positions
 
@@ -96,18 +97,18 @@ def test_shift_step(points, delta, direction, speed, expected):
 
 
 testdata3 = [
-    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
-        [0., np.sqrt(3)/3], 1e-5),
+    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]],
+              dtype=float), [0., np.sqrt(3)/3], 1e-5),
     (np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
         [0., np.sqrt(3)/3], 1e-5),
-    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
-        [np.sqrt(3)/3, 0.], 1e-4),
+    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]],
+              dtype=float), [np.sqrt(3)/3, 0.], 1e-4),
     (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
         [np.sqrt(3)/3, 0.], 1e-4),
-    (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
-        [0., 2+np.sqrt(3)/3], 1e-3),
+    (np.array([[-1.+1e-4, 2.], [1.+1e-4, 2.], [1e-4, 2.+np.sqrt(3)]],
+              dtype=float), [0., 2+np.sqrt(3)/3], 1e-3),
     (np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
-        [-4.,np.sqrt(3)/3], 1e-3),
+        [-4., np.sqrt(3)/3], 1e-3),
     ]
 
 
@@ -122,19 +123,19 @@ def test_stopping_shift_formation(points, target, error):
     assert np.array_equal(points, new_positions)
 
 
-testdata4 =  [
-    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]], dtype=float),
-        [0., np.sqrt(3)/3], 5e-6, 1e-7),
+testdata4 = [
+    (np.array([[-1.+1e-6, 0.], [1.+1e-6, 0.], [1e-6, np.sqrt(3)]],
+              dtype=float), [0., np.sqrt(3)/3], 5e-6, 1e-7),
     (np.array([[-1., 1e-6], [1., 1e-6], [0., np.sqrt(3)+1e-6]], dtype=float),
         [0., np.sqrt(3)/3], 5e-6, 1e-7),
-    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]], dtype=float),
-        [np.sqrt(3)/3, 0.], 5e-5, 1e-7),
+    (np.array([[0., -1.+1e-5], [0., 1.+1e-5], [np.sqrt(3), 1e-5]],
+              dtype=float), [np.sqrt(3)/3, 0.], 5e-5, 1e-7),
     (np.array([[1e-5, -1.], [1e-5, 1.], [np.sqrt(3)+1e-5, 0.]], dtype=float),
         [np.sqrt(3)/3, 0.], 5e-5, 1e-7),
-    (np.array([[-1.+1e-4,2.], [1.+1e-4,2.], [1e-4,2.+np.sqrt(3)]], dtype=float),
-        [0., 2+np.sqrt(3)/3], 5e-4, 1e-7),
+    (np.array([[-1.+1e-4, 2.], [1.+1e-4, 2.], [1e-4, 2.+np.sqrt(3)]],
+              dtype=float), [0., 2+np.sqrt(3)/3], 5e-4, 1e-7),
     (np.array([[-5., 1e-4], [-3., 1e-4], [-4., np.sqrt(3)+1e-4]], dtype=float),
-        [-4.,np.sqrt(3)/3], 5e-5, 1e-7),
+        [-4., np.sqrt(3)/3], 5e-5, 1e-7),
     ]
 
 
@@ -166,8 +167,8 @@ testdata5 = [
      np.array([np.cos(3*np.pi/8), np.sin(3*np.pi/8)], dtype=float)),
     (np.array([[np.cos(-np.pi/2), np.sin(-np.pi/2)],
      [np.cos(-np.pi/2 + 2*np.pi/3), np.sin(-np.pi/2 + 2*np.pi/3)],
-     [np.cos(-np.pi/2 + 4*np.pi/3), np.sin(-np.pi/2 + 4*np.pi/3)]], dtype=float),
-     0.005, 1, np.pi/8, 200*np.pi/8,
+     [np.cos(-np.pi/2 + 4*np.pi/3), np.sin(-np.pi/2 + 4*np.pi/3)]],
+             dtype=float), 0.005, 1, np.pi/8, 200*np.pi/8,
      np.array([np.cos(-3*np.pi/8), np.sin(-3*np.pi/8)], dtype=float))
             ]
 
@@ -179,7 +180,7 @@ def test_turn_step(points, delta, sign, angle, speed, expected):
     model.task_params['rotation_sign'] = sign
     model.task_params['rotation_center'] = np.array([0., 0.], dtype=float)
     model._turn_step(angle, speed)
-    new_lead_position = model.positions[0,:]
+    new_lead_position = model.positions[0, :]
 
     assert np.allclose(new_lead_position, expected)
 
@@ -198,9 +199,11 @@ testdata6 = [
      [np.cos(np.pi/4 - 1e-4 + 4*np.pi/3), np.sin(np.pi/4 - 1e-4 + 4*np.pi/3)]],
      dtype=float), [30., 30.], 50., 1e-3),
     (np.array([[np.cos(-np.pi/4 - 1e-3), np.sin(-np.pi/4 - 1e-3)],
-     [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
-     [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3), np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]],
-     dtype=float), [50., -50.], 100., 1e-2),
+     [np.cos(-np.pi/4 - 1e-3 + 2*np.pi/3),
+      np.sin(-np.pi/4 - 1e-3 + 2*np.pi/3)],
+     [np.cos(-np.pi/4 - 1e-3 + 4*np.pi/3),
+      np.sin(-np.pi/4 - 1e-3 + 4*np.pi/3)]], dtype=float), [50., -50.], 100.,
+     1e-2),
             ]
 
 
@@ -229,8 +232,10 @@ testdata7 = [
      [np.cos(np.pi/2 + 4*np.pi/3 + 1e-6), np.sin(np.pi/2 + 4*np.pi/3 + 1e-6)]],
      dtype=float), [0., 50.], 0.01, 1e-5),
     (np.array([[np.cos(-np.pi/2 + 1e-5), np.sin(-np.pi/2 + 1e-5)],
-     [np.cos(-np.pi/2 + 2*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 2*np.pi/3 + 1e-5)],
-     [np.cos(-np.pi/2 + 4*np.pi/3 + 1e-5), np.sin(-np.pi/2 + 4*np.pi/3 + 1e-5)]],
+     [np.cos(-np.pi/2 + 2*np.pi/3 + 1e-5),
+      np.sin(-np.pi/2 + 2*np.pi/3 + 1e-5)],
+     [np.cos(-np.pi/2 + 4*np.pi/3 + 1e-5),
+      np.sin(-np.pi/2 + 4*np.pi/3 + 1e-5)]],
      dtype=float), [-100., -100], 0.05, 1e-4)
             ]
 
