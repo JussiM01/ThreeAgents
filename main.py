@@ -12,7 +12,7 @@ from environment import Env, StaticUpFlow
 from utils import load_config, random_intial_positions
 
 
-def main(config_dict, parsed_args):
+def main(parsed_args):
     """Sets up everything and runs the animation.
 
     This function first intializes animation, interaction model and environment
@@ -20,13 +20,12 @@ def main(config_dict, parsed_args):
 
     Parameters
     ----------
-        config_dict: dict
-            Dictionary containing the parameters for initializing everything.
         parsed_args: argparse.Namespace
             Parsed arguments containing the parameters that are used for
             sampling the agents' initial positions.
 
     """
+    config_dict = load_config(parsed_args.conf_file)
     anim_init = config_dict['animation']
     model_init = config_dict['model']
     env_init = config_dict['env']
@@ -63,7 +62,4 @@ if __name__ == '__main__':
     # set random seed
     np.random.seed(args.random_seed)
 
-    # load config
-    config = load_config(args.conf_file)
-
-    main(config, args)
+    main(args)
