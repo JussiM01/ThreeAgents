@@ -76,12 +76,9 @@ class LeadAgent(BaseAgent):
         dist_to_target = np.linalg.norm(to_target)
 
         if to_target < self.accepted_error:
-            formation_type = self.task_params['formation_type']
-            self.task_params = {
-                'task_ready': True, 'formation_type': formation_type}
+            self.task_params = {'task_ready': True}
 
         else:
-
             if self._about_to_over_shoots():
                 adjusted_direction = normalize(to_target)
                 adjusted_speed = dist_to_target/self.time_delta
@@ -121,15 +118,19 @@ class LeadAgent(BaseAgent):
 class FollowerAgent(BaseAgent):
     """Class for representing the follower agents."""
 
-    def __init__(self, position, max_speed, time_delta, accepted_error):
+    def __init__(self, position, target_distance, bond_strength, max_speed,
+                 time_delta, accepted_error):
         super().__init__(position, max_speed, time_delta, accepted_error)
+        self.target_distance = target_distance
+        self.bond_strength = bond_strength
 
-        raise NotImplementedError
+    def keep_distance(self, other_positions, speed, disturbance):
 
-    def reshape(self, others_positions):
+        vectors_to_others = other_positions - self.position
+        deviations = np.linalg.norm(
+            vectors_to_others, axis=1) - self.target_distance
+        deviations = np.expand_dims(deviations, axis=1)
+        velocity = self.bond_strength*speed*np.sum(
+            deviations*normalize_all(vectors_to_others), axis=0)
 
-        raise NotImplementedError
-
-    def follow_lead(self, lead_position, lead_velocity):
-
-        raise NotImplementedError
+        self._move(velocity, disturbance)
