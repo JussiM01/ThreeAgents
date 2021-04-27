@@ -6,7 +6,7 @@ are given in a configuration file. For more details see the project's README.
 """
 import argparse
 import numpy as np
-from interactionmodels import CentralControl
+from interactionmodels import CentralControl, OneLead
 from animation import Animation
 from environment import Env, StaticUpFlow
 from utils import load_config, random_intial_positions
@@ -26,6 +26,7 @@ def main(parsed_args):
 
     """
     config_dict = load_config(parsed_args.conf_file)
+    interaction = config_dict['type']
     anim_init = config_dict['animation']
     model_init = config_dict['model']
     env_init = config_dict['env']
@@ -40,7 +41,11 @@ def main(parsed_args):
         time_delta = model_init['time_delta']
         model_init['env'] = Env(vectorfield, time_delta, visuals_init)
 
-    interactionmodel = CentralControl(**model_init)
+    if interaction == 'central_control':
+        interactionmodel = CentralControl(**model_init)
+
+    if interaction == 'one_lead':
+        interactionmodel = OneLead(**model_init)
 
     animation = Animation(anim_init, tasks, interactionmodel)
     animation.run()

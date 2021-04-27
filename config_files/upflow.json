@@ -72,5 +72,6 @@
             ],
             "type": "shift"
         }
-    ]
+    ],
+    "type": "central_control"
 }
