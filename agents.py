@@ -71,8 +71,8 @@ class LeadAgent(BaseAgent):
                 self.task_params['course_target'] - deepcopy(self.position))
             self.task_params['course_speed'] = speed
 
-        to_target = self.task_params['course_target']
-            - deepcopy(self.position)
+        to_target = (self.task_params['course_target']
+            - deepcopy(self.position))
         dist_to_target = np.linalg.norm(to_target)
 
         if to_target < self.accepted_error:
