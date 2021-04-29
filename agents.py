@@ -15,6 +15,7 @@ class BaseAgent:
         self.velocity = np.zeros(position.shape)
         self.targeted_position = deepcopy(position)
         self.targeted_velocity = np.zeros(position.shape)
+        self.disturbance = np.zeros(position.shape)
         self.max_speed = max_speed
         self.time_delta = time_delta
         self.accepted_error = accepted_error
@@ -30,7 +31,13 @@ class BaseAgent:
             self.targeted_position += self.velocity*self.time_delta
 
         else:
-            raise NotImplementedError
+            old_disturbance = self.disturbance
+            self.disturbance = disturbance
+            corrected_velocity = self._course_correction(pure_velocity)
+            self.velocity = corrected_velocity
+            disturbed_velocity = corrected_velocity + old_disturbance
+            self.position += disturbed_velocity*self.time_delta
+            self.targeted_position += pure_velocity*self.time_delta
 
     def _clip(self, velocity):
         speed = np.linalg.norm(velocity)
@@ -59,9 +66,6 @@ class LeadAgent(BaseAgent):
             self.task_params = task_params
 
     def shift(self, target_point, speed, disturbance):
-
-        if disturbance is not None:
-            raise NotImplementedError
 
         if 'course_target' not in self.task_params:
             self.task_params['task_ready'] = False
