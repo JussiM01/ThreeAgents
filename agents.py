@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-from utils import normalize
+from utils import normalize, normalize_all
 
 
 class BaseAgent:
@@ -21,7 +21,7 @@ class BaseAgent:
 
     def _move(self, uncut_velocity, disturbance):
 
-        pure_velocity = self._cliped(uncut_velocity)
+        pure_velocity = self._clip(uncut_velocity)
         self.targeted_velocity = pure_velocity
 
         if disturbance is None:
@@ -45,8 +45,8 @@ class LeadAgent(BaseAgent):
     def __init__(self, position, max_speed, time_delta, accepted_error,
                  correction_const=None, task_params=None):
         super().__init__(position, max_speed, time_delta, accepted_error)
-        self.targeted_positions = copy.deepcopy(positions)
-        self.targeted_velocities = np.zeros(positions.shape)
+        self.targeted_positions = deepcopy(position)
+        self.targeted_velocities = np.zeros(position.shape)
 
         if correction_const is None:
             self.correction_const = [1.0, 1.0]
@@ -75,7 +75,7 @@ class LeadAgent(BaseAgent):
             - deepcopy(self.position))
         dist_to_target = np.linalg.norm(to_target)
 
-        if to_target < self.accepted_error:
+        if dist_to_target < self.accepted_error:
             self.task_params = {'task_ready': True}
 
         else:
@@ -91,7 +91,7 @@ class LeadAgent(BaseAgent):
 
     def _about_to_over_shoots(self):
         """Checks if the agent is about to pass the target."""
-        current_diff = current_cm - self.task_params['course_target']
+        current_diff = self.position - self.task_params['course_target']
         velocity = (self.task_params['course_direction']
                     * self.task_params['course_speed'])
         planned_move = velocity*self.time_delta
@@ -127,8 +127,8 @@ class FollowerAgent(BaseAgent):
     def keep_distance(self, other_positions, speed, disturbance):
 
         vectors_to_others = other_positions - self.position
-        deviations = np.linalg.norm(
-            vectors_to_others, axis=1) - self.target_distance
+        deviations = (np.linalg.norm(vectors_to_others, axis=1)
+                      - self.target_distance)
         deviations = np.expand_dims(deviations, axis=1)
         velocity = self.bond_strength*speed*np.sum(
             deviations*normalize_all(vectors_to_others), axis=0)

@@ -458,7 +458,8 @@ class OneLead(BaseModel):
         self.follower2 = FollowerAgent(
             positions[2, :], target_distance, bond_strength, max_speed,
             time_delta, accepted_error)
-        self.task_params = lead_agent.task_params
+        self.target_distance = target_distance
+        self.task_params = self.lead_agent.task_params
         self.env = env
 
     def reshape_formation(self, speed):
@@ -474,12 +475,13 @@ class OneLead(BaseModel):
             self.task_params['task_ready'] = True
 
         else:
+            self.task_params['task_ready'] = False
             self._reshape_moves(speed)
 
     def _reshape_moves(self, speed):
 
-        other_positions1 = deepcopy(self.positions[[0, 2], :])
-        other_positions2 = deepcopy(self.positions[[0, 1], :])
+        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
+        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
 
         if self.env is None:
             self.follower1.keep_distance(other_positions1, speed, None)
@@ -493,6 +495,8 @@ class OneLead(BaseModel):
                 other_positions2, speed, disturbancies[2, :])
             self.lead_agent._move(
                 np.array([0., 0.], dtype=float), disturbancies[0, :])
+
+        self._update_state()
 
     def shift_formation(self, target_point, speed):
 
@@ -515,26 +519,40 @@ class OneLead(BaseModel):
 
     def _shift_moves(self):
 
-        other_positions1 = deepcopy(self.positions[[0, 2], :])
-        other_positions2 = deepcopy(self.positions[[0, 1], :])
+        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
+        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
 
         if self.env is None:
-            self.follower1.reshape(
+            self.follower1.keep_distance(
                 other_positions1, self.task_params['course_speed'], None)
-            self.follower2.reshape(
+            self.follower2.keep_distance(
                 other_positions2, self.task_params['course_speed'], None)
             self.lead_agent.shift(
-                self.task_params['target_point'],
+                self.task_params['course_target'],
                 self.task_params['course_speed'], None)
 
         else:
             disturbancies = self.env.evaluate(self.positions)
-            self.follower1.reshape(
+            self.follower1.keep_distance(
                 other_positions1, self.task_params['course_speed'],
                 disturbancies[1, :])
-            self.follower2.reshape(
+            self.follower2.keep_distance(
                 other_positions2, self.task_params['course_speed'],
                 disturbancies[2, :])
             self.lead_agent.shift(
-                self.task_params['target_point'],
+                self.task_params['course_target'],
                 self.task_params['course_speed'], disturbancies[0, :])
+
+        self._update_state()
+
+    def _update_state(self):
+
+         pos0 = copy.deepcopy(self.lead_agent.position)
+         pos1 = copy.deepcopy(self.follower1.position)
+         pos2 = copy.deepcopy(self.follower2.position)
+         self.positions = np.stack([pos0, pos1, pos2], axis=0)
+
+         vel0 = copy.deepcopy(self.lead_agent.velocity)
+         vel1 = copy.deepcopy(self.follower1.velocity)
+         vel2 = copy.deepcopy(self.follower2.velocity)
+         self.velocities = np.stack([vel0, vel1, vel2], axis=0)
