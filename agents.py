@@ -20,7 +20,7 @@ class BaseAgent:
         self.time_delta = time_delta
         self.accepted_error = accepted_error
 
-    def _move(self, uncut_velocity, disturbance):
+    def _move(self, uncut_velocity, disturbance, use_correction=True):
 
         pure_velocity = self._clip(uncut_velocity)
         self.targeted_velocity = pure_velocity
@@ -33,7 +33,13 @@ class BaseAgent:
         else:
             old_disturbance = self.disturbance
             self.disturbance = disturbance
-            corrected_velocity = self._course_correction(pure_velocity)
+
+            if use_correction:
+                corrected_velocity = self._course_correction(pure_velocity)
+
+            else:
+                corrected_velocity = pure_velocity
+
             self.velocity = corrected_velocity
             disturbed_velocity = corrected_velocity + old_disturbance
             self.position += disturbed_velocity*self.time_delta
@@ -137,4 +143,4 @@ class FollowerAgent(BaseAgent):
         velocity = self.bond_strength*speed*np.sum(
             deviations*normalize_all(vectors_to_others), axis=0)
 
-        self._move(velocity, disturbance)
+        self._move(velocity, disturbance, False)
