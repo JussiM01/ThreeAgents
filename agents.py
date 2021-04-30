@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-from utils import normalize, normalize_all
+from utils import normalize, normalize_all, rotate
 
 
 class BaseAgent:
@@ -110,9 +110,44 @@ class LeadAgent(BaseAgent):
 
         return current_diff.dot(planned_diff) < 0
 
-    def follow_path(self, path):
+    def start_acceleration(self, strength, direction, duration, disturbance):
 
-        raise NotImplementedError
+        if 'duration' not in self.task_params:
+            self.task_params = {'task_ready': False, 'duration': duration}
+
+        if self.task_params['duration'] == 0:
+            self.task_params = {'task_ready': True}
+
+        else:
+            acceleration = strength*direction
+            velocity = acceleration*self.time_delta
+
+            self._move(velocity, disturbance)
+            self.task_params['duration'] -= 1
+
+    def apply_acceleration(self, tangential, normal, duration, disturbance):
+
+        if 'duration' not in self.task_params:
+            self.task_params = {'task_ready': False, 'duration': duration}
+
+        if self.task_params['duration'] == 0:
+            self.task_params = {'task_ready': True}
+
+        if self.velocity == np.zeros(self.position.shape):
+            msg = "Velocity is zero. Use `start_acceleration`."
+            raise ValueError(msg)
+
+        else:
+            tangential_direction = normalize(self.velocity)
+            normal_direction = rotate(tangential_direction, np.pi/2)
+            tangential_acceleration = tangential*tangential_direction
+            normal_acceleration = normal*normal_direction
+            velocity_diff = (tangential_acceleration
+                             + normal_acceleration)*self.time_delta
+            velocity = self.velocity + velocity_diff
+
+            self._move(velocity, disturbance)
+            self.task_params['duration'] -= 1
 
     def _course_correction(self, velocity):
 
