@@ -547,9 +547,46 @@ class OneLead(BaseModel):
 
     def start_acceleration(self, strength, direction, duration):
 
-        raise NotImplementedError
+        # NOTE: REFACTOR THE DUPLICATE CODE INTO A NEW HELPER METHOD.
+
+        if 'duration' not in self.task_params:
+            self.task_params = {'task_ready': False, 'duration': duration}
+
+        if self.task_params['duration'] == 0:
+            self.task_params = {'task_ready': True}
+
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(disturbancies[[1, 2], :])
+            self.lead_agent.start_accelerate(
+                strength, direction, disturbancies[0, :])
+            self.task_params['duration'] -= 1
 
     def apply_acceleration(self, tangential, normal, duration):
+
+        # NOTE: REFACTOR THE DUPLICATE CODE INTO A NEW HELPER METHOD.
+
+        if 'duration' not in self.task_params:
+            self.task_params = {'task_ready': False, 'duration': duration}
+
+        if self.task_params['duration'] == 0:
+            self.task_params = {'task_ready': True}
+
+        if self.lead_agent.velocity == np.zeros(self.position.shape):
+            msg = "Velocity is zero. Use `start_acceleration`."
+            raise ValueError(msg)
+
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(disturbancies[[1, 2], :])
+            self.lead_agent.apply_accelerate(
+                tangential, normal, disturbancies[0, :])
+            self.task_params['duration'] -= 1
+
+    def _follow_lead(self, followers_disturbancies):
+
+        # NOTE: THIS SHOULD BE ESSENTIALLY FOLLOWER'S PART FROM
+        # `_reshape_moves` &  `_shift_moves`. REFACTOR EVERYTHING TO USE THIS.
 
         raise NotImplementedError
 

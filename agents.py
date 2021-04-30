@@ -110,44 +110,24 @@ class LeadAgent(BaseAgent):
 
         return current_diff.dot(planned_diff) < 0
 
-    def start_acceleration(self, strength, direction, duration, disturbance):
+    def start_accelerate(self, strength, direction, disturbance):
 
-        if 'duration' not in self.task_params:
-            self.task_params = {'task_ready': False, 'duration': duration}
+        acceleration = strength*direction
+        velocity = acceleration*self.time_delta
 
-        if self.task_params['duration'] == 0:
-            self.task_params = {'task_ready': True}
+        self._move(velocity, disturbance)
 
-        else:
-            acceleration = strength*direction
-            velocity = acceleration*self.time_delta
+    def apply_accelerate(self, tangential, normal, disturbance):
 
-            self._move(velocity, disturbance)
-            self.task_params['duration'] -= 1
+        tangential_direction = normalize(self.velocity)
+        normal_direction = rotate(tangential_direction, np.pi/2)
+        tangential_acceleration = tangential*tangential_direction
+        normal_acceleration = normal*normal_direction
+        velocity_diff = (tangential_acceleration
+                         + normal_acceleration)*self.time_delta
+        velocity = self.velocity + velocity_diff
 
-    def apply_acceleration(self, tangential, normal, duration, disturbance):
-
-        if 'duration' not in self.task_params:
-            self.task_params = {'task_ready': False, 'duration': duration}
-
-        if self.task_params['duration'] == 0:
-            self.task_params = {'task_ready': True}
-
-        if self.velocity == np.zeros(self.position.shape):
-            msg = "Velocity is zero. Use `start_acceleration`."
-            raise ValueError(msg)
-
-        else:
-            tangential_direction = normalize(self.velocity)
-            normal_direction = rotate(tangential_direction, np.pi/2)
-            tangential_acceleration = tangential*tangential_direction
-            normal_acceleration = normal*normal_direction
-            velocity_diff = (tangential_acceleration
-                             + normal_acceleration)*self.time_delta
-            velocity = self.velocity + velocity_diff
-
-            self._move(velocity, disturbance)
-            self.task_params['duration'] -= 1
+        self._move(velocity, disturbance)
 
     def _course_correction(self, velocity):
 
