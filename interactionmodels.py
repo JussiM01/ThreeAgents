@@ -545,6 +545,14 @@ class OneLead(BaseModel):
 
         self._update_state()
 
+    def start_acceleration(self, strength, direction, duration):
+
+        raise NotImplementedError
+
+    def apply_acceleration(self, tangential, normal, duration):
+
+        raise NotImplementedError
+
     def _update_state(self):
 
          pos0 = copy.deepcopy(self.lead_agent.position)

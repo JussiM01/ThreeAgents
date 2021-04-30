@@ -91,6 +91,12 @@ class Animation:
             elif task['type'] == 'turn':
                 self.model.turn_formation(*task['args'])
 
+            elif task['type'] == 'start_acceleration':
+                self.model.start_acceleration(*task['args'])
+
+            elif task['type'] == 'apply_acceleration':
+                self.model.apply_acceleration(*task['args'])
+
             else:
                 raise NotImplementedError
 
