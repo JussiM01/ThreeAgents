@@ -110,14 +110,14 @@ class LeadAgent(BaseAgent):
 
         return current_diff.dot(planned_diff) < 0
 
-    def start_accelerate(self, strength, direction, disturbance):
+    def start_accelerate(self, strength, direction, disturbance=None):
 
         acceleration = strength*direction
         velocity = acceleration*self.time_delta
 
         self._move(velocity, disturbance)
 
-    def apply_accelerate(self, tangential, normal, disturbance):
+    def apply_accelerate(self, tangential, normal, disturbance=None):
 
         tangential_direction = normalize(self.velocity)
         normal_direction = rotate(tangential_direction, np.pi/2)

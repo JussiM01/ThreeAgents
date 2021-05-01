@@ -71,20 +71,22 @@
         },
         {
             "args": [
-                10.0,
+                1000.0,
                 [
                     1.0,
                     0.0
                 ],
-                10
+                100,
+                100.0
             ],
             "type": "start_acceleration"
         },
         {
             "args": [
                 0.0,
-                10.0,
-                20
+                1000.0,
+                20,
+                100.0
             ],
             "type": "apply_acceleration"
         },
@@ -92,15 +94,17 @@
             "args": [
                 0.0,
                 0.0,
-                10
+                10,
+                100.0
             ],
             "type": "apply_acceleration"
         },
         {
             "args": [
                 0.0,
-                -10.0,
-                20
+                -1000.0,
+                20,
+                100.0
             ],
             "type": "apply_acceleration"
         }

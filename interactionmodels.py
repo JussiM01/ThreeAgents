@@ -480,19 +480,15 @@ class OneLead(BaseModel):
 
     def _reshape_moves(self, speed):
 
-        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
-        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
-
         if self.env is None:
-            self.follower1.keep_distance(other_positions1, speed, None)
-            self.follower2.keep_distance(other_positions2, speed, None)
+            self._follow_lead(speed)
+            self.lead_agent.shift(
+                self.task_params['course_target'],
+                self.task_params['course_speed'], None)
 
         else:
             disturbancies = self.env.evaluate(self.positions)
-            self.follower1.keep_distance(
-                other_positions1, speed, disturbancies[1, :])
-            self.follower2.keep_distance(
-                other_positions2, speed, disturbancies[2, :])
+            self._follow_lead(speed, disturbancies[[1, 2], :])
             self.lead_agent._move(
                 np.array([0., 0.], dtype=float), disturbancies[0, :])
 
@@ -515,39 +511,32 @@ class OneLead(BaseModel):
             self.task_params['task_ready'] = True
 
         else:
-            self._shift_moves()
+            self._shift_moves(speed)
 
-    def _shift_moves(self):
-
-        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
-        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
+    def _shift_moves(self, speed):
 
         if self.env is None:
-            self.follower1.keep_distance(
-                other_positions1, self.task_params['course_speed'], None)
-            self.follower2.keep_distance(
-                other_positions2, self.task_params['course_speed'], None)
+            self._follow_lead(speed)
             self.lead_agent.shift(
                 self.task_params['course_target'],
                 self.task_params['course_speed'], None)
 
         else:
             disturbancies = self.env.evaluate(self.positions)
-            self.follower1.keep_distance(
-                other_positions1, self.task_params['course_speed'],
-                disturbancies[1, :])
-            self.follower2.keep_distance(
-                other_positions2, self.task_params['course_speed'],
-                disturbancies[2, :])
+            self._follow_lead(speed, disturbancies[[1, 2], :])
             self.lead_agent.shift(
                 self.task_params['course_target'],
                 self.task_params['course_speed'], disturbancies[0, :])
 
         self._update_state()
 
-    def start_acceleration(self, strength, direction, duration):
+    def accelerate(self, acceleration_type, parameters):
 
-        # NOTE: REFACTOR THE DUPLICATE CODE INTO A NEW HELPER METHOD.
+        if acceleration_type == 'start':
+            strength, direction, duration, follow_speed = parameters
+
+        if acceleration_type == 'apply':
+            tangential, normal, duration, follow_speed = parameters
 
         if 'duration' not in self.task_params:
             self.task_params = {'task_ready': False, 'duration': duration}
@@ -556,39 +545,60 @@ class OneLead(BaseModel):
             self.task_params = {'task_ready': True}
 
         else:
-            disturbancies = self.env.evaluate(self.positions)
-            self._follow_lead(disturbancies[[1, 2], :])
-            self.lead_agent.start_accelerate(
-                strength, direction, disturbancies[0, :])
+            if acceleration_type == 'start':
+                self._start_step(strength, direction, follow_speed)
+
+            if acceleration_type == 'apply':
+                self._apply_step(tangential, normal, follow_speed)
+
             self.task_params['duration'] -= 1
 
-    def apply_acceleration(self, tangential, normal, duration):
+    def _start_step(self, strength, direction, follow_speed):
 
-        # NOTE: REFACTOR THE DUPLICATE CODE INTO A NEW HELPER METHOD.
+        direction = np.array(direction, dtype=float)
 
-        if 'duration' not in self.task_params:
-            self.task_params = {'task_ready': False, 'duration': duration}
+        if self.env is None:
+            self._follow_lead(follow_speed)
+            self.lead_agent.start_accelerate(strength, direction)
 
-        if self.task_params['duration'] == 0:
-            self.task_params = {'task_ready': True}
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(follow_speed, disturbancies[[1, 2], :])
+            self.lead_agent.start_accelerate(
+                strength, direction, disturbancies[0, :])
 
-        if self.lead_agent.velocity == np.zeros(self.position.shape):
+    def _apply_step(self, tangential, normal, follow_speed):
+
+        if np.linalg.norm(self.lead_agent.velocity) == 0:
             msg = "Velocity is zero. Use `start_acceleration`."
             raise ValueError(msg)
 
+        if self.env is None:
+            self._follow_lead(follow_speed)
+            self.lead_agent.apply_accelerate(tangential, normal)
+
         else:
             disturbancies = self.env.evaluate(self.positions)
-            self._follow_lead(disturbancies[[1, 2], :])
+            self._follow_lead(follow_speed, disturbancies[[1, 2], :])
             self.lead_agent.apply_accelerate(
                 tangential, normal, disturbancies[0, :])
-            self.task_params['duration'] -= 1
 
-    def _follow_lead(self, followers_disturbancies):
+    def _follow_lead(self, speed, followers_disturbancies=None):
 
-        # NOTE: THIS SHOULD BE ESSENTIALLY FOLLOWER'S PART FROM
-        # `_reshape_moves` &  `_shift_moves`. REFACTOR EVERYTHING TO USE THIS.
+        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
+        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
 
-        raise NotImplementedError
+        if followers_disturbancies is None:
+            self.follower1.keep_distance(other_positions1, speed, None)
+            self.follower2.keep_distance(other_positions2, speed, None)
+
+        else:
+            self.follower1.keep_distance(
+                other_positions1, speed, followers_disturbancies[0, :])
+            self.follower2.keep_distance(
+                other_positions2, speed, followers_disturbancies[1, :])
+
+        self._update_state()
 
     def _update_state(self):
 
