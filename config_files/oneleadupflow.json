@@ -47,20 +47,9 @@
     "tasks": [
         {
             "args": [
-                "triangle",
                 10.0
             ],
             "type": "reshape"
-        },
-        {
-            "args": [
-                [
-                    0.0,
-                    0.0
-                ],
-                10.0
-            ],
-            "type": "turn"
         },
         {
             "args": [
@@ -73,5 +62,5 @@
             "type": "shift"
         }
     ],
-    "type": "central_control"
+    "type": "one_lead"
 }

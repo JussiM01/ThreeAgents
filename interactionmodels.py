@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from agents import FollowerAgent, LeadAgent
 from utils import (conjugate_product, normalize, normalize_all, rotate,
                    rotate_all)
 
@@ -63,13 +64,6 @@ class BaseModel:
 
     def _course_correction(self, velocities):
         raise NotImplementedError
-
-    # def _direction(self, vector):
-    #     norm = np.linalg.norm(vector)
-    #     return vector if norm == 0 else vector/norm
-    #
-    # def _directions(self, vectors):
-    #     return np.apply_along_axis(lambda x: normalize(x), 1, vectors)
 
     def _clip(self, velocity):
         speed = np.linalg.norm(velocity)
@@ -446,3 +440,171 @@ class CentralControl(BaseModel):
         """Moves all agents to given direction with the given speed."""
         velocities = np.tile(direction*speed, [self.num_agents, 1])
         self._move(velocities)
+
+
+class OneLead(BaseModel):
+    """Class for interaction model with one lead agent and two followers."""
+
+    def __init__(self, positions, target_distance, bond_strength, max_speed,
+                 time_delta, accepted_error, env=None, correction_const=None,
+                 task_params=None):
+        super().__init__(positions, max_speed, time_delta, accepted_error, env)
+        self.lead_agent = LeadAgent(
+            positions[0, :], max_speed, time_delta, accepted_error,
+            correction_const, task_params)
+        self.follower1 = FollowerAgent(
+            positions[1, :], target_distance, bond_strength, max_speed,
+            time_delta, accepted_error)
+        self.follower2 = FollowerAgent(
+            positions[2, :], target_distance, bond_strength, max_speed,
+            time_delta, accepted_error)
+        self.target_distance = target_distance
+        self.task_params = self.lead_agent.task_params
+        self.env = env
+
+    def reshape_formation(self, speed):
+
+        dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
+        dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
+        dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
+
+        error = max([abs(d - self.target_distance)
+                    for d in [dist_01, dist_02, dist_12]])
+
+        if error < self.accepted_error:
+            self.task_params['task_ready'] = True
+
+        else:
+            self.task_params['task_ready'] = False
+            self._reshape_moves(speed)
+
+    def _reshape_moves(self, speed):
+
+        if self.env is None:
+            self._follow_lead(speed)
+
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(speed, disturbancies[[1, 2], :])
+            self.lead_agent._move(
+                np.array([0., 0.], dtype=float), disturbancies[0, :])
+
+        self._update_state()
+
+    def shift_formation(self, target_point, speed):
+
+        if 'course_target' not in self.task_params:
+            self.task_params['task_ready'] = False
+            self.task_params['course_target'] = np.array(
+                target_point, dtype=float)
+            self.task_params['course_direction'] = normalize(
+                self.task_params['course_target'] - self.positions[0, :])
+            self.task_params['course_speed'] = speed
+
+        error = np.linalg.norm(
+            self.positions[0, :] - self.task_params['course_target'])
+
+        if error < self.accepted_error:
+            self.task_params['task_ready'] = True
+
+        else:
+            self._shift_moves(speed)
+
+    def _shift_moves(self, speed):
+
+        if self.env is None:
+            self._follow_lead(speed)
+            self.lead_agent.shift(
+                self.task_params['course_target'],
+                self.task_params['course_speed'], None)
+
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(speed, disturbancies[[1, 2], :])
+            self.lead_agent.shift(
+                self.task_params['course_target'],
+                self.task_params['course_speed'], disturbancies[0, :])
+
+        self._update_state()
+
+    def accelerate(self, acceleration_type, parameters):
+
+        if acceleration_type == 'start':
+            strength, direction, duration, follow_speed = parameters
+
+        if acceleration_type == 'apply':
+            tangential, normal, duration, follow_speed = parameters
+
+        if 'duration' not in self.task_params:
+            self.task_params = {'task_ready': False, 'duration': duration}
+
+        if self.task_params['duration'] == 0:
+            self.task_params = {'task_ready': True}
+
+        else:
+            if acceleration_type == 'start':
+                self._start_step(strength, direction, follow_speed)
+
+            if acceleration_type == 'apply':
+                self._apply_step(tangential, normal, follow_speed)
+
+            self.task_params['duration'] -= 1
+
+    def _start_step(self, strength, direction, follow_speed):
+
+        direction = np.array(direction, dtype=float)
+
+        if self.env is None:
+            self._follow_lead(follow_speed)
+            self.lead_agent.start_accelerate(strength, direction)
+
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(follow_speed, disturbancies[[1, 2], :])
+            self.lead_agent.start_accelerate(
+                strength, direction, disturbancies[0, :])
+
+    def _apply_step(self, tangential, normal, follow_speed):
+
+        if np.linalg.norm(self.lead_agent.velocity) == 0:
+            msg = "Velocity is zero. Use `start_acceleration`."
+            raise ValueError(msg)
+
+        if self.env is None:
+            self._follow_lead(follow_speed)
+            self.lead_agent.apply_accelerate(tangential, normal)
+
+        else:
+            disturbancies = self.env.evaluate(self.positions)
+            self._follow_lead(follow_speed, disturbancies[[1, 2], :])
+            self.lead_agent.apply_accelerate(
+                tangential, normal, disturbancies[0, :])
+
+    def _follow_lead(self, speed, followers_disturbancies=None):
+
+        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
+        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
+
+        if followers_disturbancies is None:
+            self.follower1.keep_distance(other_positions1, speed, None)
+            self.follower2.keep_distance(other_positions2, speed, None)
+
+        else:
+            self.follower1.keep_distance(
+                other_positions1, speed, followers_disturbancies[0, :])
+            self.follower2.keep_distance(
+                other_positions2, speed, followers_disturbancies[1, :])
+
+        self._update_state()
+
+    def _update_state(self):
+
+         pos0 = copy.deepcopy(self.lead_agent.position)
+         pos1 = copy.deepcopy(self.follower1.position)
+         pos2 = copy.deepcopy(self.follower2.position)
+         self.positions = np.stack([pos0, pos1, pos2], axis=0)
+
+         vel0 = copy.deepcopy(self.lead_agent.velocity)
+         vel1 = copy.deepcopy(self.follower1.velocity)
+         vel2 = copy.deepcopy(self.follower2.velocity)
+         self.velocities = np.stack([vel0, vel1, vel2], axis=0)
