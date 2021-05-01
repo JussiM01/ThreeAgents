@@ -482,9 +482,6 @@ class OneLead(BaseModel):
 
         if self.env is None:
             self._follow_lead(speed)
-            self.lead_agent.shift(
-                self.task_params['course_target'],
-                self.task_params['course_speed'], None)
 
         else:
             disturbancies = self.env.evaluate(self.positions)
