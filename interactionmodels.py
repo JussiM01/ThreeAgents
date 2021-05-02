@@ -162,7 +162,7 @@ class CentralControl(BaseModel):
     def reshape_formation(self, formation_type, speed):
         """Method for reshaping the agents' formation to given shape
 
-        Moves the agent towards positions fo the given formation type. This
+        Moves the agent towards positions of the given formation type. This
         task is accepted as done when the postions are close enough to wanted
         positions (ie. the distance is less than `self.accepted_error`).
 
@@ -443,7 +443,34 @@ class CentralControl(BaseModel):
 
 
 class OneLead(BaseModel):
-    """Class for interaction model with one lead agent and two followers."""
+    """Interaction model with one lead agent and two followers.
+
+    This class represents a model where the leading agent executes the given
+    moven tasks and the two follower agent stay within specified distance from
+    it and each other. If environment is present, both types of agent suffer
+    from disturbancies but only the lead agents makes course corrections while
+    the others just follow it.
+
+    Parameters
+    ----------
+        positions: numpy.ndarray (dtype: float)
+            Array of shape (3, 2) representing the agents positions.
+        target_distance: float
+            Target distance between the agents in the triangle formation.
+        bond_strength: float
+            Strenght constant for the triangle formation reshaping.
+        max_speed: float
+            Maximum allowed speed for all agents.
+        time_delta: float
+            Lenght of the unit time increment.
+        accepted_error: float
+            Tasks are done when distance to target is less than this.
+        env: environment.Env
+            Object representing the environment.
+        correction_const: list (types: [float, float])
+            Constants for velocity and position based course corrections.
+
+    """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
                  time_delta, accepted_error, env=None, correction_const=None,
@@ -463,7 +490,18 @@ class OneLead(BaseModel):
         self.env = env
 
     def reshape_formation(self, speed):
+        """Moves follower agents to stay within the given target distance.
 
+        This methods moves the follower agents closer to target distance
+        from each other and the lead agent. If enviroment is present, then
+        the disturbancies are taken into account in the movemnts.
+
+        Parameters
+        ----------
+            speed: float
+                Speed parameter for the agent reshape movements.
+
+        """
         dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
         dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
         dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
@@ -479,7 +517,7 @@ class OneLead(BaseModel):
             self._reshape_moves(speed)
 
     def _reshape_moves(self, speed):
-
+        """Makes the reshape movement for single time step."""
         if self.env is None:
             self._follow_lead(speed)
 
@@ -492,7 +530,21 @@ class OneLead(BaseModel):
         self._update_state()
 
     def shift_formation(self, target_point, speed):
+        """Shifts the agents towards the givent target point.
 
+        Moves the agents towards the target point with the given speed and
+        makes the lead agent to apply course corrections if there are any
+        disturbancies. The task is finished when the lead agent is within
+        distance of `self.accepted_error` away from target.
+
+        Parameters
+        ----------
+            target_point: list (types [float, float])
+                List containing the coordinates of the target point.
+            speed: flot
+                speed of the shifting.
+
+        """
         if 'course_target' not in self.task_params:
             self.task_params['task_ready'] = False
             self.task_params['course_target'] = np.array(
@@ -511,7 +563,7 @@ class OneLead(BaseModel):
             self._shift_moves(speed)
 
     def _shift_moves(self, speed):
-
+        """Moves the agents towards the target for single time step."""
         if self.env is None:
             self._follow_lead(speed)
             self.lead_agent.shift(
@@ -528,7 +580,29 @@ class OneLead(BaseModel):
         self._update_state()
 
     def accelerate(self, acceleration_type, parameters):
+        """Method for executing acceleration movements.
 
+        This method is used for both start-acceleration and apply-acceleration.
+        The start-acceleration is to be used when the lead agent is at rest
+        and the apply-acceleration when it is already moving. For execution
+        the start-acceleration needs direction and strength of the accelration.
+        The apply-acceleration has tangential and normal components which
+        depends on the current velocity, the tangential-acceleration is towards
+        it and the normal-acceleration's direction is rotated 90 degrees to
+        clockwise from it.
+
+        Parameters
+        ----------
+            acceleration_type: str
+                type of the accelration ('start' or 'apply').
+            parameters: (float, [float, float], int, float)
+                        or (float, float, int, float)
+                Parameters for the acceleration movement. If the given
+                acceleration_type is `start` these are strength, direction,
+                duration and follow_speed. If it is 'apply' these are
+                tangential, normal, duration and follow_speed.
+
+        """
         if acceleration_type == 'start':
             strength, direction, duration, follow_speed = parameters
 
@@ -551,7 +625,7 @@ class OneLead(BaseModel):
             self.task_params['duration'] -= 1
 
     def _start_step(self, strength, direction, follow_speed):
-
+        """Method for single time step start-acceleration."""
         direction = np.array(direction, dtype=float)
 
         if self.env is None:
@@ -565,7 +639,7 @@ class OneLead(BaseModel):
                 strength, direction, disturbancies[0, :])
 
     def _apply_step(self, tangential, normal, follow_speed):
-
+        """Method for single time step apply-acceleration."""
         if np.linalg.norm(self.lead_agent.velocity) == 0:
             msg = "Velocity is zero. Use `start_acceleration`."
             raise ValueError(msg)
@@ -581,7 +655,7 @@ class OneLead(BaseModel):
                 tangential, normal, disturbancies[0, :])
 
     def _follow_lead(self, speed, followers_disturbancies=None):
-
+        """Makes the follower agents to follow the lead agent."""
         other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
         other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
 
@@ -598,7 +672,7 @@ class OneLead(BaseModel):
         self._update_state()
 
     def _update_state(self):
-
+        """Updates the agents' positions and velocities."""
          pos0 = copy.deepcopy(self.lead_agent.position)
          pos1 = copy.deepcopy(self.follower1.position)
          pos2 = copy.deepcopy(self.follower2.position)
