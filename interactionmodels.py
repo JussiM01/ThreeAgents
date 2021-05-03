@@ -28,7 +28,7 @@ class BaseModel:
 
     def _move(self, uncut_velocities):
         """
-        Method for moving the agents positions based on their velocites.
+        Method for moving the agents' positions based on their velocites.
 
         Moves the agents according to their velocities, which include
         disturbancies from the environment (if not equal to None) and
@@ -88,7 +88,7 @@ class CentralControl(BaseModel):
     Parameters
     ----------
         positions: numpy.ndarray (dtype: float)
-            Array of shape (3, 2) representing the agents positions.
+            Array of shape (3, 2) representing the agents' positions.
         target_distance: float
             Target distance between the agents in the triangle formation.
         bond_strength: float
@@ -454,7 +454,7 @@ class OneLead(BaseModel):
     Parameters
     ----------
         positions: numpy.ndarray (dtype: float)
-            Array of shape (3, 2) representing the agents positions.
+            Array of shape (3, 2) representing the agents' positions.
         target_distance: float
             Target distance between the agents in the triangle formation.
         bond_strength: float
@@ -673,12 +673,12 @@ class OneLead(BaseModel):
 
     def _update_state(self):
         """Updates the agents' positions and velocities."""
-         pos0 = copy.deepcopy(self.lead_agent.position)
-         pos1 = copy.deepcopy(self.follower1.position)
-         pos2 = copy.deepcopy(self.follower2.position)
-         self.positions = np.stack([pos0, pos1, pos2], axis=0)
+        pos0 = copy.deepcopy(self.lead_agent.position)
+        pos1 = copy.deepcopy(self.follower1.position)
+        pos2 = copy.deepcopy(self.follower2.position)
+        self.positions = np.stack([pos0, pos1, pos2], axis=0)
 
-         vel0 = copy.deepcopy(self.lead_agent.velocity)
-         vel1 = copy.deepcopy(self.follower1.velocity)
-         vel2 = copy.deepcopy(self.follower2.velocity)
-         self.velocities = np.stack([vel0, vel1, vel2], axis=0)
+        vel0 = copy.deepcopy(self.lead_agent.velocity)
+        vel1 = copy.deepcopy(self.follower1.velocity)
+        vel2 = copy.deepcopy(self.follower2.velocity)
+        self.velocities = np.stack([vel0, vel1, vel2], axis=0)
