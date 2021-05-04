@@ -489,6 +489,13 @@ class OneLead(BaseModel):
         self.task_params = self.lead_agent.task_params
         self.env = env
 
+    def __repr__(self):
+        args = (self.positions, self.target_distance, self.bond_strength,
+                self.max_speed, self.time_delta, self.accepted_error, self.env,
+                self.correction_const, self.task_params)
+        repr = 'OneLead({}, {}, {}, {}, {}, {}, {}, {}, {})'
+        return repr.format(*args)
+
     def reshape_formation(self, speed):
         """Moves follower agents to stay within the given target distance.
 

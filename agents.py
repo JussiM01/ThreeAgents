@@ -21,8 +21,7 @@ class BaseAgent:
         self.accepted_error = accepted_error
 
     def _move(self, uncut_velocity, disturbance, use_correction=True):
-        """
-        Method for moving the agent position based on its velocity.
+        """Method for moving the agent position based on its velocity.
 
         Moves the agent according to the velocity and the disturbance from the
         environment (if not equal to None) and the course corrections. The
@@ -108,6 +107,12 @@ class LeadAgent(BaseAgent):
             self.task_params = {'task_ready': True}
         else:
             self.task_params = task_params
+
+    def __repr__(self):
+        args = (self.position, self.max_speed, self.time_delta,
+                self.accepted_error, self.correction_const, self.task_params)
+        repr = 'LeadAgent({}, {}, {}, {}, {}, {})'
+        return repr.format(*args)
 
     def shift(self, target_point, speed, disturbance):
 
@@ -241,6 +246,12 @@ class FollowerAgent(BaseAgent):
         super().__init__(position, max_speed, time_delta, accepted_error)
         self.target_distance = target_distance
         self.bond_strength = bond_strength
+
+    def __repr__(self):
+        args = (self.position, self.target_distance, self.bond_strength,
+                self.max_speed, self.time_delta, self.accepted_error)
+        repr = 'FollowerAgent({}, {}, {}, {}, {}, {}, {}, {}, {})'
+        return repr.format(*args)
 
     def keep_distance(self, other_positions, speed, disturbance):
         """Keeps the agents distancies close to the target distance."""
