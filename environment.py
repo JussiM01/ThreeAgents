@@ -26,6 +26,7 @@ class Env:
         self.vector_field = vector_field
         self.time_delta = time_delta
         self.time_now = 0
+        self.visuals_init = visuals_init
 
         if visuals_init is not None:
             self.wraparoundmap = WrapAroundMap(**visuals_init['values'])
@@ -35,6 +36,10 @@ class Env:
 
         else:
             self.use_visuals = False
+
+    def __repr__(self):
+        args = (self.vector_field, self.time_delta, self.visuals_init)
+        return 'Env({}, {}, {}, {})'.format(*args)
 
     def evaluate(self, points):
         """Method for evaluating the vector field at given points.
@@ -110,6 +115,11 @@ class FlowTube:
         if not np.array_equal(direction, NORTH):
             raise NotImplementedError
 
+    def __repr__(self):
+        args = (self.flow_map, self.fluctuation, self.center_point,
+                self.direction)
+        return 'FlowTube({}, {}, {}, {})'.format(*args)
+
     def __call__(self, point, time):
         """Evaluates the vector field at a given point."""
         strenght = self.flow_map(point)*self.fluctuation(time)
@@ -125,6 +135,9 @@ class BumpMap:
 
         self.center = center
         self.width = width
+
+    def __repr__(self):
+        return 'BumpMap({}, {})'.format(self.center, self.width)
 
     def __call__(self, num_float):
         """Calculate the bump function value for a given float."""
@@ -145,6 +158,13 @@ class StaticUpFlow(FlowTube):
         bump_func = lambda p: bump_map(p[0])
         static_map = lambda t: mid_value
         super().__init__(bump_func, static_map, center)
+        self.center = center
+        self.width = width
+        self.mid_value = mid_value
+
+    def __repr__(self):
+        args = (self.center, self.width, self.mid_value)
+        return 'StaticUpFlow({}, {}, {})'.format(*args)
 
 
 class TubeSampler:
@@ -166,6 +186,9 @@ class TubeSampler:
     def __init__(self, x_range, y_range):
         self.truncnorm = truncnorm(x_range[0], x_range[1])
         self.y_vals = y_range
+
+    def __repr__(self):
+        return 'TubeSampler({}, {})'.format(self.x_range, self.y_range)
 
     def __call__(self, num_points):
         """Method for sampling points for the visualization.
@@ -220,6 +243,10 @@ class WrapAroundMap:
         self.max_x = max_x
         self.min_y = min_y
         self.max_y = max_y
+
+    def __repr__(self):
+        args = (self.min_x, self.max_x, self.min_y, self.max_y)
+        return 'WrapAroundMap({}, {}, {}, {})'.format(*args)
 
     def __call__(self, array):
         """Applies the wrap around mapping to an array of vectors."""
