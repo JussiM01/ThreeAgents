@@ -77,7 +77,7 @@ class Animation:
 
         """
         if self.task_index > self.last:
-            points = self.model.positions
+            exit(0)
 
         else:
             task = self.task_list[self.task_index]
