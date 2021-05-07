@@ -95,8 +95,6 @@ class LeadAgent(BaseAgent):
     def __init__(self, position, max_speed, time_delta, accepted_error,
                  correction_const=None, task_params=None):
         super().__init__(position, max_speed, time_delta, accepted_error)
-        self.targeted_positions = deepcopy(position)
-        self.targeted_velocities = np.zeros(position.shape)
 
         if correction_const is None:
             self.correction_const = [1.0, 1.0]
@@ -125,7 +123,7 @@ class LeadAgent(BaseAgent):
             self.task_params['course_speed'] = speed
 
         to_target = (self.task_params['course_target']
-            - deepcopy(self.position))
+                     - deepcopy(self.targeted_position))
         dist_to_target = np.linalg.norm(to_target)
 
         if dist_to_target < self.accepted_error:
@@ -144,11 +142,12 @@ class LeadAgent(BaseAgent):
 
     def _about_to_over_shoots(self):
         """Checks if the agent is about to pass the target."""
-        current_diff = self.position - self.task_params['course_target']
+        current_diff = (self.targeted_position
+            - self.task_params['course_target'])
         velocity = (self.task_params['course_direction']
                     * self.task_params['course_speed'])
         planned_move = velocity*self.time_delta
-        planned_next = self.position + planned_move
+        planned_next = self.targeted_position + planned_move
         planned_diff = planned_next - self.task_params['course_target']
 
         return current_diff.dot(planned_diff) < 0

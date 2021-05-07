@@ -560,9 +560,9 @@ class OneLead(BaseModel):
                 self.task_params['course_target'] - self.positions[0, :])
             self.task_params['course_speed'] = speed
 
-        error = np.linalg.norm(
-            self.positions[0, :] - self.task_params['course_target'])
-
+        error = np.linalg.norm(self.lead_agent.targeted_position
+                               - self.task_params['course_target'])
+                               
         if error < self.accepted_error:
             self.task_params['task_ready'] = True
 
