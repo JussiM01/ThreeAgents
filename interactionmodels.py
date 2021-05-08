@@ -486,7 +486,7 @@ class OneLead(BaseModel):
             positions[2, :], target_distance, bond_strength, max_speed,
             time_delta, accepted_error)
         self.target_distance = target_distance
-        self.task_params = self.lead_agent.task_params
+        self.task_params = {'task_ready': True}
         self.env = env
 
     def __repr__(self):
@@ -556,14 +556,13 @@ class OneLead(BaseModel):
             self.task_params['task_ready'] = False
             self.task_params['course_target'] = np.array(
                 target_point, dtype=float)
-            self.task_params['course_direction'] = normalize(
-                self.task_params['course_target'] - self.positions[0, :])
             self.task_params['course_speed'] = speed
 
         error = np.linalg.norm(self.lead_agent.targeted_position
                                - self.task_params['course_target'])
-                               
+
         if error < self.accepted_error:
+            self.lead_agent.action_params['task_ready'] = True
             self.task_params['task_ready'] = True
 
         else:

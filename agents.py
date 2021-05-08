@@ -93,7 +93,7 @@ class LeadAgent(BaseAgent):
     """
 
     def __init__(self, position, max_speed, time_delta, accepted_error,
-                 correction_const=None, task_params=None):
+                 correction_const=None, action_params=None):
         super().__init__(position, max_speed, time_delta, accepted_error)
 
         if correction_const is None:
@@ -101,54 +101,50 @@ class LeadAgent(BaseAgent):
         else:
             self.correction_const = correction_const
 
-        if task_params is None:
-            self.task_params = {'task_ready': True}
+        if action_params is None:
+            self.action_params = {'task_ready': True}
         else:
-            self.task_params = task_params
+            self.action_params = action_params
 
     def __repr__(self):
         args = (self.position, self.max_speed, self.time_delta,
-                self.accepted_error, self.correction_const, self.task_params)
+                self.accepted_error, self.correction_const, self.action_params)
         repr = 'LeadAgent({}, {}, {}, {}, {}, {})'
         return repr.format(*args)
 
     def shift(self, target_point, speed, disturbance):
 
-        if 'course_target' not in self.task_params:
-            self.task_params['task_ready'] = False
-            self.task_params['course_target'] = np.array(
+        if 'course_target' not in self.action_params:
+            self.action_params['task_ready'] = False
+            self.action_params['course_target'] = np.array(
                 target_point, dtype=float)
-            self.task_params['course_direction'] = normalize(
-                self.task_params['course_target'] - deepcopy(self.position))
-            self.task_params['course_speed'] = speed
+            self.action_params['course_direction'] = normalize(
+                self.action_params['course_target'] - deepcopy(self.position))
+            self.action_params['course_speed'] = speed
 
-        to_target = (self.task_params['course_target']
+        to_target = (self.action_params['course_target']
                      - deepcopy(self.targeted_position))
         dist_to_target = np.linalg.norm(to_target)
 
-        if dist_to_target < self.accepted_error:
-            self.task_params = {'task_ready': True}
+        if self._about_to_over_shoots():
+            adjusted_direction = normalize(to_target)
+            adjusted_speed = dist_to_target/self.time_delta
 
         else:
-            if self._about_to_over_shoots():
-                adjusted_direction = normalize(to_target)
-                adjusted_speed = dist_to_target/self.time_delta
+            adjusted_direction = self.action_params['course_direction']
+            adjusted_speed = self.action_params['course_speed']
 
-            else:
-                adjusted_direction = self.task_params['course_direction']
-                adjusted_speed = self.task_params['course_speed']
-
-            self._move(adjusted_direction*adjusted_speed, disturbance)
+        self._move(adjusted_direction*adjusted_speed, disturbance)
 
     def _about_to_over_shoots(self):
         """Checks if the agent is about to pass the target."""
         current_diff = (self.targeted_position
-            - self.task_params['course_target'])
-        velocity = (self.task_params['course_direction']
-                    * self.task_params['course_speed'])
+            - self.action_params['course_target'])
+        velocity = (self.action_params['course_direction']
+                    * self.action_params['course_speed'])
         planned_move = velocity*self.time_delta
         planned_next = self.targeted_position + planned_move
-        planned_diff = planned_next - self.task_params['course_target']
+        planned_diff = planned_next - self.action_params['course_target']
 
         return current_diff.dot(planned_diff) < 0
 
