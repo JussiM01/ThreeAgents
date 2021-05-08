@@ -93,7 +93,7 @@ class LeadAgent(BaseAgent):
     """
 
     def __init__(self, position, max_speed, time_delta, accepted_error,
-                 correction_const=None, action_params=None):
+                 correction_const=None):
         super().__init__(position, max_speed, time_delta, accepted_error)
 
         if correction_const is None:
@@ -101,15 +101,12 @@ class LeadAgent(BaseAgent):
         else:
             self.correction_const = correction_const
 
-        if action_params is None:
-            self.action_params = {'task_ready': True}
-        else:
-            self.action_params = action_params
+        self.action_params = {'task_ready': True}
 
     def __repr__(self):
         args = (self.position, self.max_speed, self.time_delta,
-                self.accepted_error, self.correction_const, self.action_params)
-        repr = 'LeadAgent({}, {}, {}, {}, {}, {})'
+                self.accepted_error, self.correction_const)
+        repr = 'LeadAgent({}, {}, {}, {}, {})'
         return repr.format(*args)
 
     def shift(self, target_point, speed, disturbance):

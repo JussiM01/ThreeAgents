@@ -107,8 +107,7 @@ class CentralControl(BaseModel):
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-                 time_delta, accepted_error, env=None, correction_const=None,
-                 task_params=None):
+                 time_delta, accepted_error, env=None, correction_const=None):
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
         self.target_distance = target_distance
         self.bond_strength = bond_strength
@@ -118,16 +117,13 @@ class CentralControl(BaseModel):
         else:
             self.correction_const = correction_const
 
-        if task_params is None:
-            self.task_params = {'task_ready': True}
-        else:
-            self.task_params = task_params
+        self.task_params = {'task_ready': True}
 
     def __repr__(self):
         args = (self.positions, self.target_distance, self.bond_strength,
                 self.max_speed, self.time_delta, self.accepted_error, self.env,
-                self.correction_const, self.task_params)
-        repr = 'CentralControl({}, {}, {}, {}, {}, {}, {}, {}, {})'
+                self.correction_const)
+        repr = 'CentralControl({}, {}, {}, {}, {}, {}, {}, {})'
         return repr.format(*args)
 
     def _course_correction(self, velocities):
@@ -473,12 +469,11 @@ class OneLead(BaseModel):
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
-                 time_delta, accepted_error, env=None, correction_const=None,
-                 task_params=None):
+                 time_delta, accepted_error, env=None, correction_const=None):
         super().__init__(positions, max_speed, time_delta, accepted_error, env)
         self.lead_agent = LeadAgent(
             positions[0, :], max_speed, time_delta, accepted_error,
-            correction_const, task_params)
+            correction_const)
         self.follower1 = FollowerAgent(
             positions[1, :], target_distance, bond_strength, max_speed,
             time_delta, accepted_error)
@@ -492,8 +487,8 @@ class OneLead(BaseModel):
     def __repr__(self):
         args = (self.positions, self.target_distance, self.bond_strength,
                 self.max_speed, self.time_delta, self.accepted_error, self.env,
-                self.correction_const, self.task_params)
-        repr = 'OneLead({}, {}, {}, {}, {}, {}, {}, {}, {})'
+                self.correction_const)
+        repr = 'OneLead({}, {}, {}, {}, {}, {}, {}, {})'
         return repr.format(*args)
 
     def reshape_formation(self, speed):
