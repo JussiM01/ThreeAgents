@@ -1,4 +1,5 @@
 import numpy as np
+
 from scipy.stats import truncnorm
 
 NORTH = np.array([0., 1.], dtype=float)

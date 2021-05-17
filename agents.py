@@ -1,4 +1,5 @@
 import numpy as np
+
 from copy import deepcopy
 from utils import normalize, normalize_all, rotate
 

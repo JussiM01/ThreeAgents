@@ -5,10 +5,12 @@ are given in a configuration file. For more details see the project's README.
 
 """
 import argparse
+
 import numpy as np
-from interactionmodels import CentralControl, OneLead
+
 from animation import Animation
 from environment import Env, StaticUpFlow
+from interactionmodels import CentralControl, OneLead
 from utils import load_config, random_intial_positions
 
 

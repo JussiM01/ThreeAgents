@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+
 from matplotlib.animation import FuncAnimation
 from utils import init_animation
 

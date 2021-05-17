@@ -1,6 +1,7 @@
-import copy
 import numpy as np
+
 from agents import FollowerAgent, LeadAgent
+from copy import deepcopy
 from utils import (conjugate_product, normalize, normalize_all, rotate,
                    rotate_all)
 
@@ -15,9 +16,9 @@ class BaseModel:
 
     def __init__(self, positions, max_speed, time_delta, accepted_error,
                  env=None):
-        self.positions = copy.deepcopy(positions)
+        self.positions = deepcopy(positions)
         self.velocities = np.zeros(positions.shape)
-        self.targeted_positions = copy.deepcopy(positions)
+        self.targeted_positions = deepcopy(positions)
         self.targeted_velocities = np.zeros(positions.shape)
         self.disturbancies = np.zeros(positions.shape)
         self.max_speed = max_speed
@@ -280,7 +281,7 @@ class CentralControl(BaseModel):
                      / self.task_params['dist_center_to_points'])
 
             if self._about_to_over_turn(direction_diff, angle):
-                vecs = (copy.deepcopy(self.targeted_positions)
+                vecs = (deepcopy(self.targeted_positions)
                         - self.task_params['rotation_center'])
                 for i in range(3):
                     ind = np.argmin(np.linalg.norm(
@@ -333,7 +334,7 @@ class CentralControl(BaseModel):
         self.targeted_velocities = diff_directions*speed
 
         if self.env is None:
-            self.positions = copy.deepcopy(new_points)
+            self.positions = deepcopy(new_points)
             self.velocities = diff_directions*speed
 
         else:
@@ -657,8 +658,8 @@ class OneLead(BaseModel):
 
     def _follow_lead(self, speed, followers_disturbancies=None):
         """Makes the follower agents to follow the lead agent."""
-        other_positions1 = copy.deepcopy(self.positions[[0, 2], :])
-        other_positions2 = copy.deepcopy(self.positions[[0, 1], :])
+        other_positions1 = deepcopy(self.positions[[0, 2], :])
+        other_positions2 = deepcopy(self.positions[[0, 1], :])
 
         if followers_disturbancies is None:
             self.follower1.keep_distance(other_positions1, speed, None)
@@ -674,12 +675,12 @@ class OneLead(BaseModel):
 
     def _update_state(self):
         """Updates the agents' positions and velocities."""
-        pos0 = copy.deepcopy(self.lead_agent.position)
-        pos1 = copy.deepcopy(self.follower1.position)
-        pos2 = copy.deepcopy(self.follower2.position)
+        pos0 = deepcopy(self.lead_agent.position)
+        pos1 = deepcopy(self.follower1.position)
+        pos2 = deepcopy(self.follower2.position)
         self.positions = np.stack([pos0, pos1, pos2], axis=0)
 
-        vel0 = copy.deepcopy(self.lead_agent.velocity)
-        vel1 = copy.deepcopy(self.follower1.velocity)
-        vel2 = copy.deepcopy(self.follower2.velocity)
+        vel0 = deepcopy(self.lead_agent.velocity)
+        vel1 = deepcopy(self.follower1.velocity)
+        vel2 = deepcopy(self.follower2.velocity)
         self.velocities = np.stack([vel0, vel1, vel2], axis=0)
