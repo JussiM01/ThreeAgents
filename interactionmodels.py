@@ -91,9 +91,9 @@ class CentralControl(BaseModel):
         positions: numpy.ndarray (dtype: float)
             Array of shape (3, 2) representing the agents' positions.
         target_distance: float
-            Target distance between the agents in the triangle formation.
+            Target distance between the agents in the formation.
         bond_strength: float
-            Strenght constant for the triangle formation reshaping.
+            Strenght constant for the formation reshaping.
         max_speed: float
             Maximum allowed speed for all agents.
         time_delta: float
@@ -156,7 +156,7 @@ class CentralControl(BaseModel):
 
         return self._cliped(adjusted_velocities)
 
-    def reshape_formation(self, formation_type, speed):
+    def reshape_formation(self, speed):
         """Method for reshaping the agents' formation to given shape
 
         Moves the agent towards positions of the given formation type. This
@@ -165,9 +165,6 @@ class CentralControl(BaseModel):
 
         Parameters
         ----------
-            formation_type: str
-                Name of the formation type (currently only the `triangle`
-                formation type is supported).
             speed: float
                 Speed parameter for the reshaping (see `_reshape_step` for
                 details).
@@ -175,24 +172,18 @@ class CentralControl(BaseModel):
         """
         self.task_params['task_ready'] = False
 
-        if formation_type == 'triangle':
-            self.task_params['formation_type'] = formation_type
-            dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
-            dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
-            dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
+        dist_01 = np.linalg.norm(self.positions[0] - self.positions[1])
+        dist_02 = np.linalg.norm(self.positions[0] - self.positions[2])
+        dist_12 = np.linalg.norm(self.positions[1] - self.positions[2])
 
-            error = max([abs(d - self.target_distance)
-                        for d in [dist_01, dist_02, dist_12]])
+        error = max([abs(d - self.target_distance)
+                    for d in [dist_01, dist_02, dist_12]])
 
-            if error < self.accepted_error:
-                self.task_params = {
-                    'task_ready': True, 'formation_type': formation_type}
-
-            else:
-                self._reshape_step(speed)
+        if error < self.accepted_error:
+            self.task_params = {'task_ready': True}
 
         else:
-            raise NotImplementedError
+            self._reshape_step(speed)
 
     def _reshape_step(self, speed):
         """Method for single time step formation reshaping.
@@ -214,15 +205,14 @@ class CentralControl(BaseModel):
         """
         velocities = []
 
-        if self.task_params['formation_type'] == 'triangle':
-            for i in range(self.num_agents):
-                vectors_to_all = self.positions - self.positions[i, :]
-                deviations = np.linalg.norm(
-                    vectors_to_all, axis=1) - self.target_distance
-                deviations = np.expand_dims(deviations, axis=1)
-                velocity = self.bond_strength*speed*np.sum(
-                    deviations*normalize_all(vectors_to_all), axis=0)
-                velocities.append(velocity)
+        for i in range(self.num_agents):
+            vectors_to_all = self.positions - self.positions[i, :]
+            deviations = np.linalg.norm(
+                vectors_to_all, axis=1) - self.target_distance
+            deviations = np.expand_dims(deviations, axis=1)
+            velocity = self.bond_strength*speed*np.sum(
+                deviations*normalize_all(vectors_to_all), axis=0)
+            velocities.append(velocity)
 
         velocities = np.stack(velocities, axis=0)
         self._move(velocities)
@@ -241,9 +231,6 @@ class CentralControl(BaseModel):
                 speed of the rotation.
 
         """
-        if self.task_params['formation_type'] != 'triangle':
-            raise NotImplementedError
-
         if 'rotation_center' not in self.task_params:
             self.task_params['task_ready'] = False
             center_of_mass = np.mean(self.targeted_positions, axis=0)
@@ -272,9 +259,7 @@ class CentralControl(BaseModel):
             lead_direction - self.task_params['target_direction'])
 
         if direction_diff < self.accepted_error:
-            formation_type = self.task_params['formation_type']
-            self.task_params = {
-                'task_ready': True, 'formation_type': formation_type}
+            self.task_params = {'task_ready': True}
 
         else:
             angle = (self.task_params['rotation_speed'] * self.time_delta
@@ -406,9 +391,7 @@ class CentralControl(BaseModel):
         dist_cm_to_target = np.linalg.norm(cm_to_target)
 
         if dist_cm_to_target < self.accepted_error:
-            formation_type = self.task_params['formation_type']
-            self.task_params = {
-                'task_ready': True, 'formation_type': formation_type}
+            self.task_params = {'task_ready': True}
 
         else:
 
@@ -453,9 +436,9 @@ class OneLead(BaseModel):
         positions: numpy.ndarray (dtype: float)
             Array of shape (3, 2) representing the agents' positions.
         target_distance: float
-            Target distance between the agents in the triangle formation.
+            Target distance between the agents in the formation.
         bond_strength: float
-            Strenght constant for the triangle formation reshaping.
+            Strenght constant for the formation reshaping.
         max_speed: float
             Maximum allowed speed for all agents.
         time_delta: float

@@ -65,7 +65,6 @@
     "tasks": [
         {
             "args": [
-                "triangle",
                 10.0
             ],
             "type": "reshape"
