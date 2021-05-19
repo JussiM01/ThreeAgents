@@ -28,7 +28,7 @@ def main(parsed_args):
 
     """
     config_dict = load_config(parsed_args.conf_file)
-    interaction = config_dict['type']
+    interaction = config_dict['interaction']
     anim_init = config_dict['animation']
     model_init = config_dict['model']
     env_init = config_dict['env']

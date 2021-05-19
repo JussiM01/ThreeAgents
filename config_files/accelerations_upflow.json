@@ -37,6 +37,7 @@
         "vectorfield": "StaticUpFlow",
         "visuals": null
     },
+    "interaction": "one_lead",
     "model": {
         "accepted_error": 0.005,
         "bond_strength": 1.0,
@@ -90,6 +91,5 @@
             ],
             "type": "apply_acceleration"
         }
-    ],
-    "type": "one_lead"
+    ]
 }

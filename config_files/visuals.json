@@ -55,6 +55,7 @@
             }
         }
     },
+    "interaction": "central_control",
     "model": {
         "accepted_error": 0.005,
         "bond_strength": 1.0,
@@ -89,6 +90,5 @@
             ],
             "type": "shift"
         }
-    ],
-    "type": "central_control"
+    ]
 }
