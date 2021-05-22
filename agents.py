@@ -222,9 +222,9 @@ class FollowerAgent(BaseAgent):
         position: numpy.ndarray (dtype: float)
             Array of shape (2, ) representing the agent's position.
         target_distance: float
-            Target distance between the agents in the triangle formation.
+            Target distance between the agents in the formation.
         bond_strength: float
-            Strenght constant for the triangle formation reshaping.
+            Strenght constant for the formation reshaping.
         max_speed: float
             Maximum speed of the agent.
         time_delta: float
