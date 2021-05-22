@@ -160,7 +160,7 @@ class CentralControl(BaseModel):
         """Method for reshaping the agents' formation to given shape
 
         Moves the agent towards positions of the given formation type. This
-        task is accepted as done when the postions are close enough to wanted
+        task is accepted as done when the positions are close enough to wanted
         positions (ie. the distance is less than `self.accepted_error`).
 
         Parameters
@@ -365,8 +365,8 @@ class CentralControl(BaseModel):
 
         Moves the formation towards the target point with the given speed
         and make course corrections if there are disturbancies. The task
-        is finished when center point of the formation is within distance
-        of `self.accepted_error` away from target.
+        is finished when center point of the agents' targeted_positions is
+        within distance of `self.accepted_error` away from target.
 
         Parameters
         ----------
@@ -520,8 +520,9 @@ class OneLead(BaseModel):
 
         Moves the agents towards the target point with the given speed and
         makes the lead agent to apply course corrections if there are any
-        disturbancies. The task is finished when the lead agent is within
-        distance of `self.accepted_error` away from target.
+        disturbancies. The task is considered finished when the lead agent's
+        targeted_position is within distance of `self.accepted_error` away
+        from target.
 
         Parameters
         ----------
