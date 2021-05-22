@@ -111,7 +111,24 @@ class LeadAgent(BaseAgent):
         return repr.format(*args)
 
     def shift(self, target_point, speed, disturbance):
+        """Shifts the lead agent towards the givent target point.
 
+        Moves the agents towards the target point with the given speed and
+        makes the applies course corrections if there are any disturbancies.
+        The task is considered finished when the targeted_position is within
+        distance of `self.accepted_error` away from target.
+
+        Parameters
+        ----------
+            target_point: numpy.ndarray (dtype: float)
+                Array of shape (2, ), coordinates of the target point.
+            speed: flot
+                speed of the shifting.
+            disturbance: numpy.ndarray (dtype: float) or None (default: None)
+                Array of shape (2, ), the disturbance vector (None if the
+                environment is equal to None).
+
+        """
         if 'course_target' not in self.action_params:
             self.action_params['task_ready'] = False
             self.action_params['course_target'] = np.array(
