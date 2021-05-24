@@ -15,10 +15,10 @@ from utils import load_config, random_intial_positions
 
 
 def main(parsed_args):
-    """Sets up everything and runs the animation.
+    """Sets up everything and runs the simulation.
 
     This function first intializes animation, interaction model and environment
-    (optional) and then runs the animation.
+    (optional) and then runs the simulation.
 
     Parameters
     ----------
