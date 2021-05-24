@@ -133,7 +133,7 @@ def init_animation(params, points, dots=None):
             and the dots.
 
     """
-    fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
+    fig = plt.figure(figsize=(params['fig_width'], params['fig_height']))
     axes = fig.add_axes(
         [params['x_min'], params['y_min'], params['x_max'], params['y_max']],
         frameon=params['frameon'])
