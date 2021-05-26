@@ -57,9 +57,9 @@
     },
     "interaction": "one_lead",
     "model": {
-        "accepted_error": 0.005,
+        "accepted_error": 0.01,
         "bond_strength": 1.0,
-        "max_speed": 100.0,
+        "max_speed": 200.0,
         "target_distance": 1.0,
         "time_delta": 0.005
     },
