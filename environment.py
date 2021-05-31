@@ -60,8 +60,8 @@ class Env:
 
         """
         t = self.time_now
-        f = lambda x: self.vector_field(x, t)
-        vectors = np.apply_along_axis(f, 1, points)
+        vectors = np.apply_along_axis(
+            lambda x: self.vector_field(x, t), 1, points)
         self.time_now += self.time_delta
 
         return vectors
@@ -156,9 +156,7 @@ class StaticUpFlow(FlowTube):
 
     def __init__(self, center, width, mid_value):
         bump_map = BumpMap(center, width)
-        bump_func = lambda p: bump_map(p[0])
-        static_map = lambda t: mid_value
-        super().__init__(bump_func, static_map, center)
+        super().__init__(lambda p: bump_map(p[0]), lambda t: mid_value, center)
         self.center = center
         self.width = width
         self.mid_value = mid_value
