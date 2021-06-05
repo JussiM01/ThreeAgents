@@ -71,6 +71,107 @@ def rotate_all(points, angle):
 
 # --- Helpers for animation.py ------------------------------------------------
 
+class RandomTopography:
+    """Class for creating random countors which resemble a topograpy map.
+
+    This class is used for sampling positive and negative gaussian bumps which
+    are added together for getting the height values of a random topograpy.
+    These are used for creating the matplotlib countors for the animation plot.
+
+    Parameters
+    ----------
+        random_scales: {
+                        'ax_x_min': float,
+                        'ax_x_max': float,
+                        'ax_y_min': float,
+                        'ax_y_max': float,
+                        'cov_diag_min': float,
+                        'cov_diag_max': float,
+                        'cov_offd_min': float,
+                        'cov_offd_max': float
+                        }
+            Dictionary containing the values from which the parameters of the
+            gaussian distributions are drawn.
+        countor_params: {
+                        'num_x_grid': int,
+                        'num_y_grid': int,
+                        'colors': str
+                        }
+            Dictionary containing the countors grid sizes and colors string.
+        num_gauss: int
+            Number of postive and negative gaussian bumps (same used for both).
+
+    """
+
+    def __init__(self, random_scales, num_gauss, countor_params):
+        self.mean_x_min = random_scales['ax_x_min']
+        self.mean_x_max = random_scales['ax_x_max']
+        self.mean_y_min = random_scales['ax_x_min']
+        self.mean_y_max = random_scales['ax_x_max']
+        self.cov_diag_min = random_scales['cov_diag_min']
+        self.cov_diag_max = random_scales['cov_diag_max']
+        self.cov_offd_min = random_scales['cov_offd_min']
+        self.cov_offd_max = random_scales['cov_offd_max']
+        self.num_gauss = num_gauss
+        self.num_x_grid = countor_params['num_x_grid']
+        self.num_y_grid = countor_params['num_y_grid']
+        self.colors = countor_params['colors']
+
+    def _sample_params(self):
+        means = []
+        covs = []
+
+        for _ in range(self.num_gauss):
+            mean_x = np.random.uniform(self.mean_x_min, self.mean_x_max)
+            mean_y = np.random.uniform(self.mean_x_min, self.mean_x_max)
+
+            cov_xx = np.random.uniform(self.cov_diag_min, self.cov_diag_max)
+            cov_xy = np.random.uniform(self.cov_offd_min, self.cov_offd_max)
+            cov_yy = np.random.uniform(self.cov_diag_min, self.cov_diag_max)
+
+            means.append([mean_x, mean_y])
+            covs.append([[cov_xx, cov_xy], [cov_xy, cov_yy]])
+
+        return means, covs
+
+    def _sample_heights(self, x_grid, y_grid):
+        pos_means, pos_covs = self._sample_params()
+        neg_means, neg_covs = self._sample_params()
+
+        pos = []
+        neg = []
+
+        arr = np.stack([x_grid, y_grid], axis=2)
+        rv = multivariate_normal()
+
+        for i in range(self.num_gauss):
+            rv_pos = multivariate_normal(pos_means[i], pos_covs[i])
+            rv_neg = multivariate_normal(neg_means[i], neg_covs[i])
+            z_pos = rv_pos.pdf(arr)
+            z_neg = rv_neg.pdf(arr)
+
+            pos.append(z_pos)
+            neg.append(z_neg)
+
+        pos_values = np.sum(np.stack(pos, axis=0), axis=0)
+        neg_values = np.sum(np.stack(neg, axis=0), axis=0)
+
+        return pos_values - neg_values
+
+    def create_countors(self, axes):
+        """Creates the random countors to a given axes object."""
+        x = np.linspace(ax_x_min, ax_x_max, self.num_x_grid)
+        y = np.linspace(ax_y_min, ax_y_max, self.num_y_grid)
+
+        X, Y = np.meshgrid(x, y)
+        Z = self._sample_heights(X, Y)
+
+        plt.rcParams['contour.negative_linestyle'] = 'solid'
+        countors = axes.contour(X, Y, Z, colors=self.colors)
+
+        return countors
+
+
 def init_scatter(params, axes, points):
     """Function for intializing a scatter artist.
 
