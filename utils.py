@@ -4,6 +4,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scipy.stats import multivariate_normal
+
 
 # --- Helpers for main.py -----------------------------------------------------
 
@@ -160,8 +162,8 @@ class RandomTopography:
 
     def create_countors(self, axes):
         """Creates the random countors to a given axes object."""
-        x = np.linspace(ax_x_min, ax_x_max, self.num_x_grid)
-        y = np.linspace(ax_y_min, ax_y_max, self.num_y_grid)
+        x = np.linspace(self.mean_x_min, self.mean_x_max, self.num_x_grid)
+        y = np.linspace(self.mean_y_min, self.mean_y_max, self.num_y_grid)
 
         X, Y = np.meshgrid(x, y)
         Z = self._sample_heights(X, Y)
@@ -256,6 +258,9 @@ def init_animation(params, points, dots=None):
             }
         env_scatter = init_scatter(env_scatter_params, axes, dots)
 
-        return fig, env_scatter, scatter
+        random_topography = RandomTopography(**params['topography'])
+        countors = random_topography.create_countors(axes)
+
+        return fig, countors, env_scatter, scatter
 
     return fig, scatter

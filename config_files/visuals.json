@@ -22,6 +22,25 @@
         "interval": 10.0,
         "pointsize": 50,
         "remove_thicks": false,
+        "topography": {
+            "countor_params": {
+                "colors": "lightgray",
+                "fontsize": 10,
+                "num_x_grid": 70,
+                "num_y_grid": 70
+            },
+            "num_gauss": 50,
+            "random_scales": {
+                "ax_x_max": 10.0,
+                "ax_x_min": -10.0,
+                "ax_y_max": 10.0,
+                "ax_y_min": -10.0,
+                "cov_diag_max": 10.0,
+                "cov_diag_min": 5.0,
+                "cov_offd_max": 5.0,
+                "cov_offd_min": -5.0
+            }
+        },
         "use_grid": false,
         "x_max": 0.8,
         "x_min": 0.1,

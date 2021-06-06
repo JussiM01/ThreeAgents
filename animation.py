@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from matplotlib.animation import FuncAnimation
-from utils import init_animation, RandomTopography
+from utils import init_animation
 
 
 class Animation:
@@ -35,9 +35,10 @@ class Animation:
 
             self.use_visuals = True
             dots = self.model.env.dots
-            fig, env_scatter, scatter = init_animation(
+            fig, countors, env_scatter, scatter = init_animation(
                 plot_params, positions, dots)
             self.fig = fig
+            self.countors = countors
             self.env_scatter = env_scatter
             self.scatter = scatter
 
@@ -112,7 +113,7 @@ class Animation:
             dots = self.model.env.visualize()
             self.env_scatter.set_offsets(dots)
 
-            return self.env_scatter, self.scatter
+            return self.env_scatter, self.scatter # NOTE: RETURN COUNTORS HERE ?
 
         return (self.scatter,)
 
