@@ -60,11 +60,11 @@ if __name__ == '__main__':
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         '-f', '--conf_file', type=str, default='visuals_cen.json')
-    parser.add_argument('-r', '--random_seed', type=int, default=0)
     parser.add_argument('-x0', '--x_min', type=float, default=0.1)
     parser.add_argument('-x1', '--x_max', type=float, default=0.2)
     parser.add_argument('-y0', '--y_min', type=float, default=0.4)
     parser.add_argument('-y1', '--y_max', type=float, default=0.5)
+    parser.add_argument('-r', '--random_seed', type=int)
     args = parser.parse_args()
 
     # set random seed
