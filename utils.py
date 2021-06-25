@@ -247,6 +247,16 @@ def init_animation(params, points, dots=None):
         axes.set_xticks([])
         axes.set_yticks([])
 
+    else:
+        step_size = params['step_size']
+        ax_x_min = params['ax_x_min']
+        ax_x_max = params['ax_x_max']
+        ax_y_min = params['ax_y_min']
+        ax_y_max = params['ax_y_max']
+
+        axes.set_xticks(np.arange(ax_x_min, ax_x_max + 1, step_size))
+        axes.set_yticks(np.arange(ax_y_min, ax_y_max + 1, step_size))
+
     axes.grid(params['use_grid'])
     scatter = init_scatter(params, axes, points)
 
