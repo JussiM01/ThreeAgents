@@ -93,6 +93,14 @@ class LeadAgent(BaseAgent):
 
     Attributes
     ----------
+        position: numpy.ndarray (dtype: float)
+            Array of shape (2, ) representing the agent's position.
+        max_speed: float
+            Maximum speed of the agent.
+        time_delta: float
+            Lenght of the unit time increment.
+        accepted_error: float
+            Tasks are done when distance to target is less than this.
         correction_const: [float, float]
             List containing the amounts of position and velocity based
             corrections.
@@ -259,6 +267,18 @@ class FollowerAgent(BaseAgent):
 
     Attributes
     ----------
+        position: numpy.ndarray (dtype: float)
+            Array of shape (2, ) representing the agent's position.
+        target_distance: float
+            Target distance between the agents in the formation.
+        bond_strength: float
+            Strenght constant for the formation reshaping.
+        max_speed: float
+            Maximum speed of the agent.
+        time_delta: float
+            Lenght of the unit time increment.
+        accepted_error: float
+            Tasks are done when distance to target is less than this.
         target_distance: float
             The amount of desired distance between each agent.
         bond_strength: float

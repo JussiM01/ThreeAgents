@@ -23,6 +23,14 @@ class Env:
 
     Attributes
     ----------
+        vector_field: object
+            Callable object which returns the values of the vector filed at
+            given points when its `__call__` method is invoked.
+        time_delta: float
+            Lenght of the unit time increment.
+        visuals_init: dict or None
+            Dictionary containing the parameters for intialisation of the
+            visualization (or None if visualization is not used).
         time_now: float
             Time from the start.
         use_visuals: bool
@@ -125,42 +133,54 @@ class FlowTube:
     """
 
     def __init__(self, flow_map, fluctuation, center_point, direction=NORTH):
-        self.flow_map = flow_map
-        self.fluctuation = fluctuation
-        self.center_point = center_point
-        self.direction = direction
+        self._flow_map = flow_map
+        self._fluctuation = fluctuation
+        self._center_point = center_point
+        self._direction = direction
         # currently only one direction is supported
         if not np.array_equal(direction, NORTH):
             raise NotImplementedError
 
     def __repr__(self):
-        args = (self.flow_map, self.fluctuation, self.center_point,
-                self.direction)
+        args = (self._flow_map, self._fluctuation, self._center_point,
+                self._direction)
         return 'FlowTube({}, {}, {}, {})'.format(*args)
 
     def __call__(self, point, time):
         """Evaluates the vector field at a given point."""
-        strenght = self.flow_map(point)*self.fluctuation(time)
-        vector = strenght*self.direction
+        strenght = self._flow_map(point)*self._fluctuation(time)
+        vector = strenght*self._direction
 
         return vector
 
 
 class BumpMap:
-    """Class for representing a bump function."""
+    """Class for representing a bump function.
+
+    Creates a smooth exponential bump function corresponding to given
+    center value and width.
+
+    Parameters
+    ----------
+        center: float
+            Center point where the function value is one.
+        width: float
+            For arguments with absolute value greater than half of this the
+            function value is zero.
+
+    """
 
     def __init__(self, center, width):
-
-        self.center = center
-        self.width = width
+        self._center = center
+        self._width = width
 
     def __repr__(self):
-        return 'BumpMap({}, {})'.format(self.center, self.width)
+        return 'BumpMap({}, {})'.format(self._center, self._width)
 
     def __call__(self, num_float):
         """Calculate the bump function value for a given float."""
-        dist_square = (num_float - self.center)**2
-        rad_square = (self.width*0.5)**2
+        dist_square = (num_float - self._center)**2
+        rad_square = (self._width*0.5)**2
 
         if dist_square < rad_square:
             return np.exp(1/rad_square)*np.exp(-1/(rad_square - dist_square))
@@ -169,17 +189,32 @@ class BumpMap:
 
 
 class StaticUpFlow(FlowTube):
-    """Static bump function valued flow towards postive y-direction."""
+    """Static bump function valued flow towards postive y-direction.
+
+    Creates a FlowTube that is supported in a rectangular area with values
+    decreasing according to a bump function valued distribution in towards
+    x-direction at the tube boundary.
+
+    Parameters
+    ----------
+        center: [float, float]
+            Coordinates of the middle point.
+        width: float
+            width of the tube in the x-direction.
+        mid_value: float
+            Strenght of the flow in the vertical middle line.
+
+    """
 
     def __init__(self, center, width, mid_value):
         bump_map = BumpMap(center, width)
         super().__init__(lambda p: bump_map(p[0]), lambda t: mid_value, center)
-        self.center = center
-        self.width = width
-        self.mid_value = mid_value
+        self._center = center
+        self._width = width
+        self._mid_value = mid_value
 
     def __repr__(self):
-        args = (self.center, self.width, self.mid_value)
+        args = (self._center, self._width, self._mid_value)
         return 'StaticUpFlow({}, {}, {})'.format(*args)
 
 
@@ -200,8 +235,8 @@ class TubeSampler:
     """
 
     def __init__(self, x_range, y_range):
-        self.truncnorm = truncnorm(x_range[0], x_range[1])
-        self.y_vals = y_range
+        self._truncnorm = truncnorm(x_range[0], x_range[1])
+        self._y_vals = y_range
 
     def __repr__(self):
         return 'TubeSampler({}, {})'.format(self.x_range, self.y_range)
@@ -224,9 +259,9 @@ class TubeSampler:
                 Array of shape (num_points, 2) containing the points.
 
         """
-        x_coordinates = self.truncnorm.rvs((num_points, 1))
+        x_coordinates = self._truncnorm.rvs((num_points, 1))
         y_coordinates = np.random.uniform(
-            self.y_vals[0], self.y_vals[1], (num_points, 1))
+            self._y_vals[0], self._y_vals[1], (num_points, 1))
         points = np.concatenate([x_coordinates, y_coordinates], axis=1)
 
         return points
@@ -255,19 +290,19 @@ class WrapAroundMap:
     """
 
     def __init__(self, min_x, max_x, min_y, max_y):
-        self.min_x = min_x
-        self.max_x = max_x
-        self.min_y = min_y
-        self.max_y = max_y
+        self._min_x = min_x
+        self._max_x = max_x
+        self._min_y = min_y
+        self._max_y = max_y
 
     def __repr__(self):
-        args = (self.min_x, self.max_x, self.min_y, self.max_y)
+        args = (self._min_x, self._max_x, self._min_y, self._max_y)
         return 'WrapAroundMap({}, {}, {}, {})'.format(*args)
 
     def __call__(self, array):
         """Applies the wrap around mapping to an array of vectors."""
-        min_array = np.array([[self.min_x, self.min_y]], dtype=float)
-        upper_bounds = (np.array([[self.max_x, self.max_y]], dtype=float)
+        min_array = np.array([[self._min_x, self._min_y]], dtype=float)
+        upper_bounds = (np.array([[self._max_x, self._max_y]], dtype=float)
                         - min_array)
 
         return min_array + np.remainder(array - min_array, upper_bounds)

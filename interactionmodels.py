@@ -107,6 +107,22 @@ class CentralControl(BaseModel):
 
     Attributes
     ----------
+        positions: numpy.ndarray (dtype: float)
+            Array of shape (3, 2) representing the agents' positions.
+        target_distance: float
+            Target distance between the agents in the formation.
+        bond_strength: float
+            Strenght constant for the formation reshaping.
+        max_speed: float
+            Maximum allowed speed for all agents.
+        time_delta: float
+            Lenght of the unit time increment.
+        accepted_error: float
+            Tasks are done when distance to target is less than this.
+        env: environment.Env or None (default)
+            Object representing the environment.
+        correction_const: [float, float] or None (default)
+            Constants for velocity and position based course corrections.
         task_params: dict
             Dictionary containing parameters for the task execution.
 
@@ -457,8 +473,25 @@ class OneLead(BaseModel):
 
     Attributes
     ----------
+        positions: numpy.ndarray (dtype: float)
+            Array of shape (3, 2) representing the agents' positions.
+        target_distance: float
+            Target distance between the agents in the formation.
+        bond_strength: float
+            Strenght constant for the formation reshaping.
+        max_speed: float
+            Maximum allowed speed for all agents.
+        time_delta: float
+            Lenght of the unit time increment.
+        accepted_error: float
+            Tasks are done when distance to target is less than this.
+        env: environment.Env or None (default)
+            Object representing the environment.
+        correction_const: [float, float] or None (default)
+            Constants for velocity and position based course corrections.
         task_params: dict
             Dictionary containing parameters for the task execution.
+            
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,

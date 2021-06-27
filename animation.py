@@ -22,8 +22,13 @@ class Animation:
 
     Attributes
     ----------
+        plot_params: dict
+            Parameters for intializing the animation figure and the artists
+            used for the visualizations.
+        model:
+            Interaction model for the agents and (optionally) the environment.
         task_list: list
-            List of the movemnts tasks to be executed.
+            List of the agents' movent tasks.
         last: int
             Index of the last task.
         task_index: int
