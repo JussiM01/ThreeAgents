@@ -100,10 +100,15 @@ class CentralControl(BaseModel):
             Lenght of the unit time increment.
         accepted_error: float
             Tasks are done when distance to target is less than this.
-        env: environment.Env
+        env: environment.Env or None (default)
             Object representing the environment.
-        correction_const: list (types: [float, float])
+        correction_const: [float, float] or None (default)
             Constants for velocity and position based course corrections.
+
+    Attributes
+    ----------
+        task_params: dict
+            Dictionary containing parameters for the task execution.
 
     """
 
@@ -225,7 +230,7 @@ class CentralControl(BaseModel):
 
         Parameters
         ----------
-            target_point: list (types [float, float])
+            target_point: [float, float]
                 List containing the coordinates of the target point.
             speed: flot
                 speed of the rotation.
@@ -445,11 +450,15 @@ class OneLead(BaseModel):
             Lenght of the unit time increment.
         accepted_error: float
             Tasks are done when distance to target is less than this.
-        env: environment.Env
+        env: environment.Env or None (default)
             Object representing the environment.
-        correction_const: list (types: [float, float])
+        correction_const: [float, float] or None (default)
             Constants for velocity and position based course corrections.
 
+    Attributes
+    ----------
+        task_params: dict
+            Dictionary containing parameters for the task execution.
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
@@ -526,7 +535,7 @@ class OneLead(BaseModel):
 
         Parameters
         ----------
-            target_point: list (types [float, float])
+            target_point: [float, float]
                 List containing the coordinates of the target point.
             speed: flot
                 speed of the shifting.

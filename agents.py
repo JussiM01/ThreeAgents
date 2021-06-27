@@ -91,6 +91,14 @@ class LeadAgent(BaseAgent):
         correction_const: list (types: [float, float])
             Constants for velocity and position based course corrections.
 
+    Attributes
+    ----------
+        correction_const: [float, float]
+            List containing the amounts of position and velocity based
+            corrections.
+        action_params: dict
+            Dictionary containing parameters for the task execution.
+
     """
 
     def __init__(self, position, max_speed, time_delta, accepted_error,
@@ -248,6 +256,13 @@ class FollowerAgent(BaseAgent):
             Lenght of the unit time increment.
         accepted_error: float
             Tasks are done when distance to target is less than this.
+
+    Attributes
+    ----------
+        target_distance: float
+            The amount of desired distance between each agent.
+        bond_strength: float
+            Strenght paramter for the pull towards target distance position.
 
      """
 
