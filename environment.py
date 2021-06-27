@@ -21,6 +21,23 @@ class Env:
             Dictionary containing the parameters for intialisation of the
             visualization (or None if visualization is not used).
 
+    Attributes
+    ----------
+        time_now: float
+            Time from the start.
+        use_visuals: bool
+            False if `visuals_init` is None else True.
+        wraparoundmap: object
+            (Set only if `visuals_init` is not None.)
+            Callable object responsible for stopping points from escaping at
+            the boundary.
+        sampler: TubeSampler
+            (Set only if `visuals_init` is not None.)
+            Samples the original postions of the points for flow visualization.
+        dots: numpy.ndarray (dtype: float)
+            (Set only if `visuals_init` is not None.)
+            Positions of the visualization points.
+
     """
 
     def __init__(self, vector_field, time_delta, visuals_init=None):
@@ -105,7 +122,7 @@ class FlowTube:
             Array of shape (2,). The direction of the flow (currently only
             [0.0, 1.0] is supported).
 
-        """
+    """
 
     def __init__(self, flow_map, fluctuation, center_point, direction=NORTH):
         self.flow_map = flow_map
@@ -203,7 +220,7 @@ class TubeSampler:
 
         Returns
         -------
-            points:  numpy.ndarray (dtype: float)
+            points: numpy.ndarray (dtype: float)
                 Array of shape (num_points, 2) containing the points.
 
         """
