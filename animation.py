@@ -20,6 +20,30 @@ class Animation:
         model:
             Interaction model for the agents and (optionally) the environment.
 
+    Attributes
+    ----------
+        task_list: list
+            List of the movemnts tasks to be executed.
+        last: int
+            Index of the last task.
+        task_index: int
+            Index of the current task.
+        use_visuals: bool
+            Wheter or not to visualize disturbance and random topograpy.
+        fig: matplotlib.figure.Figure
+            Figure object for the animation plotting.
+        scatter: matplotlib.axes.collections.PathCollection
+            Scatter object for showing the agents positions in the plot.
+        dots: numpy.ndarray (dtype: float)
+            (Set only if `use_visuals` is True.)
+            Positions of the dots use for visualizing the disturbance.
+        countors: matplotlib.contour.QuadContourSet
+            (Set only if `use_visuals` is True.)
+            Countors for visualizing the random topography.
+        env_scatter: matplotlib.axes.collections.PathCollection
+            (Set only if `use_visuals` is True.)
+            Scatter object for showing the disturbance visualization.
+
     """
 
     def __init__(self, plot_params, task_list, model):
@@ -65,12 +89,12 @@ class Animation:
 
         Returns
         -------
-            if self.use_visuals None:
+            if self.use_visuals == False:
                 (scatter,): (
                     matplotlib.axes.collections.PathCollection,
                     )
                 Tuple with only the scatter artist for the agents.
-            else:
+            if self.use_visuals == True:
                 (env_scatter, scatter): (
                     matplotlib.axes.collections.PathCollection,
                     matplotlib.axes.collections.PathCollection
@@ -113,7 +137,7 @@ class Animation:
             dots = self.model.env.visualize()
             self.env_scatter.set_offsets(dots)
 
-            return self.env_scatter, self.scatter # NOTE: RETURN COUNTORS HERE ?
+            return self.env_scatter, self.scatter
 
         return (self.scatter,)
 
