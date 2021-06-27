@@ -106,30 +106,30 @@ class RandomTopography:
     """
 
     def __init__(self, random_scales, num_gauss, countor_params):
-        self.mean_x_min = random_scales['ax_x_min']
-        self.mean_x_max = random_scales['ax_x_max']
-        self.mean_y_min = random_scales['ax_x_min']
-        self.mean_y_max = random_scales['ax_x_max']
-        self.cov_diag_min = random_scales['cov_diag_min']
-        self.cov_diag_max = random_scales['cov_diag_max']
-        self.cov_offd_min = random_scales['cov_offd_min']
-        self.cov_offd_max = random_scales['cov_offd_max']
-        self.num_gauss = num_gauss
-        self.num_x_grid = countor_params['num_x_grid']
-        self.num_y_grid = countor_params['num_y_grid']
-        self.colors = countor_params['colors']
+        self._mean_x_min = random_scales['ax_x_min']
+        self._mean_x_max = random_scales['ax_x_max']
+        self._mean_y_min = random_scales['ax_x_min']
+        self._mean_y_max = random_scales['ax_x_max']
+        self._cov_diag_min = random_scales['cov_diag_min']
+        self._cov_diag_max = random_scales['cov_diag_max']
+        self._cov_offd_min = random_scales['cov_offd_min']
+        self._cov_offd_max = random_scales['cov_offd_max']
+        self._num_gauss = num_gauss
+        self._num_x_grid = countor_params['num_x_grid']
+        self._num_y_grid = countor_params['num_y_grid']
+        self._colors = countor_params['colors']
 
     def _sample_params(self):
         means = []
         covs = []
 
-        for _ in range(self.num_gauss):
-            mean_x = np.random.uniform(self.mean_x_min, self.mean_x_max)
-            mean_y = np.random.uniform(self.mean_x_min, self.mean_x_max)
+        for _ in range(self._num_gauss):
+            mean_x = np.random.uniform(self._mean_x_min, self._mean_x_max)
+            mean_y = np.random.uniform(self._mean_x_min, self._mean_x_max)
 
-            cov_xx = np.random.uniform(self.cov_diag_min, self.cov_diag_max)
-            cov_xy = np.random.uniform(self.cov_offd_min, self.cov_offd_max)
-            cov_yy = np.random.uniform(self.cov_diag_min, self.cov_diag_max)
+            cov_xx = np.random.uniform(self._cov_diag_min, self._cov_diag_max)
+            cov_xy = np.random.uniform(self._cov_offd_min, self._cov_offd_max)
+            cov_yy = np.random.uniform(self._cov_diag_min, self._cov_diag_max)
 
             means.append([mean_x, mean_y])
             covs.append([[cov_xx, cov_xy], [cov_xy, cov_yy]])
@@ -146,7 +146,7 @@ class RandomTopography:
         arr = np.stack([x_grid, y_grid], axis=2)
         rv = multivariate_normal()
 
-        for i in range(self.num_gauss):
+        for i in range(self._num_gauss):
             rv_pos = multivariate_normal(pos_means[i], pos_covs[i])
             rv_neg = multivariate_normal(neg_means[i], neg_covs[i])
             z_pos = rv_pos.pdf(arr)
@@ -162,14 +162,14 @@ class RandomTopography:
 
     def create_countors(self, axes):
         """Creates the random countors to a given axes object."""
-        x = np.linspace(self.mean_x_min, self.mean_x_max, self.num_x_grid)
-        y = np.linspace(self.mean_y_min, self.mean_y_max, self.num_y_grid)
+        x = np.linspace(self._mean_x_min, self._mean_x_max, self._num_x_grid)
+        y = np.linspace(self._mean_y_min, self._mean_y_max, self._num_y_grid)
 
         X, Y = np.meshgrid(x, y)
         Z = self._sample_heights(X, Y)
 
         plt.rcParams['contour.negative_linestyle'] = 'solid'
-        countors = axes.contour(X, Y, Z, colors=self.colors)
+        countors = axes.contour(X, Y, Z, colors=self._colors)
 
         return countors
 
