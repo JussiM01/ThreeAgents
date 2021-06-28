@@ -23,8 +23,8 @@ def main(parsed_args):
     Parameters
     ----------
         parsed_args: argparse.Namespace
-            Parsed arguments containing the parameters that are used for
-            sampling the agents' initial positions.
+            Parsed arguments containing name of the cofig-file and parameters
+            that are used for sampling the agents' initial positions.
 
     """
     config_dict = load_config(parsed_args.conf_file)
