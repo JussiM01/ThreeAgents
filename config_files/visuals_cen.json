@@ -21,7 +21,7 @@
         "frameon": true,
         "interval": 10.0,
         "pointsize": 50,
-        "remove_thicks": true,
+        "remove_ticks": true,
         "step_size": 2,
         "topography": {
             "countor_params": {

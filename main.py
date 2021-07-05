@@ -49,11 +49,11 @@ def main(parsed_args):
     if interaction == 'one_lead':
         interactionmodel = OneLead(**model_init)
 
-    if parsed_args.use_thicks:
-        anim_init['remove_thicks'] = False
+    if parsed_args.use_ticks:
+        anim_init['remove_ticks'] = False
 
     if parsed_args.use_grid:
-        anim_init['remove_thicks'] = False
+        anim_init['remove_ticks'] = False
         anim_init['use_grid'] = True
 
     animation = Animation(anim_init, tasks, interactionmodel)
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('-x1', '--x_max', type=float, default=0.2)
     parser.add_argument('-y0', '--y_min', type=float, default=0.4)
     parser.add_argument('-y1', '--y_max', type=float, default=0.5)
-    parser.add_argument('-t', '--use_thicks', action='store_true')
+    parser.add_argument('-t', '--use_ticks', action='store_true')
     parser.add_argument('-g', '--use_grid', action='store_true')
     parser.add_argument('-r', '--random_seed', type=int)
     args = parser.parse_args()

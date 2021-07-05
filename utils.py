@@ -243,7 +243,7 @@ def init_animation(params, points, dots=None):
     axes.set_xlim(params['ax_x_min'], params['ax_x_max'])
     axes.set_ylim(params['ax_y_min'], params['ax_y_max'])
 
-    if params['remove_thicks']:
+    if params['remove_ticks']:
         axes.set_xticks([])
         axes.set_yticks([])
 
