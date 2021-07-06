@@ -491,7 +491,7 @@ class OneLead(BaseModel):
             Constants for velocity and position based course corrections.
         task_params: dict
             Dictionary containing parameters for the task execution.
-            
+
     """
 
     def __init__(self, positions, target_distance, bond_strength, max_speed,
@@ -584,8 +584,8 @@ class OneLead(BaseModel):
                                - self.task_params['course_target'])
 
         if error < self.accepted_error:
-            self.lead_agent.action_params['task_ready'] = True
-            self.task_params['task_ready'] = True
+            self.lead_agent.action_params = {'task_ready': True}
+            self.task_params = {'task_ready': True}
 
         else:
             self._shift_moves(speed)
