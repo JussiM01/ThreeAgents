@@ -60,7 +60,7 @@
                     1.0,
                     0.0
                 ],
-                10,
+                5,
                 100.0
             ],
             "type": "start_acceleration"
@@ -69,7 +69,7 @@
             "args": [
                 0.0,
                 1000.0,
-                20,
+                5,
                 100.0
             ],
             "type": "apply_acceleration"
@@ -78,7 +78,7 @@
             "args": [
                 0.0,
                 0.0,
-                10,
+                20,
                 100.0
             ],
             "type": "apply_acceleration"
@@ -87,10 +87,55 @@
             "args": [
                 0.0,
                 -1000.0,
-                20,
+                15,
                 100.0
             ],
             "type": "apply_acceleration"
-        }
+        },
+        {
+            "args": [
+                0.0,
+                0.0,
+                30,
+                100.0
+            ],
+            "type": "apply_acceleration"
+        },
+        {
+            "args": [
+                0.0,
+                1000.0,
+                40,
+                100.0
+            ],
+            "type": "apply_acceleration"
+        },
+        {
+        "args": [
+            0.0,
+            0.0,
+            30,
+            100.0
+        ],
+        "type": "apply_acceleration"
+    },
+    {
+        "args": [
+            0.0,
+            1000.0,
+            15,
+            100.0
+        ],
+        "type": "apply_acceleration"
+    },
+    {
+    "args": [
+        0.0,
+        0.0,
+        30,
+        100.0
+    ],
+    "type": "apply_acceleration"
+}
     ]
 }
