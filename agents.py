@@ -53,13 +53,14 @@ class BaseAgent:
             self.disturbance = disturbance
 
             if use_correction:
-                corrected_velocity = self._course_correction(pure_velocity)
+                velocity = pure_velocity + old_disturbance
+                corrected_velocity = self._course_correction(velocity)
 
             else:
                 corrected_velocity = pure_velocity
 
             self.velocity = corrected_velocity
-            disturbed_velocity = corrected_velocity + old_disturbance
+            disturbed_velocity = corrected_velocity + disturbance
             self.position += disturbed_velocity*self.time_delta
             self.targeted_position += pure_velocity*self.time_delta
 
@@ -222,13 +223,13 @@ class LeadAgent(BaseAgent):
                 environment is equal to None).
 
         """
-        tangential_direction = normalize(self.velocity)
+        tangential_direction = normalize(self.targeted_velocity)
         normal_direction = rotate(tangential_direction, np.pi/2)
         tangential_acceleration = tangential*tangential_direction
         normal_acceleration = normal*normal_direction
         velocity_diff = (tangential_acceleration
                          + normal_acceleration)*self.time_delta
-        velocity = self.velocity + velocity_diff
+        velocity = self.targeted_velocity + velocity_diff
 
         self._move(velocity, disturbance)
 
