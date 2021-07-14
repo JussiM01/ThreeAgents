@@ -60,7 +60,7 @@ if __name__ == '__main__':
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
-        '-f', '--conf_file', type=str, default='visuals_cen.json')
+        '-f', '--conf_file', type=str, default='central_control.json')
     parser.add_argument('-x0', '--x_min', type=float, default=0.1)
     parser.add_argument('-x1', '--x_max', type=float, default=0.2)
     parser.add_argument('-y0', '--y_min', type=float, default=0.4)
