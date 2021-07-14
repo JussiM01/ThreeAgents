@@ -34,7 +34,7 @@ class Animation:
         task_index: int
             Index of the current task.
         use_visuals: bool
-            Wheter or not to visualize disturbance and random topograpy.
+            Wheter or not to visualize disturbance and random topography.
         fig: matplotlib.figure.Figure
             Figure object for the animation plotting.
         scatter: matplotlib.axes.collections.PathCollection
