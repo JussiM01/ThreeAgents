@@ -11,7 +11,7 @@ import numpy as np
 from animation import Animation
 from environment import Env, StaticUpFlow
 from interactionmodels import CentralControl, OneLead
-from utils import load_config, random_intial_positions
+from utils import load_config, make_changes, random_intial_positions
 
 
 def main(parsed_args):
@@ -34,6 +34,7 @@ def main(parsed_args):
     env_init = config_dict['env']
     tasks = config_dict['tasks']
 
+    anim_int, env_init = make_changes(anim_init, env_init, parsed_args)
     initial_positions = random_intial_positions(anim_init, parsed_args)
     model_init['positions'] = initial_positions
 
@@ -46,15 +47,8 @@ def main(parsed_args):
     if interaction == 'central_control':
         interactionmodel = CentralControl(**model_init)
 
-    if interaction == 'one_lead':
+    elif interaction == 'one_lead':
         interactionmodel = OneLead(**model_init)
-
-    if parsed_args.use_ticks:
-        anim_init['remove_ticks'] = False
-
-    if parsed_args.use_grid:
-        anim_init['remove_ticks'] = False
-        anim_init['use_grid'] = True
 
     animation = Animation(anim_init, tasks, interactionmodel)
     animation.run()
@@ -71,6 +65,8 @@ if __name__ == '__main__':
     parser.add_argument('-x1', '--x_max', type=float, default=0.2)
     parser.add_argument('-y0', '--y_min', type=float, default=0.4)
     parser.add_argument('-y1', '--y_max', type=float, default=0.5)
+    parser.add_argument('-rv', '--remove_visuals', action='store_true')
+    parser.add_argument('-re', '--remove_environment', action='store_true')
     parser.add_argument('-t', '--use_ticks', action='store_true')
     parser.add_argument('-g', '--use_grid', action='store_true')
     parser.add_argument('-r', '--random_seed', type=int)

@@ -36,6 +36,25 @@ def random_intial_positions(anim_dict, parsed_args):
 
     return initial_positions
 
+def make_changes(anim_init, env_init, parsed_args):
+    """Makes the changes defined in parsed_args to anim_int and env_init."""
+    if parsed_args.remove_visuals:
+        del anim_init['topography']
+        env_init['visuals'] = None
+
+    if parsed_args.remove_environment:
+        del anim_init['topography']
+        env_init = {'vectorfield': None}
+
+    if parsed_args.use_ticks:
+        anim_init['remove_ticks'] = False
+
+    if parsed_args.use_grid:
+        anim_init['remove_ticks'] = False
+        anim_init['use_grid'] = True
+
+    return anim_init, env_init
+
 
 # --- Helpers for interactionmodels.py ----------------------------------------
 
