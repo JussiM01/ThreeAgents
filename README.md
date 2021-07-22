@@ -96,4 +96,4 @@ At the moment my focus is in other things, but I might later add some of the fol
 - More options for the disturbance vector fields.
 
 ## License
-[MIT](./LICENSE)
+[MIT](./LICENSE) License
