@@ -1,6 +1,7 @@
-import copy
 import numpy as np
 import pytest
+
+from copy import deepcopy
 from interactionmodels import CentralControl
 from utils import normalize, normalize_all
 
@@ -19,9 +20,8 @@ testdata0 = [
 
 @pytest.mark.parametrize("points,target_distance,expected_sign", testdata0)
 def test_sign_reshape_step(points, target_distance, expected_sign):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, target_distance, 1., 100., 0.05, 0.001)
-    model.task_params['formation_type'] = 'triangle'
     model._reshape_step(1.)
     old_distances = [
         np.linalg.norm(points[0] - points[1]),
@@ -55,9 +55,9 @@ testdata1 = [
 
 @pytest.mark.parametrize("points,accepted_error", testdata1)
 def test_stopping_reshape_formation(points, accepted_error):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, 2., 1., 100., 0.05, accepted_error)
-    model.reshape_formation('triangle', 1.)
+    model.reshape_formation(1.)
     new_positions = model.positions
 
     assert np.array_equal(points, new_positions)
@@ -88,7 +88,7 @@ testdata2 = [
 
 @pytest.mark.parametrize("points,delta,direction,speed,expected", testdata2)
 def test_shift_step(points, delta, direction, speed, expected):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, 1., 1., 50., delta, 0.001)
     model._shift_step(direction, speed)
     new_positions = model.positions
@@ -114,9 +114,8 @@ testdata3 = [
 
 @pytest.mark.parametrize("points,target,error,", testdata3)
 def test_stopping_shift_formation(points, target, error):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, 1., 1., 50., 0.01, error)
-    model.task_params['formation_type'] = 'triangle'
     model.shift_formation(target, 10.)
     new_positions = model.positions
 
@@ -141,7 +140,7 @@ testdata4 = [
 
 @pytest.mark.parametrize("points,target,delta,error", testdata4)
 def test_over_shooting_prevention(points, target, delta, error):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, 1., 1., 50., delta, error)
     model.shift_formation(target, 20.)
     new_mean = np.mean(model.positions, axis=0)
@@ -175,7 +174,7 @@ testdata5 = [
 
 @pytest.mark.parametrize("points,delta,sign,angle,speed,expected", testdata5)
 def test_turn_step(points, delta, sign, angle, speed, expected):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, 1., 1., 1000., delta, 0.001)
     model.task_params['rotation_sign'] = sign
     model.task_params['rotation_center'] = np.array([0., 0.], dtype=float)
@@ -209,9 +208,8 @@ testdata6 = [
 
 @pytest.mark.parametrize("points,target,speed,error,", testdata6)
 def test_stopping_turn_formation(points, target, speed, error):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     model = CentralControl(init_points, 1., 1., 50., 0.01, error)
-    model.task_params['formation_type'] = 'triangle'
     model.turn_formation(target, speed)
     new_positions = model.positions
 
@@ -242,10 +240,9 @@ testdata7 = [
 
 @pytest.mark.parametrize("points,target,delta,error", testdata7)
 def test_over_turning_prevention(points, target, delta, error):
-    init_points = copy.deepcopy(points)
+    init_points = deepcopy(points)
     rotation_center = np.mean(points)
     model = CentralControl(init_points, 1., 1., 1000., delta, error)
-    model.task_params['formation_type'] = 'triangle'
     model.turn_formation(target, 100.)
     target_direction = normalize(target - rotation_center)
     center_to_points = model.positions - rotation_center

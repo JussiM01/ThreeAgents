@@ -1,7 +1,10 @@
 import json
 import os
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+from scipy.stats import multivariate_normal
 
 
 # --- Helpers for main.py -----------------------------------------------------
@@ -32,6 +35,25 @@ def random_intial_positions(anim_dict, parsed_args):
     initial_positions = np.concatenate([points_x, points_y], axis=1)
 
     return initial_positions
+
+def make_changes(anim_init, env_init, parsed_args):
+    """Makes the changes defined in parsed_args to anim_int and env_init."""
+    if parsed_args.remove_visuals:
+        del anim_init['topography']
+        env_init['visuals'] = None
+
+    if parsed_args.remove_environment:
+        del anim_init['topography']
+        env_init = {'vectorfield': None}
+
+    if parsed_args.use_ticks:
+        anim_init['remove_ticks'] = False
+
+    if parsed_args.use_grid:
+        anim_init['remove_ticks'] = False
+        anim_init['use_grid'] = True
+
+    return anim_init, env_init
 
 
 # --- Helpers for interactionmodels.py ----------------------------------------
@@ -69,6 +91,107 @@ def rotate_all(points, angle):
 
 
 # --- Helpers for animation.py ------------------------------------------------
+
+class RandomTopography:
+    """Class for creating random countors which resemble a topograpy map.
+
+    This class is used for sampling positive and negative gaussian bumps which
+    are added together for getting the height values of a random topograpy.
+    These are used for creating the matplotlib countors for the animation plot.
+
+    Parameters
+    ----------
+        random_scales: {
+                        'ax_x_min': float,
+                        'ax_x_max': float,
+                        'ax_y_min': float,
+                        'ax_y_max': float,
+                        'cov_diag_min': float,
+                        'cov_diag_max': float,
+                        'cov_offd_min': float,
+                        'cov_offd_max': float
+                        }
+            Dictionary containing the values from which the parameters of the
+            gaussian distributions are drawn.
+        countor_params: {
+                        'num_x_grid': int,
+                        'num_y_grid': int,
+                        'colors': str
+                        }
+            Dictionary containing the countors grid sizes and colors string.
+        num_gauss: int
+            Number of postive and negative gaussian bumps (same used for both).
+
+    """
+
+    def __init__(self, random_scales, num_gauss, countor_params):
+        self._mean_x_min = random_scales['ax_x_min']
+        self._mean_x_max = random_scales['ax_x_max']
+        self._mean_y_min = random_scales['ax_x_min']
+        self._mean_y_max = random_scales['ax_x_max']
+        self._cov_diag_min = random_scales['cov_diag_min']
+        self._cov_diag_max = random_scales['cov_diag_max']
+        self._cov_offd_min = random_scales['cov_offd_min']
+        self._cov_offd_max = random_scales['cov_offd_max']
+        self._num_gauss = num_gauss
+        self._num_x_grid = countor_params['num_x_grid']
+        self._num_y_grid = countor_params['num_y_grid']
+        self._colors = countor_params['colors']
+
+    def _sample_params(self):
+        means = []
+        covs = []
+
+        for _ in range(self._num_gauss):
+            mean_x = np.random.uniform(self._mean_x_min, self._mean_x_max)
+            mean_y = np.random.uniform(self._mean_x_min, self._mean_x_max)
+
+            cov_xx = np.random.uniform(self._cov_diag_min, self._cov_diag_max)
+            cov_xy = np.random.uniform(self._cov_offd_min, self._cov_offd_max)
+            cov_yy = np.random.uniform(self._cov_diag_min, self._cov_diag_max)
+
+            means.append([mean_x, mean_y])
+            covs.append([[cov_xx, cov_xy], [cov_xy, cov_yy]])
+
+        return means, covs
+
+    def _sample_heights(self, x_grid, y_grid):
+        pos_means, pos_covs = self._sample_params()
+        neg_means, neg_covs = self._sample_params()
+
+        pos = []
+        neg = []
+
+        arr = np.stack([x_grid, y_grid], axis=2)
+        rv = multivariate_normal()
+
+        for i in range(self._num_gauss):
+            rv_pos = multivariate_normal(pos_means[i], pos_covs[i])
+            rv_neg = multivariate_normal(neg_means[i], neg_covs[i])
+            z_pos = rv_pos.pdf(arr)
+            z_neg = rv_neg.pdf(arr)
+
+            pos.append(z_pos)
+            neg.append(z_neg)
+
+        pos_values = np.sum(np.stack(pos, axis=0), axis=0)
+        neg_values = np.sum(np.stack(neg, axis=0), axis=0)
+
+        return pos_values - neg_values
+
+    def create_countors(self, axes):
+        """Creates the random countors to a given axes object."""
+        x = np.linspace(self._mean_x_min, self._mean_x_max, self._num_x_grid)
+        y = np.linspace(self._mean_y_min, self._mean_y_max, self._num_y_grid)
+
+        X, Y = np.meshgrid(x, y)
+        Z = self._sample_heights(X, Y)
+
+        plt.rcParams['contour.negative_linestyle'] = 'solid'
+        countors = axes.contour(X, Y, Z, colors=self._colors)
+
+        return countors
+
 
 def init_scatter(params, axes, points):
     """Function for intializing a scatter artist.
@@ -132,16 +255,26 @@ def init_animation(params, points, dots=None):
             and the dots.
 
     """
-    fig = plt.figure(figsize=(params['fig_width'], params['fig_hight']))
+    fig = plt.figure(figsize=(params['fig_width'], params['fig_height']))
     axes = fig.add_axes(
         [params['x_min'], params['y_min'], params['x_max'], params['y_max']],
         frameon=params['frameon'])
     axes.set_xlim(params['ax_x_min'], params['ax_x_max'])
     axes.set_ylim(params['ax_y_min'], params['ax_y_max'])
 
-    if params['remove_thicks']:
+    if params['remove_ticks']:
         axes.set_xticks([])
         axes.set_yticks([])
+
+    else:
+        step_size = params['step_size']
+        ax_x_min = params['ax_x_min']
+        ax_x_max = params['ax_x_max']
+        ax_y_min = params['ax_y_min']
+        ax_y_max = params['ax_y_max']
+
+        axes.set_xticks(np.arange(ax_x_min, ax_x_max + 1, step_size))
+        axes.set_yticks(np.arange(ax_y_min, ax_y_max + 1, step_size))
 
     axes.grid(params['use_grid'])
     scatter = init_scatter(params, axes, points)
@@ -154,6 +287,9 @@ def init_animation(params, points, dots=None):
             }
         env_scatter = init_scatter(env_scatter_params, axes, dots)
 
-        return fig, env_scatter, scatter
+        random_topography = RandomTopography(**params['topography'])
+        countors = random_topography.create_countors(axes)
+
+        return fig, countors, env_scatter, scatter
 
     return fig, scatter

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+
 from matplotlib.animation import FuncAnimation
 from utils import init_animation
 
@@ -19,6 +20,35 @@ class Animation:
         model:
             Interaction model for the agents and (optionally) the environment.
 
+    Attributes
+    ----------
+        plot_params: dict
+            Parameters for intializing the animation figure and the artists
+            used for the visualizations.
+        model:
+            Interaction model for the agents and (optionally) the environment.
+        task_list: list
+            List of the agents' movent tasks.
+        last: int
+            Index of the last task.
+        task_index: int
+            Index of the current task.
+        use_visuals: bool
+            Wheter or not to visualize disturbance and random topography.
+        fig: matplotlib.figure.Figure
+            Figure object for the animation plotting.
+        scatter: matplotlib.axes.collections.PathCollection
+            Scatter object for showing the agents positions in the plot.
+        dots: numpy.ndarray (dtype: float)
+            (Set only if `use_visuals` is True.)
+            Positions of the dots use for visualizing the disturbance.
+        countors: matplotlib.contour.QuadContourSet
+            (Set only if `use_visuals` is True.)
+            Countors for visualizing the random topography.
+        env_scatter: matplotlib.axes.collections.PathCollection
+            (Set only if `use_visuals` is True.)
+            Scatter object for showing the disturbance visualization.
+
     """
 
     def __init__(self, plot_params, task_list, model):
@@ -34,9 +64,10 @@ class Animation:
 
             self.use_visuals = True
             dots = self.model.env.dots
-            fig, env_scatter, scatter = init_animation(
+            fig, countors, env_scatter, scatter = init_animation(
                 plot_params, positions, dots)
             self.fig = fig
+            self.countors = countors
             self.env_scatter = env_scatter
             self.scatter = scatter
 
@@ -63,12 +94,12 @@ class Animation:
 
         Returns
         -------
-            if self.use_visuals None:
+            if self.use_visuals == False:
                 (scatter,): (
                     matplotlib.axes.collections.PathCollection,
                     )
                 Tuple with only the scatter artist for the agents.
-            else:
+            if self.use_visuals == True:
                 (env_scatter, scatter): (
                     matplotlib.axes.collections.PathCollection,
                     matplotlib.axes.collections.PathCollection
@@ -77,7 +108,7 @@ class Animation:
 
         """
         if self.task_index > self.last:
-            points = self.model.positions
+            exit(0)
 
         else:
             task = self.task_list[self.task_index]

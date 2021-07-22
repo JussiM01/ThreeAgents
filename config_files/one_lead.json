@@ -1,7 +1,7 @@
 {
     "animation": {
-        "ax_x_max": 10.0,
-        "ax_x_min": -10.0,
+        "ax_x_max": 15.0,
+        "ax_x_min": -15.0,
         "ax_y_max": 10.0,
         "ax_y_min": -10.0,
         "edgecolors": [
@@ -16,12 +16,32 @@
             0.0,
             1.0
         ],
-        "fig_hight": 7,
-        "fig_width": 7,
+        "fig_height": 7,
+        "fig_width": 10.5,
         "frameon": true,
         "interval": 10.0,
         "pointsize": 50,
-        "remove_thicks": false,
+        "remove_ticks": true,
+        "step_size": 2,
+        "topography": {
+            "countor_params": {
+                "colors": "lightgray",
+                "fontsize": 10,
+                "num_x_grid": 70,
+                "num_y_grid": 70
+            },
+            "num_gauss": 50,
+            "random_scales": {
+                "ax_x_max": 15.0,
+                "ax_x_min": -15.0,
+                "ax_y_max": 10.0,
+                "ax_y_min": -10.0,
+                "cov_diag_max": 10.0,
+                "cov_diag_min": 5.0,
+                "cov_offd_max": 5.0,
+                "cov_offd_min": -5.0
+            }
+        },
         "use_grid": false,
         "x_max": 0.8,
         "x_min": 0.1,
@@ -55,30 +75,60 @@
             }
         }
     },
+    "interaction": "one_lead",
     "model": {
-        "accepted_error": 0.005,
+        "accepted_error": 0.01,
         "bond_strength": 1.0,
-        "max_speed": 100.0,
+        "max_speed": 200.0,
         "target_distance": 1.0,
         "time_delta": 0.005
     },
     "tasks": [
         {
             "args": [
-                10.0
+                50.0
             ],
             "type": "reshape"
         },
         {
             "args": [
                 [
-                    5.0,
+                    8.0,
+                    0.0
+                ],
+                100.0
+            ],
+            "type": "shift"
+        },
+        {
+            "args": [
+                [
+                    4.0,
+                    -4.0
+                ],
+                100.0
+            ],
+            "type": "shift"
+        },
+        {
+            "args": [
+                [
+                    -4.0,
+                    4.0
+                ],
+                100.0
+            ],
+            "type": "shift"
+        },
+        {
+            "args": [
+                [
+                    -10.0,
                     0.0
                 ],
                 100.0
             ],
             "type": "shift"
         }
-    ],
-    "type": "one_lead"
+    ]
 }
