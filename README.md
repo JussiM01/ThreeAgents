@@ -35,9 +35,10 @@ The [Boids](https://www.red3d.com/cwr/boids/) model is used for simulating flock
 Clone this repository and install the libraries with pip:
 ```
 git clone https://github.com/JussiM01/ThreeAgents.git
+cd ThreeAgents/
 pip install -r requirements.txt
 ```
-I used Python 3.8 but the code probably works also with slightly earlier versions. I have only tested the code on a machine with Ubuntu 20.04.2.0 LTS (Focal Fossa). Other operating systems might need some tweaks for matplotlib to work properly.
+I used Python 3.8 but the code probably works also with slightly earlier or later versions. I have only tested the code on a machine with Ubuntu 20.04.2.0 LTS (Focal Fossa). Other operating systems might need some tweaks in order for matplotlib to work properly.
 
 ## How to use
 The program is run by running the main python-file from the command line:
